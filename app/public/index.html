@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Athan Center - Prayer Times</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+
+        <div id="nextPrayerCard" class="next-prayer-card" style="display: none;">
+            <div class="next-prayer-label">Next Prayer</div>
+            <div class="next-prayer-name"></div>
+            <div class="next-prayer-time"></div>
+            <div class="next-prayer-countdown"></div>
+        </div>
+
+        <div id="muteAlertBanner" class="mute-alert-banner" style="display: none;">
+            🔇 Next athan is muted
+        </div>
+
+        <div id="weekdayMuteBanner" class="weekday-mute-banner" style="display: none;">
+            <span id="weekdayMuteText">🔇 All athans muted for today</span>
+        </div>
+
+        <div class="prayers-list" id="prayersList">
+            <!-- Prayers will be loaded dynamically -->
+        </div>
+
+
+        <div class="date-navigation">
+            <button id="prevDay" class="nav-btn">⬅️ Previous Day</button>
+            <button id="todayBtn" class="nav-btn">
+                🧎 Today (<br>
+                <span id="todayDate" class="btn-date"></span>)
+            </button>
+            <button id="calendarBtn" class="nav-btn calendar-btn">
+                📅 Calendar (<br>
+                <span id="currentDate" class="btn-date"></span>)
+            </button>
+            <button id="nextDay" class="nav-btn">Next Day ➡️</button>
+        </div>
+
+        <!-- Calendar Modal -->
+        <div id="calendarModal" class="modal">
+            <div class="modal-content calendar-modal-content">
+                <div class="calendar-header">
+                    <h2>📅 Select a date</h2>
+                    <span class="close" id="closeCalendar">&times;</span>
+                </div>
+                <div class="calendar-nav">
+                    <button id="prevYear" class="calendar-nav-btn">◀ Previous Year</button>
+                    <span id="currentYear" class="current-year"></span>
+                    <button id="nextYear" class="calendar-nav-btn">Next Year ▶</button>
+                </div>
+                <div id="calendarGrid" class="calendar-grid">
+                    <!-- Calendar months will be generated here -->
+                </div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button id="skipNextBtn" class="action-btn warning-btn" style="display: none;">
+                🔇 Mute next Athan
+            </button>
+            <button id="settingsBtn" class="action-btn">
+                ⚙️ Settings
+            </button>
+        </div>
+
+        <div id="settingsModal" class="modal">
+            <div class="modal-content">
+                <span class="close" id="closeSettings">&times;</span>
+                <h2>⚙️ Settings</h2>
+                <div class="dua-card">
+                    <p class="dua-text arabic">لا تنسى أخاك في دعائك 🤲🙏</p>
+                    <p class="dua-text english">Don't forget your brother in your du'a 🤲🙏</p>
+                </div><br><br>
+
+                <div class="settings-section settings-section-tight">
+                    <h3>🛠️ General</h3>
+                    <div class="update-info-card"
+                        style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+
+                        <div style="margin-bottom: 4px;">
+                            <strong>📍 City: </strong>
+                            <span id="updateCity">Loading...</span>
+                        </div>
+                        <div style="margin-bottom: 4px;">
+                            <strong>📅 Server date: </strong>
+                            <span id="serverDateValue">--/--/----</span>
+                        </div>
+                        <div style="margin-bottom: 4px;">
+                            <strong>🕐 Server time: </strong>
+                            <span id="serverTimeValue">--:--:--</span>
+                        </div>
+                        <div style="margin-bottom: 4px;">
+                            <strong>🖥️ Server IP: </strong>
+                            <span id="serverIpValue">Loading...</span>
+                        </div>
+                        <div style="margin-bottom: 4px;">
+                            <strong>🔠 Server hostname: </strong>
+                            <span id="serverHostnameValue">Loading...</span>
+                        </div>
+                        <div style="margin-bottom: 8px;">
+                            <strong>⌛️ Last prayer times update: </strong><br>
+                            <span id="lastUpdate">Never</span>
+                            <span id="prayersCount" style="color: #666; font-size: 0.9em;"></span>
+                        </div>
+                        <div style="margin-bottom: 8px;">
+                            <strong>⏳ Next prayer times update: </strong>
+                            <span id="nextUpdate">Loading...</span>
+                        </div>
+                        <div style="margin-bottom: 8px;">
+                            <strong>🔊 Server audio & external IP/hostname access support: </strong><br>
+                            <span id="serverAudioSupport" style="font-weight: 600;">Loading...</span>
+                        </div>
+                    </div>
+                    <div class="prayer-toggle">
+                        <span>Dark mode</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="darkModeToggle">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <p class="help-text" style="margin-bottom: 15px;">
+                        Enable dark mode for a comfortable viewing experience in low-light environments
+                    </p>
+                </div>
+
+                <div class="settings-section">
+                    <h3>📍 Location</h3>
+                    <div class="form-group">
+                        <label id="icsLabel">ICS link:</label>
+                        <input type="text" id="icsUrl" class="input-field" placeholder="ICS calendar URL">
+                        <p class="help-text">
+                            Use the ICS link to configure your location and athan times, then retrieve it. Please
+                            visit:
+                            <a href="https://prayerwebcal.dsultan.com/" target="_blank">Prayer WebCal</a>
+                        </p>
+                        <button id="updateLocationBtn" class="btn" style="flex: 1;">🔄 Load ICS link with athans
+                            times</button><br>
+                        <button id="forceUpdateBtn" class="btn" style="flex: 1;">🔄 Update athan times now</button>
+                        <p class="help-text">
+                            Prayer times are automatically updated every day at 12:00 AM<br>
+                            Fetches the next 3 months - Past data is preserved<br>
+                            The reference time is the server time (not the web client time)
+                        </p>
+                    </div>
+                </div>
+
+                <div id="athanCallSection" class="settings-section">
+                    <h3>🕌 Athan call</h3>
+                    <div class="form-group">
+                        <label>Athan call audio file:</label>
+                        <select id="audioFile" class="input-field">
+                            <!-- Populated dynamically -->
+                        </select>
+                        <p class="help-text" style="margin-top: 5px; font-size: 0.85em;">
+                            Upload your audio files into <code>/audio/athan</code> so they appear in this list.
+                        </p>
+                    </div>
+                    <div class="form-group">
+                        <label>Athan Schedule:</label>
+                        <p class="help-text" style="margin-bottom: 10px;">
+                            Select a day to configure athans. Use "All" tab to enable/disable a prayer for the entire
+                            week.
+                        </p>
+                        <div id="scheduleMatrix" class="schedule-matrix">
+                            <!-- Tab-based schedule populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>📖 Quran recitation</h3>
+
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label for="fridayQuranFile">Al Kahf Sourat audio file:</label>
+                        <select id="fridayQuranFile" class="input-field">
+                            <option value="">Loading...</option>
+                        </select>
+                        <p class="help-text" style="margin-top: 5px; font-size: 0.85em;">
+                            Upload your audio files into <code>/audio/coran</code> so they appear in this list.
+                        </p>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 15px;">
+                        <button id="playFullQuranBtn" class="btn" style="width: 100%;">
+                            🔉 Listen to Sourat Al Kahf now
+                        </button>
+                        <p class="help-text" style="margin-top: 5px; font-size: 0.85em;">
+                            Plays on server and/or web app (depending on audio output setting). Recitation continues
+                            until the end.
+                        </p>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label for="fridayQuranFile">Schedule every Friday:</label>
+                        <div class="prayer-toggle">
+                            <span>Al Kahf Sourat on Friday</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="fridayQuranEnabled"
+                                    onchange="toggleSetting('friday_quran_enabled', this.checked)">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <p class="help-text" style="margin-bottom: 15px;">
+                            Al Kahf sourat listening every Friday at a specific time
+                        </p>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <select id="fridayQuranHour" class="input-field" style="width: 80px;">
+                                <!-- Populated dynamically -->
+                            </select>
+                            <span style="font-size: 1.2em; font-weight: bold;">:</span>
+                            <select id="fridayQuranMinute" class="input-field" style="width: 80px;">
+                                <!-- Populated dynamically -->
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>🔉 Audio control</h3>
+
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label>Audio output:</label>
+                        <select id="audioOutput" class="input-field" onchange="updateAudioOutput(this.value)">
+                            <option value="both">Both (Server and Web App)</option>
+                            <option value="server">Server only</option>
+                            <option value="browser">Web app only</option>
+                        </select>
+                        <p class="help-text" style="margin-top: 5px; font-size: 0.85em;">
+                            • <strong>Server</strong>: Audio is played on the Docker / Raspberry Pi speakers
+                            (standalone)<br>
+                            • <strong>Web app</strong>: Audio is played in the browser (this page, if it is open)<br>
+                            • <strong>Both</strong>: Audio is played on the server and in the web browser
+                        </p>
+                    </div>
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label id="audioCardLabel">Server audio device:</label>
+                        <select id="audioCard" class="input-field">
+                            <option value="auto">Auto-detect (USB/HDMI)</option>
+                        </select>
+                        <p id="audioDeviceHelp" class="help-text" style="margin-top: 5px; font-size: 0.85em;">
+                            Select which audio output to use on the server (Raspberry Pi / Docker on Linux only).<br>
+                            Auto-detect prioritizes USB devices, then HDMI.
+                        </p>
+                    </div>
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label>Server volume: <span id="volumeValue">50</span>%</label>
+                        <input type="range" id="volumeSlider" class="volume-slider" min="0" max="200" value="50"
+                            style="width: 100%;">
+                        <p id="volumeWarning"
+                            style="color: #8B0000; font-weight: bold; margin-top: 8px; font-size: 0.9em; display: none;">
+                            ⚠️ WARNING: Volume above 100% may cause audio distortion or damage to speakers!
+                        </p>
+                        <p class="help-text" style="margin-top: 5px; font-size: 0.85em;">
+                            <strong>Server volume control:</strong> Browser always plays at 100%.
+                        </p>
+                    </div>
+                    <div class="form-group" style="margin-top: 15px;">
+                        <div class="prayer-toggle" style="margin-top: 10px;">
+                            <span>Use different volume for Fajr prayer</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="syncFajrVolume">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <p class="help-text" style="margin-top: 5px; font-size: 0.85em;">
+                            Set a specific volume for Fajr prayer on the server. When disabled, the Fajr athan uses the
+                            server volume above.
+                        </p><br>
+                        <label>Fajr prayer volume: <span id="fajrVolumeValue">50</span>%</label>
+                        <input type="range" id="fajrVolumeSlider" class="volume-slider" min="0" max="200" value="50"
+                            style="width: 100%;">
+                        <p id="fajrVolumeWarning"
+                            style="color: #8B0000; font-weight: bold; margin-top: 8px; font-size: 0.9em; display: none;">
+                            ⚠️ WARNING: Volume above 100% may cause audio distortion or damage to speakers!
+                        </p>
+                    </div>
+                    <br>
+                    <div class="prayer-toggle">
+                        <span>Server startup sound</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="playOnStartup"
+                                onchange="toggleSetting('play_on_startup', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="prayer-toggle">
+                        <span>Web app startup sound</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="playOnPageLoad"
+                                onchange="toggleSetting('play_on_page_load', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 10px;">
+                        <button id="stopAudioBtn" class="btn" style="background: #8B0000; width: 100%;"
+                            onmouseover="this.style.background='#a30000'" onmouseout="this.style.background='#8B0000'">
+                            🛑 Stop playing Athan and Quran recitation
+                        </button>
+                        <p class="help-text" style="margin-bottom: 10px;">
+                            Stop all audio playback (athan, Quran recitation, startup, tests) on both web app and
+                            server.
+                            You can also stop audio from the "Next Prayer" banner or using the API.
+                        </p>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label style="font-weight: 600;">Athan & Quran audio tests:</label>
+                        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                            <button id="testAthanBtn" class="btn" style="flex: 1;">🔊 Test web Athan</button>
+                            <button id="testAthanServerBtn" class="btn" style="flex: 1;">🔊 Test server Athan</button>
+                        </div>
+                        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                            <button id="testQuranBtn" class="btn" style="flex: 1;">🔊 Test web Quran</button>
+                            <button id="testQuranServerBtn" class="btn" style="flex: 1;">🔊 Test server Quran</button>
+                        </div>
+                    </div>
+
+                    <p class="help-text" style="margin-bottom: 15px;">
+                        Quickly test Athan and Quran recitation on the web app or directly on the server speakers.
+                        Tests are limited to 30 seconds.
+                    </p>
+
+
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label style="font-weight: 600;">Use the API:</label>
+                        <div class="update-info-card"
+                            style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                            <div style="margin-bottom: 10px;">
+                                <strong>
+                                    🔊 Test Athan on server using API (30 seconds): </strong><br><code
+                                    id="testAthanServerCommand" class="inline-code">Loading...</code><br><strong>
+                                    🔊 Test Quran on server using API (30 seconds): </strong><br><code
+                                    id="testQuranServerCommand" class="inline-code">Loading...</code><br><strong>
+                                    🚀 Mute next Athan using API: </strong><br><code id="muteCommand"
+                                    class="inline-code">Loading...</code><br><strong>
+                                    🚀 Unmute next Athan using API: </strong><br><code id="unmuteCommand"
+                                    class="inline-code">Loading...</code><br><strong>
+                                    🚀 Stop all playing audio in the server using API: </strong><br><code
+                                    id="stopAudioCommand" class="inline-code">Loading...</code>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>💾 Backup & Restore</h3>
+
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <button id="exportConfigBtn" class="btn" style="flex: 1;">📤 Export configuration</button>
+                        <button id="importConfigBtn" class="btn" style="flex: 1;">📥 Import configuration</button>
+                    </div>
+                    <input type="file" id="importConfigFile" accept=".csv" style="display: none;">
+                    <p class="help-text">
+                        Export all settings to a CSV file for backup or import to restore configuration
+                    </p>
+                    <button id="resetPrayerChecksBtn" class="btn"
+                        style="background: #8B0000; width: 100%; margin-bottom: 15px;"
+                        onmouseover="this.style.background='#a30000'" onmouseout="this.style.background='#8B0000'">
+                        🔄 Reset and undo all prayers
+                    </button>
+                    <p class="help-text" style="margin-top: -10px; margin-bottom: 15px;">
+                        Remove all check marks (✓) from all prayers in the database
+                    </p>
+                    <button id="restoreDefaultsBtn" class="btn"
+                        style="background: #8B0000; width: 100%; margin-top: 10px;"
+                        onmouseover="this.style.background='#a30000'" onmouseout="this.style.background='#8B0000'">🔄
+                        Restore default configuration</button>
+                    <p class="help-text" style="margin-top: 5px; color: #8B0000;">
+                        ⚠️ This will reset ALL settings to their default values
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <img src="logo.png" alt="Athan Center logo" class="app-logo">
+            <p>© 2025 Athan Center - 3.0</p>
+        </footer>
+    </div>
+
+    <!-- Floating Audio Notification Banner -->
+    <div id="audioNotificationBanner" class="audio-notification-banner" style="display: none;">
+        <div class="audio-notification-content">
+            <span class="audio-notification-icon">🔊</span>
+            <span id="audioNotificationText" class="audio-notification-text">Audio playing...</span>
+            <button id="audioNotificationClose" class="audio-notification-close" title="Close notification">✕</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

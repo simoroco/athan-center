@@ -1,0 +1,24 @@
+services:
+  athan-center:
+    build: ./app
+    platform: linux/arm64
+    image: simoroco/athan-center:latest
+    container_name: athan-center
+    # Network mode: host for Linux, bridge for macOS/Windows
+    network_mode: ${NETWORK_MODE:-bridge}  # Dev defaults to bridge for compatibility
+    ports:
+      - "7777:7777"
+    volumes:
+      # DEV: Bind mount for easy modification of audio and data files
+      - ./app/data:/app/data    # Database persistence
+      - ./app/audio:/app/audio  # Audio files (modify/add easily)
+      - /dev/snd:/dev/snd       # Audio device passthrough
+    devices:
+      - /dev/snd:/dev/snd
+    privileged: true
+    environment:
+      - TZ=Europe/Paris
+      - NODE_ENV=development
+      - HOST_HOSTNAME=${HOST_HOSTNAME:-}
+      - HOST_IP=${HOST_IP:-}
+    restart: unless-stopped

@@ -1,0 +1,27 @@
+services:
+  athan-center:
+    platform: linux/arm64
+    image: simoroco/athan-center:latest
+    container_name: athan-center
+    # Network mode: host for Linux (best performance, real host IP)
+    # bridge for macOS/Windows (Docker Desktop compatibility)
+    network_mode: ${NETWORK_MODE:-host}
+    ports:
+      - "7777:7777"  # Used only in bridge mode (macOS/Windows)
+    volumes:
+      # PRODUCTION VOLUMES - Auto-created by Docker if they don't exist
+      # The container automatically initializes empty folders with default files
+      - ./data:/app/data        # SQLite database (auto-initialized on first run)
+      - ./audio:/app/audio      # Audio files (auto-initialized from image)
+      - /dev/snd:/dev/snd       # Audio device passthrough for speakers
+    devices:
+      - /dev/snd:/dev/snd
+    privileged: true
+    environment:
+      - TZ=Europe/Paris         # Timezone (modify as needed)
+      - NODE_ENV=production
+      # Linux host mode: these vars are optional (auto-detected from host interfaces)
+      # macOS/Windows: these vars should be set (detected by start script)
+      - HOST_HOSTNAME=${HOST_HOSTNAME:-}
+      - HOST_IP=${HOST_IP:-}
+    restart: unless-stopped

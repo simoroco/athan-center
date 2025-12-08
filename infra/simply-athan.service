@@ -1,0 +1,36 @@
+# Service systemd pour Athan Center
+# Ce fichier permet de démarrer automatiquement Athan Center au boot du Raspberry Pi
+
+# Installation :
+# 1. Modifier WorkingDirectory avec le chemin absolu de votre installation
+# 2. Copier ce fichier : sudo cp athan-center.service /etc/systemd/system/
+# 3. Activer le service : sudo systemctl enable athan-center
+# 4. Démarrer le service : sudo systemctl start athan-center
+
+[Unit]
+Description=Athan Center - Islamic Prayer Times
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+
+# IMPORTANT: Modifier ce chemin avec le chemin absolu de votre installation
+WorkingDirectory=/home/pi/athan-center
+
+# Commandes d'arrêt et de démarrage
+ExecStart=/usr/bin/docker-compose up -d
+ExecStop=/usr/bin/docker-compose down
+
+# Redémarrage automatique en cas d'échec
+Restart=on-failure
+RestartSec=10
+
+# Utilisateur (modifier si nécessaire)
+User=pi
+Group=pi
+
+[Install]
+WantedBy=multi-user.target

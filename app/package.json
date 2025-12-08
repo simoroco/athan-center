@@ -1,0 +1,26 @@
+{
+  "name": "athan-center",
+  "version": "1.0.0",
+  "description": "Application web simpliste pour afficher les horaires de prière islamique",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": ["prayer", "athan", "islam", "raspberry-pi"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "node-cron": "^3.0.3",
+    "ical": "^0.8.0",
+    "axios": "^1.6.2",
+    "better-sqlite3": "^9.2.2",
+    "cors": "^2.8.5",
+    "node-schedule": "^2.1.1",
+    "play-sound": "^1.1.6"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}
