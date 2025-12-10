@@ -1,9 +1,30 @@
 # 🕌 Athan Center
 
+<p align="center">
+  <a href="https://github.com/simoroco/athan-center/stargazers"><img src="https://img.shields.io/github/stars/simoroco/athan-center?style=flat-square" alt="GitHub stars"></a>
+  <a href="https://github.com/simoroco/athan-center/issues"><img src="https://img.shields.io/github/issues/simoroco/athan-center?style=flat-square" alt="GitHub issues"></a>
+  <a href="https://github.com/simoroco/athan-center/network/members"><img src="https://img.shields.io/github/forks/simoroco/athan-center?style=flat-square" alt="GitHub forks"></a>
+  <a href="https://github.com/simoroco/athan-center/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-GPLv3-green?style=flat-square" alt="License"></a>
+  <a href="https://hub.docker.com/r/simoroco/athan-center"><img src="https://img.shields.io/docker/pulls/simoroco/athan-center?style=flat-square" alt="Docker pulls"></a>
+</p>
+
 Athan Center is a complete solution for Islamic prayer call at home or in mosques. It allows you to track prayer times on a modern web interface and automatically call for the Athan through a background service.
 The solution is optimized for Raspberry Pi and Linux with Docker but works in MacOS and Windows too.
 
 **May Allah accept your prayers** 🤲
+
+Try it locally or on a Raspberry Pi, then share feedback and stars so more communities can benefit.
+
+## 📚 Table of Contents
+
+- [✨ Key Features](#-key-features)
+- [⚡ Quick Start](#-quick-start)
+- [🚀 Production Deployment](#-production-deployment)
+- [⚙️ How does it work?](#-how-does-it-work)
+- [🔌 Remote control API](#-remote-control-api)
+- [📄 License](#-license)
+- [🛠️ Technologies](#-technologies)
+- [🤝 Community & Roadmap](#-community--roadmap)
 
 ## ✨ Key Features
 
@@ -17,6 +38,25 @@ The solution is optimized for Raspberry Pi and Linux with Docker but works in Ma
 - 🔄 **Automatic updates** - Prayer times updated daily at 7 PM
 - 💾 **Export/Import** configuration
 - 🐳 **Docker** - One-command deployment
+
+## ⚡ Quick Start
+
+```bash
+git clone https://github.com/simoroco/athan-center.git
+cd athan-center
+npm install
+npm run dev
+```
+
+- Default UI: `http://localhost:7777`
+- Configure location via [Prayer WebCal ICS](https://prayerwebcal.dsultan.com/)
+- Docker image: [simoroco/athan-center](https://hub.docker.com/r/simoroco/athan-center)
+
+```bash
+docker pull simoroco/athan-center:latest
+# OR publish from your fork
+docker push simoroco/athan-center:latest
+```
 
 ## 🖥️ Screenshots
 
@@ -75,11 +115,18 @@ Using 'start.sh' is recommended for MacOS and Windows platforms only. It's not r
 - Access from any device on local network
 
 ### 5. Remote control
-- REST API for integrations (Home Assistant, scripts, etc.)
-- Mute next athan: `curl http://IP:7777/api/mute-next-athan`
-- Stop all playing audio in the server: `curl http://172.18.0.2:7777/api/stop-audio`
-- Test Athan on server (30 seconds): `curl http://IP:7777/api/test-athan-server`
-- Test Quran on server (30 seconds): `curl http://IP:7777/api/test-quran-server`
+- REST API for integrations (Home Assistant, scripts, etc.) — see [🔌 Remote control API](#-remote-control-api)
+
+## 🔌 Remote control API
+
+All endpoints are available on `http://IP:7777/api`.
+
+| Action | Endpoint | Notes |
+| --- | --- | --- |
+| Mute next athan | `/mute-next-athan` | Skips only the upcoming prayer |
+| Stop current audio | `/stop-audio` | Immediately stops every active stream |
+| Test Athan (server) | `/test-athan-server` | Plays 30 s sample through speakers |
+| Test Quran (server) | `/test-quran-server` | 30 s Quran recitation |
 
 ## 📄 License
 
@@ -94,12 +141,10 @@ By using, modifying, or redistributing this software, you accept the terms of th
 - **Containerization**: Docker
 - **Scheduling**: node-cron, node-schedule
 
----
+## � Community & Roadmap
+
+- ⭐️ Star the repo if it helps your mosque or home.
+- 🐛 [Open an issue](https://github.com/simoroco/athan-center/issues) for bugs or feature ideas.
+- 🙌 Check the roadmap and “good first issue” label to start contributing.
 
 🤲🙏 Don't forget your brother in your du'a 🤲🙏 لا تنسى أخاك في دعائك 🤲🙏
-
-## Production
-
-[OPEN SOURCE PROJECT (GNU v3.0)](https://github.com/simoroco/athan-center)
-
-[ICS location configuration link](https://prayerwebcal.dsultan.com/ics/Les_Lilas/cq=0:csr=0:ct=0:ee=0:fv=14.0:iv=20.0:qs=0:srs=0:ss=0:sus=0:ts=0:tz=Europe%2FParis:x=48.88:y=2.416)
