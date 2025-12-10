@@ -20,10 +20,8 @@ The solution is optimized for Raspberry Pi and Linux with Docker but works in Ma
 
 ## 🖥️ Screenshots
 
-![Dashboard overview on desktop](./screens/1.png)
-![Athan call settings](./screens/2.png)
-![Friday Quran recitation settings](./screens/3.png)
-![Voice control settings](./screens/4.png)
+| [![Dashboard overview on desktop](./screens/1.png)](./screens/1.png) | [![Athan call settings](./screens/2.png)](./screens/2.png) | [![Friday Quran recitation settings](./screens/3.png)](./screens/3.png) | [![Voice control settings](./screens/4.png)](./screens/4.png) |
+| --- | --- | --- | --- |
 
 ## 🚀 Production Deployment
 
@@ -99,3 +97,9 @@ By using, modifying, or redistributing this software, you accept the terms of th
 ---
 
 🤲🙏 Don't forget your brother in your du'a 🤲🙏 لا تنسى أخاك في دعائك 🤲🙏
+
+## Production
+
+[OPEN SOURCE PROJECT (GNU v3.0)](https://github.com/simoroco/athan-center)
+
+[ICS location configuration link](https://prayerwebcal.dsultan.com/ics/Les_Lilas/cq=0:csr=0:ct=0:ee=0:fv=14.0:iv=20.0:qs=0:srs=0:ss=0:sus=0:ts=0:tz=Europe%2FParis:x=48.88:y=2.416)

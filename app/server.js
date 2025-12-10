@@ -180,6 +180,11 @@ let fridayQuranJob = null;
 // System time tracking for drift detection
 let lastSystemTime = Date.now();
 
+// Audio support cache to avoid testing during playback
+let audioSupportCache = null;
+let audioSupportCacheTime = 0;
+const AUDIO_SUPPORT_CACHE_DURATION = 60000; // 1 minute cache
+
 // Initialize muted_weekdays (0=Sunday, 1=Monday, ..., 6=Saturday)
 const weekdays = [0, 1, 2, 3, 4, 5, 6];
 const initWeekday = db.prepare('INSERT OR IGNORE INTO muted_weekdays (weekday, muted) VALUES (?, 0)');
@@ -1962,14 +1967,50 @@ app.get('/api/server-time', (req, res) => {
 });
 
 // GET - Check server audio support (test actual audio playback capability)
+// Uses cache to avoid testing during audio playback (prevents false negatives when ALSA device is busy)
 app.get('/api/audio-support', (req, res) => {
     try {
         const platform = os.platform(); // 'linux', 'darwin' (macOS), 'win32' (Windows), etc.
         const { execSync } = require('child_process');
+        const now = Date.now();
+
+        // Check if we have a valid cached result (less than 1 minute old)
+        if (audioSupportCache && (now - audioSupportCacheTime < AUDIO_SUPPORT_CACHE_DURATION)) {
+            log(`[audio-support] 📦 Returning cached result (age: ${Math.round((now - audioSupportCacheTime) / 1000)}s)`);
+            return res.json(audioSupportCache);
+        }
 
         let status, message, color, supported = false;
 
-        // First check if sox/play command exists
+        // If audio is currently playing, skip the playback test to avoid ALSA device busy error
+        // Just check if sox exists without testing actual playback
+        if (currentAudioPlayer) {
+            log(`[audio-support] ⏭️ Audio currently playing, skipping playback test`);
+            try {
+                execSync('which play', { stdio: 'ignore' });
+                // Sox exists, assume it's supported (we can't test playback while device is busy)
+                supported = true;
+                status = 'supported';
+                message = `✅ Supported (${platform === 'linux' ? 'Linux' : platform === 'darwin' ? 'macOS' : platform} with sox)`;
+                color = '#27ae60'; // Green
+                log(`[audio-support] ✅ Sox found, assuming supported (playback test skipped)`);
+            } catch (whichError) {
+                // Sox doesn't exist
+                const osName = platform === 'darwin' ? 'macOS' : platform === 'win32' ? 'Windows' : platform;
+                supported = false;
+                status = 'unsupported';
+                message = `❌ Not supported - Sox not installed (${osName})`;
+                color = '#8B0000'; // Burgundy
+                log(`[audio-support] ❌ Sox not found on ${platform}`);
+            }
+
+            const result = { supported, status, message, color, platform };
+            audioSupportCache = result;
+            audioSupportCacheTime = now;
+            return res.json(result);
+        }
+
+        // No audio playing, perform full test (check sox exists AND test actual playback)
         try {
             execSync('which play', { stdio: 'ignore' });
 
@@ -2010,13 +2051,13 @@ app.get('/api/audio-support', (req, res) => {
             log(`[audio-support] ❌ Sox not found on ${platform}`);
         }
 
-        res.json({
-            supported,
-            status,
-            message,
-            color,
-            platform
-        });
+        // Cache the result
+        const result = { supported, status, message, color, platform };
+        audioSupportCache = result;
+        audioSupportCacheTime = now;
+        log(`[audio-support] 💾 Result cached for ${AUDIO_SUPPORT_CACHE_DURATION / 1000}s`);
+
+        res.json(result);
     } catch (error) {
         logError('[audio-support] Error checking audio support:', error);
         const osName = os.platform() === 'darwin' ? 'macOS' : os.platform() === 'win32' ? 'Windows' : os.platform();
