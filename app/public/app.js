@@ -560,7 +560,7 @@ function playAthanInBrowser(audioFile, prayerName) {
         const nextPrayerCard = document.getElementById('nextPrayerCard');
 
         // Mark as real prayer audio ONLY if it's not a test
-        // Real prayers: Fajr, Dhuhr, Asr, Maghrib, Isha
+        // Real prayers: Fajr | Sobh, Dohr, Asr, Maghrib, Isha
         isRealPrayerAudio = (prayerName !== 'Test' && prayerName !== 'Startup' && prayerName !== 'PageLoad');
 
         // Create audio element if it doesn't exist
@@ -1960,7 +1960,7 @@ async function validateNextPrayer(nextPrayerToValidate, todayPrayers) {
         }
 
         // Filter main 5 prayers only
-        const mainPrayers = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+        const mainPrayers = ['Fajr | Sobh', 'Dohr', 'Asr', 'Maghrib', 'Isha'];
         const mainPrayersToday = todayPrayers.filter(p => mainPrayers.includes(p.prayer_name));
 
 
@@ -2487,7 +2487,7 @@ async function loadScheduleMatrix() {
         const schedule = await response.json();
         console.log(`[FRONTEND] Received ${schedule.length} prayer_schedule entries from API`);
 
-        const prayers = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+        const prayers = ['Fajr | Sobh', 'Dohr', 'Asr', 'Maghrib', 'Isha'];
         const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
         const daysFull = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -3201,8 +3201,8 @@ function initializeFridayQuranTime() {
 // Get the display name for a prayer
 function getPrayerName(name) {
     const names = {
-        'Fajr': 'Fajr | Sobh',
-        'Dhuhr': 'Dhuhr',
+        'Fajr | Sobh': 'Fajr | Sobh',
+        'Dohr': 'Dohr',
         'Asr': 'Asr',
         'Maghrib': 'Maghrib',
         'Isha': 'Isha',

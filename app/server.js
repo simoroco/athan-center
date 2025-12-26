@@ -135,9 +135,21 @@ initSettings.run('dark_mode', '0'); // Dark mode disabled by default
 initSettings.run('fajr_volume', '50'); // Default Fajr volume at 50% (same as main volume)
 initSettings.run('sync_fajr_volume', '0'); // Sync Fajr volume disabled by default (independent volume)
 
+// Prayer name mapping: WebCal ICS names → Internal database names
+function mapPrayerNameFromWebCal(webCalName) {
+    const mapping = {
+        'Fajr': 'Fajr | Sobh',
+        'Dhuhr': 'Dohr',
+        'Asr': 'Asr',
+        'Maghrib': 'Maghrib',
+        'Isha': 'Isha'
+    };
+    return mapping[webCalName] || webCalName;
+}
+
 // NOTE: prayer_settings table is DEPRECATED - kept for backward compatibility only
 // All prayer enable/disable logic now uses prayer_schedule matrix
-const prayerNames = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+const prayerNames = ['Fajr | Sobh', 'Dohr', 'Asr', 'Maghrib', 'Isha'];
 
 // Initialize prayer schedule (5 prayers × 7 days = 35 entries, all enabled by default)
 // day_of_week: 0=Monday, 1=Tuesday, 2=Wednesday, 3=Thursday, 4=Friday, 5=Saturday, 6=Sunday
@@ -305,7 +317,9 @@ async function fetchPrayerTimes() {
             if (events.hasOwnProperty(k)) {
                 const ev = events[k];
                 if (ev.type === 'VEVENT') {
-                    const prayerName = ev.summary;
+                    const webCalPrayerName = ev.summary;
+                    // Map WebCal name to internal database name
+                    const prayerName = mapPrayerNameFromWebCal(webCalPrayerName);
                     const prayerTime = new Date(ev.start);
                     const date = formatDateLocal(prayerTime);
                     const time = prayerTime.toTimeString().split(' ')[0].substring(0, 5);
@@ -351,7 +365,7 @@ function scheduleAthanCalls() {
     const tomorrowStr = formatDateLocal(tomorrow);
 
     // Only schedule the 5 main prayers (same filter as frontend)
-    const mainPrayers = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+    const mainPrayers = ['Fajr | Sobh', 'Dohr', 'Asr', 'Maghrib', 'Isha'];
     const prayers = db.prepare(`
         SELECT * FROM prayers 
         WHERE date IN (?, ?) AND prayer_name IN (?, ?, ?, ?, ?)
@@ -570,7 +584,7 @@ function playAthan(prayerName) {
         // Retrieve volume (0-100)
         // For Fajr prayer, check if we should use the specific Fajr volume
         let volumePercent = 50;
-        if (prayerName === 'Fajr') {
+        if (prayerName === 'Fajr | Sobh') {
             // Check if Fajr volume is independent (not synced with main volume)
             const syncFajrVolumeRow = db.prepare('SELECT value FROM settings WHERE key = ?').get('sync_fajr_volume');
             const useFajrVolume = syncFajrVolumeRow ? syncFajrVolumeRow.value === '1' : false;
@@ -904,7 +918,7 @@ app.get('/api/prayers/next/upcoming', (req, res) => {
         log(`[API] /api/prayers/next/upcoming called at ${currentTime} on ${currentDate}`);
 
         // Only include the 5 main prayers
-        const mainPrayers = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+        const mainPrayers = ['Fajr | Sobh', 'Dohr', 'Asr', 'Maghrib', 'Isha'];
 
         // Debug: Show all main prayers for today
         const allMainPrayersToday = db.prepare(`
@@ -963,7 +977,7 @@ app.get('/api/next-prayer-text', (req, res) => {
         log(`[API] /api/next-prayer-text called with lang=${lang}`);
 
         // Only include the 5 main prayers
-        const mainPrayers = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+        const mainPrayers = ['Fajr | Sobh', 'Dohr', 'Asr', 'Maghrib', 'Isha'];
 
         // Find next prayer strictly in the future
         let nextPrayer = db.prepare(`
@@ -1006,8 +1020,8 @@ app.get('/api/next-prayer-text', (req, res) => {
 
         // Format prayer name in French
         const prayerNamesFR = {
-            'Fajr': 'Fajr',
-            'Dhuhr': 'Dhuhr',
+            'Fajr | Sobh': 'Fajr | Sobh',
+            'Dohr': 'Dohr',
             'Asr': 'Asr',
             'Maghrib': 'Maghrib',
             'Isha': 'Isha'
@@ -1096,7 +1110,7 @@ app.post('/api/settings', (req, res) => {
 // Returns enabled=1 if prayer is enabled for ALL days, 0 otherwise
 app.get('/api/prayer-settings', (req, res) => {
     try {
-        const mainPrayers = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+        const mainPrayers = ['Fajr | Sobh', 'Dohr', 'Asr', 'Maghrib', 'Isha'];
         const settings = mainPrayers.map(prayerName => {
             // A prayer is considered "enabled" if it's enabled for ALL 7 days
             const disabledCount = db.prepare(
@@ -1204,9 +1218,9 @@ app.post('/api/prayer-schedule', (req, res) => {
             return res.status(400).json({ error: 'day_of_week must be between 0 (Monday) and 6 (Sunday)' });
         }
 
-        const mainPrayers = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+        const mainPrayers = ['Fajr | Sobh', 'Dohr', 'Asr', 'Maghrib', 'Isha'];
         if (!mainPrayers.includes(prayer_name)) {
-            return res.status(400).json({ error: 'Invalid prayer_name. Must be one of: Fajr, Dhuhr, Asr, Maghrib, Isha' });
+            return res.status(400).json({ error: 'Invalid prayer_name. Must be one of: Fajr | Sobh, Dohr, Asr, Maghrib, Isha' });
         }
 
         db.prepare('UPDATE prayer_schedule SET enabled = ? WHERE prayer_name = ? AND day_of_week = ?')
@@ -1230,7 +1244,7 @@ app.post('/api/prayer-schedule/bulk', (req, res) => {
             return res.status(400).json({ error: 'type, target, and enabled are required' });
         }
 
-        const mainPrayers = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+        const mainPrayers = ['Fajr | Sobh', 'Dohr', 'Asr', 'Maghrib', 'Isha'];
 
         if (type === 'prayer') {
             // Update all 7 days for a specific prayer (whole week column)
@@ -1266,7 +1280,7 @@ app.post('/api/skip-next', (req, res) => {
         const now = new Date();
         const currentDate = formatDateLocal(now);
         const currentTime = now.toTimeString().split(' ')[0].substring(0, 5);
-        const mainPrayers = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+        const mainPrayers = ['Fajr | Sobh', 'Dohr', 'Asr', 'Maghrib', 'Isha'];
 
         const nextPrayer = db.prepare(`
             SELECT * FROM prayers 
@@ -1327,7 +1341,7 @@ app.get('/api/mute-next-athan', (req, res) => {
         const now = new Date();
         const currentDate = formatDateLocal(now);
         const currentTime = now.toTimeString().split(' ')[0].substring(0, 5);
-        const mainPrayers = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+        const mainPrayers = ['Fajr | Sobh', 'Dohr', 'Asr', 'Maghrib', 'Isha'];
 
         const nextPrayer = db.prepare(`
             SELECT * FROM prayers 
@@ -2223,7 +2237,7 @@ app.get('/api/check-athan-time', (req, res) => {
         const currentTime = now.toTimeString().split(' ')[0].substring(0, 5);
 
         // Only check the 5 main prayers
-        const mainPrayers = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+        const mainPrayers = ['Fajr | Sobh', 'Dohr', 'Asr', 'Maghrib', 'Isha'];
 
         // Retrieve today's main prayers only
         const prayers = db.prepare(`
