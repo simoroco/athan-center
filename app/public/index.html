@@ -36,7 +36,7 @@
         <div class="date-navigation">
             <button id="prevDay" class="nav-btn">⬅️ Previous Day</button>
             <button id="todayBtn" class="nav-btn">
-                🧎 Today (<br>
+                🧎 Go Today (<br>
                 <span id="todayDate" class="btn-date"></span>)
             </button>
             <button id="calendarBtn" class="nav-btn calendar-btn">
@@ -336,19 +336,20 @@
                         <label style="font-weight: 600;">Use the API:</label>
                         <div class="update-info-card"
                             style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                            <div style="margin-bottom: 10px;">
+                            <div style="margin-bottom: 10px;" id="apis-web-list">
                                 <strong>
-                                    🔊 Test Athan on server using API (30 seconds): </strong><br><code
+                                    📖 Get next prayer (text): </strong><br><code
+                                    id="nextPrayerTextCommand" class="inline-code">Loading...</code><br><strong>
+                                    🔊 Test Athan on server (30 seconds): </strong><br><code
                                     id="testAthanServerCommand" class="inline-code">Loading...</code><br><strong>
-                                    🔊 Test Quran on server using API (30 seconds): </strong><br><code
+                                    🔊 Test Quran on server (30 seconds): </strong><br><code
                                     id="testQuranServerCommand" class="inline-code">Loading...</code><br><strong>
-                                    🚀 Mute next Athan using API: </strong><br><code id="muteCommand"
+                                    🚀 Mute next Athan: </strong><br><code id="muteCommand"
                                     class="inline-code">Loading...</code><br><strong>
-                                    🚀 Unmute next Athan using API: </strong><br><code id="unmuteCommand"
+                                    🚀 Unmute next Athan: </strong><br><code id="unmuteCommand"
                                     class="inline-code">Loading...</code><br><strong>
-                                    🚀 Stop all playing audio in the server using API: </strong><br><code
+                                    🚀 Stop all playing audio in the server: </strong><br><code
                                     id="stopAudioCommand" class="inline-code">Loading...</code>
-
                             </div>
                         </div>
                     </div>
@@ -386,7 +387,7 @@
 
         <footer>
             <img src="logo.png" alt="Athan Center logo" class="app-logo">
-            <p>© 2025 Athan Center - 3.0.1</p>
+            <p>© 2025 Athan Center - 3.1.0</p>
         </footer>
     </div>
 

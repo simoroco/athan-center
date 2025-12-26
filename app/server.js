@@ -848,14 +848,25 @@ app.get('/api/prayer-checks/:date', (req, res) => {
 });
 
 // POST - Toggle prayer check
+// Supports 3 states: 0 (unchecked) → 2 (orange) → 1 (green) → 0 (unchecked)
 app.post('/api/prayer-checks/toggle', (req, res) => {
     try {
         const { date, prayer_name } = req.body;
 
         // Get current check status
         const currentCheck = db.prepare('SELECT checked FROM prayer_checks WHERE date = ? AND prayer_name = ?').get(date, prayer_name);
-        const newChecked = currentCheck ? (currentCheck.checked === 1 ? 0 : 1) : 1;
-        const checkedAt = newChecked === 1 ? new Date().toISOString() : null;
+        
+        // Triple-state toggle logic: 0 → 2 (orange) → 1 (green) → 0
+        let newChecked;
+        if (!currentCheck || currentCheck.checked === 0) {
+            newChecked = 2; // First click: orange
+        } else if (currentCheck.checked === 2) {
+            newChecked = 1; // Second click: green
+        } else {
+            newChecked = 0; // Third click: unchecked
+        }
+        
+        const checkedAt = newChecked !== 0 ? new Date().toISOString() : null;
 
         // Insert or update
         db.prepare(`
@@ -936,6 +947,112 @@ app.get('/api/prayers/next/upcoming', (req, res) => {
     } catch (error) {
         logError(`[API] Error in /api/prayers/next/upcoming:`, error);
         res.status(500).json({ error: error.message });
+    }
+});
+
+// GET - Retrieve next prayer as natural language text
+// Supports language parameter (default: FR)
+// Example: /api/next-prayer-text?lang=FR
+app.get('/api/next-prayer-text', (req, res) => {
+    try {
+        const lang = (req.query.lang || 'FR').toUpperCase();
+        const now = new Date();
+        const currentDate = formatDateLocal(now);
+        const currentTime = now.toTimeString().split(' ')[0].substring(0, 5);
+
+        log(`[API] /api/next-prayer-text called with lang=${lang}`);
+
+        // Only include the 5 main prayers
+        const mainPrayers = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+
+        // Find next prayer strictly in the future
+        let nextPrayer = db.prepare(`
+            SELECT * FROM prayers 
+            WHERE date = ? AND prayer_time > ? AND prayer_name IN (?, ?, ?, ?, ?)
+            ORDER BY prayer_time
+            LIMIT 1
+        `).get(currentDate, currentTime, ...mainPrayers);
+
+        // If no prayer today, get first prayer tomorrow
+        if (!nextPrayer) {
+            const tomorrow = new Date(now);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const tomorrowDate = formatDateLocal(tomorrow);
+
+            nextPrayer = db.prepare(`
+                SELECT * FROM prayers 
+                WHERE date = ? AND prayer_name IN (?, ?, ?, ?, ?)
+                ORDER BY prayer_time
+                LIMIT 1
+            `).get(tomorrowDate, ...mainPrayers);
+        }
+
+        // If no prayer found at all, return configuration message
+        if (!nextPrayer) {
+            if (lang === 'FR') {
+                res.type('text/plain').send('Athan Center doit être configuré');
+            } else {
+                res.type('text/plain').send('Athan Center must be configured');
+            }
+            return;
+        }
+
+        // Calculate time remaining
+        const prayerDateTime = new Date(`${nextPrayer.date}T${nextPrayer.prayer_time}:00`);
+        const diffMs = prayerDateTime - now;
+        const diffMinutes = Math.floor(diffMs / 60000);
+        const hours = Math.floor(diffMinutes / 60);
+        const minutes = diffMinutes % 60;
+
+        // Format prayer name in French
+        const prayerNamesFR = {
+            'Fajr': 'Fajr',
+            'Dhuhr': 'Dhuhr',
+            'Asr': 'Asr',
+            'Maghrib': 'Maghrib',
+            'Isha': 'Isha'
+        };
+
+        const prayerName = prayerNamesFR[nextPrayer.prayer_name] || nextPrayer.prayer_name;
+
+        // Build natural language response in French
+        if (lang === 'FR') {
+            let timeText = '';
+            if (hours > 0 && minutes > 0) {
+                const hourWord = hours === 1 ? 'heure' : 'heures';
+                const minuteWord = minutes === 1 ? 'minute' : 'minutes';
+                timeText = `${hours} ${hourWord} et ${minutes} ${minuteWord}`;
+            } else if (hours > 0) {
+                const hourWord = hours === 1 ? 'heure' : 'heures';
+                timeText = `${hours} ${hourWord}`;
+            } else {
+                const minuteWord = minutes === 1 ? 'minute' : 'minutes';
+                timeText = `${minutes} ${minuteWord}`;
+            }
+
+            const response = `Salate Al ${prayerName} est à ${nextPrayer.prayer_time}, il reste ${timeText} avant l'adhan`;
+            res.type('text/plain').send(response);
+        } else {
+            // English fallback (for future expansion)
+            let timeText = '';
+            if (hours > 0 && minutes > 0) {
+                const hourWord = hours === 1 ? 'hour' : 'hours';
+                const minuteWord = minutes === 1 ? 'minute' : 'minutes';
+                timeText = `${hours} ${hourWord} and ${minutes} ${minuteWord}`;
+            } else if (hours > 0) {
+                const hourWord = hours === 1 ? 'hour' : 'hours';
+                timeText = `${hours} ${hourWord}`;
+            } else {
+                const minuteWord = minutes === 1 ? 'minute' : 'minutes';
+                timeText = `${minutes} ${minuteWord}`;
+            }
+
+            const response = `Salate Al ${prayerName} is at ${nextPrayer.prayer_time}, ${timeText} remaining before adhan`;
+            res.type('text/plain').send(response);
+        }
+    } catch (error) {
+        logError(`[API] Error in /api/next-prayer-text:`, error);
+        res.status(500).type('text/plain').send('Error retrieving prayer information');
     }
 });
 
@@ -1621,12 +1738,14 @@ app.get('/api/settings/export', (req, res) => {
             log(`[EXPORT] Exporting skip_next: ${skipNext.skip}`);
         }
 
-        // Export prayer checks
-        const prayerChecks = db.prepare('SELECT date, prayer_name, checked, checked_at FROM prayer_checks WHERE checked = 1').all();
+        // Export prayer checks (all states: 0=unchecked, 1=green, 2=orange)
+        const prayerChecks = db.prepare('SELECT date, prayer_name, checked, checked_at FROM prayer_checks WHERE checked > 0').all();
         log(`[EXPORT] Exporting ${prayerChecks.length} prayer checks`);
         prayerChecks.forEach(pc => {
-            csvContent += `prayer_check,${pc.date}-${pc.prayer_name},${pc.checked_at || ''}\n`;
-            log(`[EXPORT]   - ${pc.date}-${pc.prayer_name} checked at ${pc.checked_at}`);
+            csvContent += `prayer_check,${pc.date}-${pc.prayer_name},${pc.checked}|${pc.checked_at || ''}
+`;
+            const checkState = pc.checked === 1 ? 'green' : pc.checked === 2 ? 'orange' : 'unchecked';
+            log(`[EXPORT]   - ${pc.date}-${pc.prayer_name} ${checkState} (${pc.checked}) at ${pc.checked_at}`);
         });
 
         log('[EXPORT] ========== EXPORT COMPLETED ==========');
@@ -1713,10 +1832,20 @@ app.post('/api/settings/import', (req, res) => {
                         }
                         return acc;
                     }, ['', '']);
-                    const checkedAt = value || new Date().toISOString();
-                    db.prepare('INSERT OR REPLACE INTO prayer_checks (date, prayer_name, checked, checked_at) VALUES (?, ?, 1, ?)')
-                        .run(date, prayerName, checkedAt);
-                    log(`[IMPORT] prayer_check: ${date}-${prayerName} checked`);
+                    // value format: "checked_state|checked_at" or just "checked_at" (legacy)
+                    let checkedState = 1; // default to green for legacy imports
+                    let checkedAt = value || new Date().toISOString();
+                    
+                    if (value.includes('|')) {
+                        const [state, timestamp] = value.split('|');
+                        checkedState = parseInt(state) || 1;
+                        checkedAt = timestamp || new Date().toISOString();
+                    }
+                    
+                    db.prepare('INSERT OR REPLACE INTO prayer_checks (date, prayer_name, checked, checked_at) VALUES (?, ?, ?, ?)')
+                        .run(date, prayerName, checkedState, checkedAt);
+                    const checkStateLabel = checkedState === 1 ? 'green' : checkedState === 2 ? 'orange' : 'unchecked';
+                    log(`[IMPORT] prayer_check: ${date}-${prayerName} ${checkStateLabel} (${checkedState})`);
                     importedCount++;
                 }
             } catch (err) {

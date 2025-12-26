@@ -1,19 +1,35 @@
 # 🕌 Athan Center
 
 <p align="center">
+  <img src="./app/public/logo.png" alt="Athan Center Logo" width="150"/>
+</p>
+
+<p align="center">
+  <strong>Complete Islamic Prayer Times & Automated Athan Solution</strong>
+</p>
+
+<p align="center">
   <a href="https://github.com/simoroco/athan-center/stargazers"><img src="https://img.shields.io/github/stars/simoroco/athan-center?style=flat-square" alt="GitHub stars"></a>
   <a href="https://github.com/simoroco/athan-center/issues"><img src="https://img.shields.io/github/issues/simoroco/athan-center?style=flat-square" alt="GitHub issues"></a>
   <a href="https://github.com/simoroco/athan-center/network/members"><img src="https://img.shields.io/github/forks/simoroco/athan-center?style=flat-square" alt="GitHub forks"></a>
   <a href="https://github.com/simoroco/athan-center/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-GPLv3-green?style=flat-square" alt="License"></a>
   <a href="https://hub.docker.com/r/simoroco/athan-center"><img src="https://img.shields.io/docker/pulls/simoroco/athan-center?style=flat-square" alt="Docker pulls"></a>
+  <img src="https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen?style=flat-square" alt="Node version">
+  <img src="https://img.shields.io/badge/platform-linux%20%7C%20macos%20%7C%20windows-blue?style=flat-square" alt="Platform">
 </p>
 
-Athan Center is a complete solution for Islamic prayer call at home or in mosques. It allows you to track prayer times on a modern web interface and automatically call for the Athan through a background service.
-The solution is optimized for Raspberry Pi and Linux with Docker but works in MacOS and Windows too.
+<p align="center">
+  <em>A modern, self-hosted solution for Islamic prayer times with automatic Athan playback</em><br>
+  <em>Perfect for homes, mosques, and Islamic centers</em>
+</p>
 
-**May Allah accept your prayers** 🤲
+---
 
-Try it locally or on a Raspberry Pi, then share feedback and stars so more communities can benefit.
+**May Allah accept your prayers** 🤲 **لا تنسى أخاك في دعائك**
+
+Athan Center provides accurate prayer times with automatic Athan playback through a beautiful web interface. Optimized for Raspberry Pi and Docker, it works seamlessly on Linux, macOS, and Windows.
+
+⭐ **Star this repo** if it helps your mosque or home • 🐛 **Report issues** • 🤝 **Contribute**
 
 ## 📚 Table of Contents
 
@@ -58,10 +74,13 @@ docker pull simoroco/athan-center:latest
 docker push simoroco/athan-center:latest
 ```
 
-## 🖥️ Screenshots
+## 🖥️ Demo
 
-| [![Dashboard overview on desktop](./screens/1.png)](./screens/1.png) | [![Athan call settings](./screens/2.png)](./screens/2.png) | [![Friday Quran recitation settings](./screens/3.png)](./screens/3.png) | [![Voice control settings](./screens/4.png)](./screens/4.png) |
-| --- | --- | --- | --- |
+<p align="center">
+  <img src="./Screens.gif" alt="Athan Center Demo" width="100%"/>
+</p>
+
+> **Note:** The animated demo shows the main features of Athan Center including prayer times display, settings configuration, and audio controls.
 
 ## 🚀 Production Deployment
 
@@ -125,8 +144,11 @@ All endpoints are available on `http://IP:7777/api`.
 | --- | --- | --- |
 | Mute next athan | `/mute-next-athan` | Skips only the upcoming prayer |
 | Stop current audio | `/stop-audio` | Immediately stops every active stream |
-| Test Athan (server) | `/test-athan-server` | Plays 30 s sample through speakers |
-| Test Quran (server) | `/test-quran-server` | 30 s Quran recitation |
+| Test Athan (server) | `/test-athan-server` | Plays 30 s sample through speakers |
+| Test Quran (server) | `/test-quran-server` | 30 s Quran recitation |
+| Next prayer text | `/next-prayer-text?lang=FR` | Returns next prayer in natural language (FR/EN) |
+
+For complete API documentation, see [API.md](./docs/API.md).
 
 ## 📄 License
 
@@ -141,7 +163,7 @@ By using, modifying, or redistributing this software, you accept the terms of th
 - **Containerization**: Docker
 - **Scheduling**: node-cron, node-schedule
 
-## � Community & Roadmap
+## 🌍 Community & Roadmap
 
 - ⭐️ Star the repo if it helps your mosque or home.
 - 🐛 [Open an issue](https://github.com/simoroco/athan-center/issues) for bugs or feature ideas.

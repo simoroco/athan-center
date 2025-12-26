@@ -1727,6 +1727,15 @@ function setupEventListeners() {
             openUrlFromCurlCode(stopAudioCommand);
         });
     }
+
+    const nextPrayerTextCommand = document.getElementById('nextPrayerTextCommand');
+    if (nextPrayerTextCommand) {
+        nextPrayerTextCommand.style.cursor = 'pointer';
+        nextPrayerTextCommand.title = 'Open this API URL in a new tab';
+        nextPrayerTextCommand.addEventListener('click', () => {
+            openUrlFromCurlCode(nextPrayerTextCommand);
+        });
+    }
 }
 
 // Apply or remove dark mode
@@ -1753,6 +1762,7 @@ function updateDateButtons() {
 
     const todayDateElement = document.getElementById('todayDate');
     const currentDateElement = document.getElementById('currentDate');
+    const calendarBtn = document.getElementById('calendarBtn');
 
     if (todayDateElement) {
         todayDateElement.textContent = todayStr;
@@ -1760,6 +1770,20 @@ function updateDateButtons() {
 
     if (currentDateElement) {
         currentDateElement.textContent = currentDateStr;
+    }
+
+    // Update calendar button with weekday name
+    if (calendarBtn) {
+        const weekdayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const currentWeekday = weekdayNames[currentDate.getDay()];
+        const todayFormatted = formatDateLocal(today);
+        const currentFormatted = formatDateLocal(currentDate);
+        
+        if (todayFormatted === currentFormatted) {
+            calendarBtn.innerHTML = `📅 Today (<br><span class="btn-date">${currentDateStr}</span>)`;
+        } else {
+            calendarBtn.innerHTML = `📅 ${currentWeekday} (<br><span class="btn-date">${currentDateStr}</span>)`;
+        }
     }
 }
 
@@ -1868,7 +1892,7 @@ async function displayPrayers(prayers) {
             const checksResponse = await fetch(`${API_BASE}/api/prayer-checks/${selectedDate}`);
             const checks = await checksResponse.json();
             checks.forEach(check => {
-                prayerChecks[check.prayer_name] = check.checked === 1;
+                prayerChecks[check.prayer_name] = check.checked; // Store the actual value (0, 1, or 2)
             });
         } catch (error) {
             console.error('Error loading prayer checks:', error);
@@ -1878,8 +1902,16 @@ async function displayPrayers(prayers) {
     prayersList.innerHTML = prayers.map(prayer => {
         const isPast = selectedDate < today || (selectedDate === today && prayer.prayer_time < currentTime);
         const prayerClass = isPast ? 'prayer-item past' : 'prayer-item';
-        const isChecked = prayerChecks[prayer.prayer_name] || false;
-        const checkMark = isChecked ? '<span class="prayer-check-mark">✓</span>' : '';
+        const checkState = prayerChecks[prayer.prayer_name] || 0;
+        
+        // Generate check mark based on state: 0=none, 1=green, 2=orange
+        let checkMark = '';
+        if (checkState === 1) {
+            checkMark = '<span class="prayer-check-mark">✓</span>';
+        } else if (checkState === 2) {
+            checkMark = '<span class="prayer-redcheck-mark">✓</span>';
+        }
+        
         const canToggle = !isFutureDate;
         const itemStyle = canToggle ? 'cursor: pointer;' : 'cursor: not-allowed;';
 
@@ -3036,6 +3068,20 @@ async function loadServerTime() {
                 testQuranServerCommandElement.textContent = 'Error';
             }
         }
+
+        const nextPrayerTextCommandElement = document.getElementById('nextPrayerTextCommand');
+        if (nextPrayerTextCommandElement) {
+            try {
+                const nextPrayerTextUrl = new URL(`${API_BASE}/api/next-prayer-text?lang=FR`);
+                if (data.ip) {
+                    nextPrayerTextUrl.hostname = data.ip;
+                }
+                nextPrayerTextCommandElement.textContent = `curl ${nextPrayerTextUrl.href}`;
+            } catch (urlError) {
+                console.error('Error building next prayer text command URL:', urlError);
+                nextPrayerTextCommandElement.textContent = 'Error';
+            }
+        }
     } catch (error) {
         console.error('Error loading server time:', error);
         const serverTimeValue = document.getElementById('serverTimeValue');
@@ -3155,7 +3201,7 @@ function initializeFridayQuranTime() {
 // Get the display name for a prayer
 function getPrayerName(name) {
     const names = {
-        'Fajr': 'Fajr',
+        'Fajr': 'Fajr | Sobh',
         'Dhuhr': 'Dhuhr',
         'Asr': 'Asr',
         'Maghrib': 'Maghrib',
