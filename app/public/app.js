@@ -1763,6 +1763,7 @@ function updateDateButtons() {
     const todayDateElement = document.getElementById('todayDate');
     const currentDateElement = document.getElementById('currentDate');
     const calendarBtn = document.getElementById('calendarBtn');
+    const todayBtn = document.getElementById('todayBtn');
 
     if (todayDateElement) {
         todayDateElement.textContent = todayStr;
@@ -1783,6 +1784,24 @@ function updateDateButtons() {
             calendarBtn.innerHTML = `📅 Today (<br><span class="btn-date">${currentDateStr}</span>)`;
         } else {
             calendarBtn.innerHTML = `📅 ${currentWeekday} (<br><span class="btn-date">${currentDateStr}</span>)`;
+        }
+    }
+
+    // Disable todayBtn when viewing today's prayers
+    if (todayBtn) {
+        const todayFormatted = formatDateLocal(today);
+        const currentFormatted = formatDateLocal(currentDate);
+        
+        if (todayFormatted === currentFormatted) {
+            // Viewing today - disable button
+            todayBtn.disabled = true;
+            todayBtn.style.opacity = '0.5';
+            todayBtn.style.cursor = 'not-allowed';
+        } else {
+            // Viewing another day - enable button
+            todayBtn.disabled = false;
+            todayBtn.style.opacity = '1';
+            todayBtn.style.cursor = 'pointer';
         }
     }
 }
