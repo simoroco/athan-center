@@ -115,6 +115,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     loadServerTime();
     loadUpdateInfo();
     initAccordion();  // Initialize accordion after all content is loaded
+    initDailyActivitiesCollapse();  // Initialize daily activities collapse
 
     // Start countdown AFTER prayers are loaded to ensure nextPrayerCard has correct data
     startCountdown();
@@ -1531,11 +1532,13 @@ function setupEventListeners() {
         importConfigFile.value = '';
     });
 
-    // Reset all prayer checks
+    // Reset all prayer checks and daily activities
     document.getElementById('resetPrayerChecksBtn').addEventListener('click', async () => {
         const confirmed = confirm(
-            '⚠️ Are you sure you want to reset all prayer checks?\n\n' +
-            'This will remove all check marks (✓) from all prayers in the database.\n\n' +
+            '⚠️ Are you sure you want to reset all prayer checks and daily activities?\n\n' +
+            'This will remove all check marks (✓) from:\n' +
+            '• All prayers in the database\n' +
+            '• All daily activities (Coran & Tasbih)\n\n' +
             'This action cannot be undone.'
         );
 
@@ -1547,7 +1550,7 @@ function setupEventListeners() {
                 const data = await response.json();
 
                 if (data.success) {
-                    alert('✅ All prayer checks have been reset!');
+                    alert('✅ All prayer checks and daily activities have been reset!');
                     loadPrayers(); // Reload to remove check marks
                 } else {
                     alert('❌ Error: ' + (data.error || 'Unknown error'));
@@ -1747,6 +1750,31 @@ function applyDarkMode(isDarkMode) {
     }
 }
 
+// Calculate the day difference between two dates
+function getDayDifference(date1, date2) {
+    const d1 = new Date(formatDateLocal(date1) + 'T00:00:00');
+    const d2 = new Date(formatDateLocal(date2) + 'T00:00:00');
+    const diffTime = d2 - d1;
+    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+}
+
+// Get the start of the week (Monday) for a given date
+function getWeekStart(date) {
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = day === 0 ? -6 : 1 - day; // Adjust when day is Sunday (0)
+    d.setDate(d.getDate() + diff);
+    return d;
+}
+
+// Check if two dates are in the same week (Monday to Sunday)
+function isSameWeek(date1, date2) {
+    const week1Start = formatDateLocal(getWeekStart(date1));
+    const week2Start = formatDateLocal(getWeekStart(date2));
+    return week1Start === week2Start;
+}
+
 // Update date displays in navigation buttons
 function updateDateButtons() {
     const today = getServerSyncedDate();
@@ -1764,6 +1792,8 @@ function updateDateButtons() {
     const currentDateElement = document.getElementById('currentDate');
     const calendarBtn = document.getElementById('calendarBtn');
     const todayBtn = document.getElementById('todayBtn');
+    const prevDayBtn = document.getElementById('prevDay');
+    const nextDayBtn = document.getElementById('nextDay');
 
     if (todayDateElement) {
         todayDateElement.textContent = todayStr;
@@ -1773,16 +1803,64 @@ function updateDateButtons() {
         currentDateElement.textContent = currentDateStr;
     }
 
-    // Update calendar button with weekday name
+    // Calculate day difference
+    const dayDiff = getDayDifference(today, currentDate);
+    const weekdayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const currentWeekday = weekdayNames[currentDate.getDay()];
+
+    // Update prevDay button label
+    if (prevDayBtn) {
+        if (dayDiff === 0) {
+            // Viewing today → prevDay = "Yesterday"
+            prevDayBtn.innerHTML = '⬅️ Yesterday';
+        } else if (dayDiff === 1) {
+            // Viewing tomorrow → prevDay = "Go today"
+            prevDayBtn.innerHTML = '⬅️ Go Today';
+        } else if (dayDiff === -1) {
+            // Viewing yesterday → prevDay = "Before Yesterday"
+            prevDayBtn.innerHTML = '⬅️ Before Yesterday';
+        } else {
+            // Default
+            prevDayBtn.innerHTML = '⬅️ Previous Day';
+        }
+    }
+
+    // Update nextDay button label
+    if (nextDayBtn) {
+        if (dayDiff === 0) {
+            // Viewing today → nextDay = "Tomorrow"
+            nextDayBtn.innerHTML = 'Tomorrow ➡️';
+        } else if (dayDiff === 1) {
+            // Viewing tomorrow → nextDay = "After Tomorrow"
+            nextDayBtn.innerHTML = 'After Tomorrow ➡️';
+        } else if (dayDiff === -1) {
+            // Viewing yesterday → nextDay = "Go today"
+            nextDayBtn.innerHTML = 'Go Today ➡️';
+        } else {
+            // Default
+            nextDayBtn.innerHTML = 'Next Day ➡️';
+        }
+    }
+
+    // Update calendar button with natural labels
     if (calendarBtn) {
-        const weekdayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-        const currentWeekday = weekdayNames[currentDate.getDay()];
         const todayFormatted = formatDateLocal(today);
         const currentFormatted = formatDateLocal(currentDate);
-        
-        if (todayFormatted === currentFormatted) {
+
+        if (dayDiff === 0) {
+            // Viewing today
             calendarBtn.innerHTML = `📅 Today (<br><span class="btn-date">${currentDateStr}</span>)`;
+        } else if (dayDiff === 1) {
+            // Viewing tomorrow
+            calendarBtn.innerHTML = `📅 Tomorrow (<br><span class="btn-date">${currentDateStr}</span>)`;
+        } else if (dayDiff === -1) {
+            // Viewing yesterday
+            calendarBtn.innerHTML = `📅 Yesterday (<br><span class="btn-date">${currentDateStr}</span>)`;
+        } else if (isSameWeek(today, currentDate) && dayDiff !== 0) {
+            // Viewing another day in the current week (before or after today)
+            calendarBtn.innerHTML = `📅 This ${currentWeekday} (<br><span class="btn-date">${currentDateStr}</span>)`;
         } else {
+            // Default: show weekday name
             calendarBtn.innerHTML = `📅 ${currentWeekday} (<br><span class="btn-date">${currentDateStr}</span>)`;
         }
     }
@@ -1791,7 +1869,7 @@ function updateDateButtons() {
     if (todayBtn) {
         const todayFormatted = formatDateLocal(today);
         const currentFormatted = formatDateLocal(currentDate);
-        
+
         if (todayFormatted === currentFormatted) {
             // Viewing today - disable button
             todayBtn.disabled = true;
@@ -1823,6 +1901,7 @@ async function loadPrayers() {
         displayPrayers(prayers);
         updateDateButtons();
         await updateWeekdayMuteBanner();
+        await loadDailyActivities();
 
         // Determine if we should show next prayer card
         const today = getServerSyncedDate();
@@ -1922,7 +2001,7 @@ async function displayPrayers(prayers) {
         const isPast = selectedDate < today || (selectedDate === today && prayer.prayer_time < currentTime);
         const prayerClass = isPast ? 'prayer-item past' : 'prayer-item';
         const checkState = prayerChecks[prayer.prayer_name] || 0;
-        
+
         // Generate check mark based on state: 0=none, 1=green, 2=orange
         let checkMark = '';
         if (checkState === 1) {
@@ -1930,7 +2009,7 @@ async function displayPrayers(prayers) {
         } else if (checkState === 2) {
             checkMark = '<span class="prayer-redcheck-mark">✓</span>';
         }
-        
+
         const canToggle = !isFutureDate;
         const itemStyle = canToggle ? 'cursor: pointer;' : 'cursor: not-allowed;';
 
@@ -1964,6 +2043,99 @@ async function displayPrayers(prayers) {
             });
         });
     }
+}
+
+// Load and display daily activities
+async function loadDailyActivities() {
+    try {
+        const selectedDate = formatDateLocal(currentDate);
+        const now = getServerSyncedDate();
+        const today = formatDateLocal(now);
+        const isFutureDate = selectedDate > today;
+
+        // Load activity checks for the selected date (only for today/past)
+        let activityChecks = {};
+        if (!isFutureDate) {
+            try {
+                const checksResponse = await fetch(`${API_BASE}/api/daily-activities/${selectedDate}`);
+                const checks = await checksResponse.json();
+                checks.forEach(check => {
+                    activityChecks[check.activity_name] = check.checked;
+                });
+            } catch (error) {
+                console.error('Error loading activity checks:', error);
+            }
+        }
+
+        // Define the two activities
+        const activities = [
+            { name: 'Read Coran', icon: '📖' },
+            { name: 'Tasbih & Dikr', icon: '📿' }
+        ];
+
+        const activitiesContent = document.getElementById('dailyActivitiesContent');
+
+        activitiesContent.innerHTML = activities.map(activity => {
+            const checkState = activityChecks[activity.name] || 0;
+
+            // Generate check mark based on state: 0=none, 1=green, 2=orange
+            let checkMark = '';
+            if (checkState === 1) {
+                checkMark = '<span class="prayer-check-mark">✓</span>';
+            } else if (checkState === 2) {
+                checkMark = '<span class="prayer-redcheck-mark">✓</span>';
+            }
+
+            const canToggle = !isFutureDate;
+            const itemStyle = canToggle ? 'cursor: pointer;' : 'cursor: not-allowed;';
+
+            return `
+                <div class="activity-item" data-date="${selectedDate}" data-activity="${activity.name}" data-can-toggle="${canToggle}" style="${itemStyle}">
+                    <div class="activity-name">${checkMark}${activity.icon} ${activity.name}</div>
+                </div>
+            `;
+        }).join('');
+
+        // Add click event listeners to toggle activity checks (only for today/past)
+        if (!isFutureDate) {
+            document.querySelectorAll('.activity-item[data-can-toggle="true"]').forEach(item => {
+                item.addEventListener('click', async function () {
+                    const date = this.getAttribute('data-date');
+                    const activityName = this.getAttribute('data-activity');
+
+                    try {
+                        await fetch(`${API_BASE}/api/daily-activities/toggle`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ date, activity_name: activityName })
+                        });
+
+                        // Reload activities to update the check mark
+                        loadDailyActivities();
+                    } catch (error) {
+                        console.error('Error toggling activity check:', error);
+                    }
+                });
+            });
+        }
+    } catch (error) {
+        console.error('Error loading daily activities:', error);
+    }
+}
+
+// Initialize daily activities collapse/expand functionality
+function initDailyActivitiesCollapse() {
+    const header = document.getElementById('dailyActivitiesHeader');
+    const content = document.getElementById('dailyActivitiesContent');
+
+    // Start collapsed by default
+    header.classList.add('collapsed');
+    content.classList.add('collapsed');
+
+    header.addEventListener('click', () => {
+        header.classList.toggle('collapsed');
+        content.classList.toggle('collapsed');
+    });
 }
 
 // Validate that nextPrayer is coherent with today's prayers list

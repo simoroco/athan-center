@@ -44,15 +44,17 @@ Athan Center provides accurate prayer times with automatic Athan playback throug
 
 ## ✨ Key Features
 
-- 🔊 **Automatic Athan playback** at the exact moment of each prayer
+- 🔊 **Automatic & Customizable Athan caller** in a server or from a web browser
 - 📅 **Prayer times display** with real-time countdown
-- 📍 **Customizable location** via ICS link (Prayer WebCal)
-- ⚙️ **Per-prayer settings** - Individual enable/disable
-- 🔇 **One-time skip** - Mute next athan only
+- 🧎 **Daily track pray, dikr and Coran read** efficiently
+- 📍 **Customizable location & prayer times** using ICS link (Prayer WebCal)
+- 🔈 **Friday Coran recitation** - Individual enable/disable
+- 🔇 **Skip specific prayer athan** - : Mute next athan only for example
+- 🎵 **Simplified statistics** to improve your practices (next version !)
 - 📱 **Responsive interface** - Accessible from mobile/tablet/desktop
 - 🌐 **REST API** - Remote control (mute, stop audio, etc.)
 - 🔄 **Automatic updates** - Prayer times updated daily at 7 PM
-- 💾 **Export/Import** configuration
+- ⚙️ **Easy Configuration** with Export / Import  
 - 🐳 **Docker** - One-command deployment
 
 ## ⚡ Quick Start

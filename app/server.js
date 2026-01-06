@@ -114,6 +114,15 @@ db.exec(`
         checked_at TEXT DEFAULT NULL,
         UNIQUE(date, prayer_name)
     );
+
+    CREATE TABLE IF NOT EXISTS daily_activities (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        date TEXT NOT NULL,
+        activity_name TEXT NOT NULL,
+        checked INTEGER DEFAULT 0,
+        checked_at TEXT DEFAULT NULL,
+        UNIQUE(date, activity_name)
+    );
 `);
 
 // Initialize friday_quran_trigger
@@ -869,7 +878,7 @@ app.post('/api/prayer-checks/toggle', (req, res) => {
 
         // Get current check status
         const currentCheck = db.prepare('SELECT checked FROM prayer_checks WHERE date = ? AND prayer_name = ?').get(date, prayer_name);
-        
+
         // Triple-state toggle logic: 0 → 2 (orange) → 1 (green) → 0
         let newChecked;
         if (!currentCheck || currentCheck.checked === 0) {
@@ -879,7 +888,7 @@ app.post('/api/prayer-checks/toggle', (req, res) => {
         } else {
             newChecked = 0; // Third click: unchecked
         }
-        
+
         const checkedAt = newChecked !== 0 ? new Date().toISOString() : null;
 
         // Insert or update
@@ -897,11 +906,61 @@ app.post('/api/prayer-checks/toggle', (req, res) => {
     }
 });
 
-// POST - Reset all prayer checks
+// POST - Reset all prayer checks and daily activities
 app.post('/api/prayer-checks/reset', (req, res) => {
     try {
         db.prepare('DELETE FROM prayer_checks').run();
-        res.json({ success: true, message: 'All prayer checks have been reset' });
+        db.prepare('DELETE FROM daily_activities').run();
+        res.json({ success: true, message: 'All prayer checks and daily activities have been reset' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ===== DAILY ACTIVITIES APIs =====
+
+// GET - Retrieve daily activities for a given date
+app.get('/api/daily-activities/:date', (req, res) => {
+    try {
+        const { date } = req.params;
+        const activities = db.prepare('SELECT * FROM daily_activities WHERE date = ?').all(date);
+        res.json(activities);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// POST - Toggle daily activity check
+// Supports 3 states: 0 (unchecked) → 2 (orange) → 1 (green) → 0 (unchecked)
+app.post('/api/daily-activities/toggle', (req, res) => {
+    try {
+        const { date, activity_name } = req.body;
+
+        // Get current check status
+        const currentCheck = db.prepare('SELECT checked FROM daily_activities WHERE date = ? AND activity_name = ?').get(date, activity_name);
+
+        // Triple-state toggle logic: 0 → 2 (orange) → 1 (green) → 0
+        let newChecked;
+        if (!currentCheck || currentCheck.checked === 0) {
+            newChecked = 2; // First click: orange
+        } else if (currentCheck.checked === 2) {
+            newChecked = 1; // Second click: green
+        } else {
+            newChecked = 0; // Third click: unchecked
+        }
+
+        const checkedAt = newChecked !== 0 ? new Date().toISOString() : null;
+
+        // Insert or update
+        db.prepare(`
+            INSERT INTO daily_activities (date, activity_name, checked, checked_at)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT(date, activity_name) DO UPDATE SET
+                checked = excluded.checked,
+                checked_at = excluded.checked_at
+        `).run(date, activity_name, newChecked, checkedAt);
+
+        res.json({ success: true, checked: newChecked });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -1762,6 +1821,16 @@ app.get('/api/settings/export', (req, res) => {
             log(`[EXPORT]   - ${pc.date}-${pc.prayer_name} ${checkState} (${pc.checked}) at ${pc.checked_at}`);
         });
 
+        // Export daily activities (all states: 0=unchecked, 1=green, 2=orange)
+        const dailyActivities = db.prepare('SELECT date, activity_name, checked, checked_at FROM daily_activities WHERE checked > 0').all();
+        log(`[EXPORT] Exporting ${dailyActivities.length} daily activities`);
+        dailyActivities.forEach(da => {
+            csvContent += `daily_activity,${da.date}-${da.activity_name},${da.checked}|${da.checked_at || ''}
+`;
+            const checkState = da.checked === 1 ? 'green' : da.checked === 2 ? 'orange' : 'unchecked';
+            log(`[EXPORT]   - ${da.date}-${da.activity_name} ${checkState} (${da.checked}) at ${da.checked_at}`);
+        });
+
         log('[EXPORT] ========== EXPORT COMPLETED ==========');
         res.setHeader('Content-Type', 'text/csv');
         res.setHeader('Content-Disposition', 'attachment; filename=athan-center-config.csv');
@@ -1849,17 +1918,42 @@ app.post('/api/settings/import', (req, res) => {
                     // value format: "checked_state|checked_at" or just "checked_at" (legacy)
                     let checkedState = 1; // default to green for legacy imports
                     let checkedAt = value || new Date().toISOString();
-                    
+
                     if (value.includes('|')) {
                         const [state, timestamp] = value.split('|');
                         checkedState = parseInt(state) || 1;
                         checkedAt = timestamp || new Date().toISOString();
                     }
-                    
+
                     db.prepare('INSERT OR REPLACE INTO prayer_checks (date, prayer_name, checked, checked_at) VALUES (?, ?, ?, ?)')
                         .run(date, prayerName, checkedState, checkedAt);
                     const checkStateLabel = checkedState === 1 ? 'green' : checkedState === 2 ? 'orange' : 'unchecked';
                     log(`[IMPORT] prayer_check: ${date}-${prayerName} ${checkStateLabel} (${checkedState})`);
+                    importedCount++;
+                } else if (type === 'daily_activity') {
+                    // key format: "2025-01-15-Tasbih" (date-activity_name)
+                    const [date, activityName] = key.split('-').reduce((acc, part, idx) => {
+                        if (idx < 3) {
+                            acc[0] = acc[0] ? `${acc[0]}-${part}` : part;
+                        } else {
+                            acc[1] = acc[1] ? `${acc[1]} ${part}` : part;
+                        }
+                        return acc;
+                    }, ['', '']);
+                    // value format: "checked_state|checked_at"
+                    let checkedState = 1;
+                    let checkedAt = value || new Date().toISOString();
+
+                    if (value.includes('|')) {
+                        const [state, timestamp] = value.split('|');
+                        checkedState = parseInt(state) || 1;
+                        checkedAt = timestamp || new Date().toISOString();
+                    }
+
+                    db.prepare('INSERT OR REPLACE INTO daily_activities (date, activity_name, checked, checked_at) VALUES (?, ?, ?, ?)')
+                        .run(date, activityName, checkedState, checkedAt);
+                    const checkStateLabel = checkedState === 1 ? 'green' : checkedState === 2 ? 'orange' : 'unchecked';
+                    log(`[IMPORT] daily_activity: ${date}-${activityName} ${checkStateLabel} (${checkedState})`);
                     importedCount++;
                 }
             } catch (err) {
@@ -1934,6 +2028,10 @@ app.post('/api/settings/restore-defaults', (req, res) => {
         // Reset all prayer checks
         db.prepare('DELETE FROM prayer_checks').run();
         log('All prayer checks reset');
+
+        // Reset all daily activities
+        db.prepare('DELETE FROM daily_activities').run();
+        log('All daily activities reset');
 
         // Re-fetch prayer times with default ICS URL and re-schedule
         fetchPrayerTimes().then(() => {

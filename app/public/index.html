@@ -32,6 +32,16 @@
             <!-- Prayers will be loaded dynamically -->
         </div>
 
+        <!-- Daily Activities Section -->
+        <div class="daily-activities-section" id="daily-activities-section">
+            <div class="daily-activities-header" id="dailyActivitiesHeader">
+                <span class="daily-activities-title">📖 Coran | 📿 Tasbih</span>
+                <span class="daily-activities-toggle">▼</span>
+            </div>
+            <div class="daily-activities-content" id="dailyActivitiesContent">
+                <!-- Activities will be loaded dynamically -->
+            </div>
+        </div>
 
         <div class="date-navigation">
             <button id="prevDay" class="nav-btn">⬅️ Previous Day</button>
@@ -274,7 +284,8 @@
                             </label>
                         </div>
                         <p class="help-text" style="margin-top: 5px; font-size: 0.85em;">
-                            Set a specific volume for Fajr | Sobh prayer on the server. When disabled, the Fajr | Sobh athan uses the
+                            Set a specific volume for Fajr | Sobh prayer on the server. When disabled, the Fajr | Sobh
+                            athan uses the
                             server volume above.
                         </p><br>
                         <label>Fajr | Sobh prayer volume: <span id="fajrVolumeValue">50</span>%</label>
@@ -338,18 +349,18 @@
                             style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
                             <div style="margin-bottom: 10px;" id="apis-web-list">
                                 <strong>
-                                    📖 Get next prayer (text): </strong><br><code
-                                    id="nextPrayerTextCommand" class="inline-code">Loading...</code><br><strong>
-                                    🔊 Test Athan on server (30 seconds): </strong><br><code
-                                    id="testAthanServerCommand" class="inline-code">Loading...</code><br><strong>
-                                    🔊 Test Quran on server (30 seconds): </strong><br><code
-                                    id="testQuranServerCommand" class="inline-code">Loading...</code><br><strong>
+                                    📖 Get next prayer (text): </strong><br><code id="nextPrayerTextCommand"
+                                    class="inline-code">Loading...</code><br><strong>
+                                    🔊 Test Athan on server (30 seconds): </strong><br><code id="testAthanServerCommand"
+                                    class="inline-code">Loading...</code><br><strong>
+                                    🔊 Test Quran on server (30 seconds): </strong><br><code id="testQuranServerCommand"
+                                    class="inline-code">Loading...</code><br><strong>
                                     🚀 Mute next Athan: </strong><br><code id="muteCommand"
                                     class="inline-code">Loading...</code><br><strong>
                                     🚀 Unmute next Athan: </strong><br><code id="unmuteCommand"
                                     class="inline-code">Loading...</code><br><strong>
-                                    🚀 Stop all playing audio in the server: </strong><br><code
-                                    id="stopAudioCommand" class="inline-code">Loading...</code>
+                                    🚀 Stop all playing audio in the server: </strong><br><code id="stopAudioCommand"
+                                    class="inline-code">Loading...</code>
                             </div>
                         </div>
                     </div>
@@ -369,10 +380,10 @@
                     <button id="resetPrayerChecksBtn" class="btn"
                         style="background: #8B0000; width: 100%; margin-bottom: 15px;"
                         onmouseover="this.style.background='#a30000'" onmouseout="this.style.background='#8B0000'">
-                        🔄 Reset and undo all prayers
+                        🔄 Reset prayers & activities
                     </button>
                     <p class="help-text" style="margin-top: -10px; margin-bottom: 15px;">
-                        Remove all check marks (✓) from all prayers in the database
+                        Remove all check marks (✓) from prayers and daily activities (Coran & Tasbih)
                     </p>
                     <button id="restoreDefaultsBtn" class="btn"
                         style="background: #8B0000; width: 100%; margin-top: 10px;"
@@ -387,7 +398,7 @@
 
         <footer>
             <img src="logo.png" alt="Athan Center logo" class="app-logo">
-            <p>© 2025 Athan Center - 3.1.2</p>
+            <p>© 2025 Athan Center - 3.2</p>
         </footer>
     </div>
 

@@ -247,6 +247,78 @@ header h1 {
     color: #6c757d !important;
 }
 
+/* Daily Activities Section */
+.daily-activities-section {
+    padding: 20px;
+}
+
+.daily-activities-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    margin-bottom: 5px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+    user-select: none;
+}
+
+.daily-activities-header:hover {
+    background: #e9ecef;
+    transform: translateX(5px);
+}
+
+.daily-activities-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #495057;
+    font-family: 'Consolas', 'Courier New', monospace;
+}
+
+.daily-activities-toggle {
+    font-size: 1rem;
+    transition: transform 0.3s;
+}
+
+.daily-activities-header.collapsed .daily-activities-toggle {
+    transform: rotate(-90deg);
+}
+
+.daily-activities-content {
+    max-height: 500px;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.daily-activities-content.collapsed {
+    max-height: 0;
+}
+
+.activity-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    margin-bottom: 5px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    transition: all 0.3s;
+}
+
+.activity-item:hover {
+    background: #e9ecef;
+    transform: translateX(5px);
+}
+
+.activity-name {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #495057;
+    font-family: 'Consolas', 'Courier New', monospace;
+}
+
 .actions {
     display: flex;
     gap: 15px;
@@ -1113,6 +1185,36 @@ body.dark-mode .prayer-name {
 
 body.dark-mode .prayer-time {
     color: #1e7e34;
+}
+
+body.dark-mode .daily-activities-section {
+    background: #252830;
+}
+
+body.dark-mode .daily-activities-header {
+    background: #2d3748;
+    color: #e4e6eb;
+}
+
+body.dark-mode .daily-activities-header:hover {
+    background: #3a4556;
+}
+
+body.dark-mode .daily-activities-title {
+    color: #ffffff;
+}
+
+body.dark-mode .activity-item {
+    background: #2d3748;
+    color: #e4e6eb;
+}
+
+body.dark-mode .activity-item:hover {
+    background: #3a4556;
+}
+
+body.dark-mode .activity-name {
+    color: #ffffff;
 }
 
 body.dark-mode .settings-btn {
