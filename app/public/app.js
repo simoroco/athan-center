@@ -3410,3 +3410,534 @@ function getPrayerName(name) {
 // Expose functions globally for inline handlers
 window.togglePrayer = togglePrayer;
 window.toggleWeekday = toggleWeekday;
+
+// ===== STATISTICS FUNCTIONALITY =====
+
+let prayerStatsData = null;
+let activityStatsData = null;
+let ramadanWeeks = new Set();
+let prayerPieChartInstance = null;
+let prayerBarChartInstance = null;
+let activityPieChartInstance = null;
+let activityBarChartInstance = null;
+let fullscreenChartInstance = null;
+
+// Open statistics modal
+document.getElementById('statisticsBtn').addEventListener('click', async () => {
+    document.getElementById('statisticsModal').style.display = 'block';
+    await loadStatistics();
+});
+
+// Close statistics modal
+document.getElementById('closeStatistics').addEventListener('click', () => {
+    document.getElementById('statisticsModal').style.display = 'none';
+});
+
+// Load all statistics data
+async function loadStatistics() {
+    try {
+        // Fetch prayer statistics
+        const prayerResponse = await fetch(`${API_BASE}/api/statistics/prayers`);
+        const prayerData = await prayerResponse.json();
+        prayerStatsData = prayerData.statistics;
+
+        // Fetch activity statistics
+        const activityResponse = await fetch(`${API_BASE}/api/statistics/activities`);
+        const activityData = await activityResponse.json();
+        activityStatsData = activityData.statistics;
+
+        // Fetch Ramadan weeks
+        const ramadanResponse = await fetch(`${API_BASE}/api/hijri/ramadan-weeks`);
+        const ramadanData = await ramadanResponse.json();
+
+        // Create Ramadan weeks set
+        ramadanWeeks = new Set();
+        ramadanData.ramadan_dates.forEach(rd => {
+            const weekInfo = getWeekNumberFromDate(rd.gregorian_date);
+            ramadanWeeks.add(`${weekInfo.year}-W${String(weekInfo.week).padStart(2, '0')}`);
+        });
+
+        // Render all charts
+        renderPrayerPieChart();
+        renderPrayerBarChart();
+        renderActivityPieChart();
+        renderActivityBarChart();
+    } catch (error) {
+        console.error('Error loading statistics:', error);
+        alert('Error loading statistics: ' + error.message);
+    }
+}
+
+// Helper function to get week number
+function getWeekNumberFromDate(dateStr) {
+    const d = new Date(dateStr);
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+    const yearStart = new Date(d.getFullYear(), 0, 1);
+    const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+    return { year: d.getFullYear(), week: weekNo };
+}
+
+// Get last week data
+function getLastWeekData(statsData) {
+    if (!statsData || statsData.length === 0) return null;
+
+    const today = new Date();
+    const lastWeek = new Date(today);
+    lastWeek.setDate(today.getDate() - 7);
+
+    const weekInfo = getWeekNumberFromDate(formatDateLocal(today));
+    const weekKey = `${weekInfo.year}-W${String(weekInfo.week).padStart(2, '0')}`;
+
+    return statsData.find(s => s.week === weekKey) || statsData[statsData.length - 1];
+}
+
+// Render Prayer Pie Chart (Last Week)
+function renderPrayerPieChart() {
+    const ctx = document.getElementById('prayerPieChart');
+    const lastWeekData = getLastWeekData(prayerStatsData);
+
+    if (!lastWeekData) {
+        ctx.getContext('2d').fillText('No data available', 10, 50);
+        return;
+    }
+
+    if (prayerPieChartInstance) {
+        prayerPieChartInstance.destroy();
+    }
+
+    const isDarkMode = document.body.classList.contains('dark-mode');
+
+    prayerPieChartInstance = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: ['Not Done', 'On Time (Green)', 'Late (Orange)'],
+            datasets: [{
+                data: [lastWeekData.not_done, lastWeekData.on_time, lastWeekData.late],
+                backgroundColor: ['#6c757d', '#27ae60', '#ff8c00'],
+                borderWidth: 2,
+                borderColor: isDarkMode ? '#1a202c' : '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: isDarkMode ? '#e4e6eb' : '#2c3e50',
+                        font: { size: 12 }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            const label = context.label || '';
+                            const value = context.parsed || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                            return `${label}: ${value} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Render Prayer Bar Chart (104 weeks)
+function renderPrayerBarChart() {
+    const ctx = document.getElementById('prayerBarChart');
+
+    if (!prayerStatsData || prayerStatsData.length === 0) {
+        ctx.getContext('2d').fillText('No data available', 10, 50);
+        return;
+    }
+
+    if (prayerBarChartInstance) {
+        prayerBarChartInstance.destroy();
+    }
+
+    const isDarkMode = document.body.classList.contains('dark-mode');
+
+    // Determine how many weeks to show based on screen width
+    let weeksToShow = 52; // Default: 1 year
+    if (window.innerWidth < 768) {
+        weeksToShow = 4; // Mobile: 1 month
+    } else if (window.innerWidth < 1200) {
+        weeksToShow = 26; // Tablet: 6 months
+    }
+
+    const recentData = prayerStatsData.slice(-weeksToShow);
+
+    const labels = recentData.map(s => {
+        const isRamadan = ramadanWeeks.has(s.week);
+        return isRamadan ? `${s.week} 🌙` : s.week;
+    });
+
+    prayerBarChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Not Done',
+                    data: recentData.map(s => s.not_done),
+                    backgroundColor: '#6c757d',
+                    stack: 'stack0'
+                },
+                {
+                    label: 'Late (Orange)',
+                    data: recentData.map(s => s.late),
+                    backgroundColor: '#ff8c00',
+                    stack: 'stack0'
+                },
+                {
+                    label: 'On Time (Green)',
+                    data: recentData.map(s => s.on_time),
+                    backgroundColor: '#27ae60',
+                    stack: 'stack0'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            scales: {
+                x: {
+                    stacked: true,
+                    ticks: {
+                        color: isDarkMode ? '#e4e6eb' : '#2c3e50',
+                        maxRotation: 45,
+                        minRotation: 45,
+                        font: { size: 10 },
+                        callback: function (value, index) {
+                            const label = this.getLabelForValue(value);
+                            if (label.includes('🌙')) {
+                                return label;
+                            }
+                            return label;
+                        }
+                    },
+                    grid: {
+                        color: isDarkMode ? '#4a5568' : '#e0e0e0'
+                    }
+                },
+                y: {
+                    stacked: true,
+                    ticks: {
+                        color: isDarkMode ? '#e4e6eb' : '#2c3e50'
+                    },
+                    grid: {
+                        color: isDarkMode ? '#4a5568' : '#e0e0e0'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        color: isDarkMode ? '#e4e6eb' : '#2c3e50',
+                        font: { size: 12 }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        title: function (context) {
+                            return context[0].label.replace(' 🌙', ' (Ramadan)');
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Render Activity Pie Chart (Last Week)
+function renderActivityPieChart() {
+    const ctx = document.getElementById('activityPieChart');
+    const lastWeekData = getLastWeekData(activityStatsData);
+
+    if (!lastWeekData) {
+        ctx.getContext('2d').fillText('No data available', 10, 50);
+        return;
+    }
+
+    if (activityPieChartInstance) {
+        activityPieChartInstance.destroy();
+    }
+
+    const isDarkMode = document.body.classList.contains('dark-mode');
+
+    activityPieChartInstance = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: ['Not Done', 'On Time (Green)', 'Late (Orange)'],
+            datasets: [{
+                data: [lastWeekData.not_done, lastWeekData.on_time, lastWeekData.late],
+                backgroundColor: ['#6c757d', '#27ae60', '#ff8c00'],
+                borderWidth: 2,
+                borderColor: isDarkMode ? '#1a202c' : '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: isDarkMode ? '#e4e6eb' : '#2c3e50',
+                        font: { size: 12 }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            const label = context.label || '';
+                            const value = context.parsed || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                            return `${label}: ${value} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Render Activity Bar Chart (104 weeks)
+function renderActivityBarChart() {
+    const ctx = document.getElementById('activityBarChart');
+
+    if (!activityStatsData || activityStatsData.length === 0) {
+        ctx.getContext('2d').fillText('No data available', 10, 50);
+        return;
+    }
+
+    if (activityBarChartInstance) {
+        activityBarChartInstance.destroy();
+    }
+
+    const isDarkMode = document.body.classList.contains('dark-mode');
+
+    // Determine how many weeks to show based on screen width
+    let weeksToShow = 52; // Default: 1 year
+    if (window.innerWidth < 768) {
+        weeksToShow = 4; // Mobile: 1 month
+    } else if (window.innerWidth < 1200) {
+        weeksToShow = 26; // Tablet: 6 months
+    }
+
+    const recentData = activityStatsData.slice(-weeksToShow);
+
+    const labels = recentData.map(s => {
+        const isRamadan = ramadanWeeks.has(s.week);
+        return isRamadan ? `${s.week} 🌙` : s.week;
+    });
+
+    activityBarChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Not Done',
+                    data: recentData.map(s => s.not_done),
+                    backgroundColor: '#6c757d',
+                    stack: 'stack0'
+                },
+                {
+                    label: 'Late (Orange)',
+                    data: recentData.map(s => s.late),
+                    backgroundColor: '#ff8c00',
+                    stack: 'stack0'
+                },
+                {
+                    label: 'On Time (Green)',
+                    data: recentData.map(s => s.on_time),
+                    backgroundColor: '#27ae60',
+                    stack: 'stack0'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            scales: {
+                x: {
+                    stacked: true,
+                    ticks: {
+                        color: isDarkMode ? '#e4e6eb' : '#2c3e50',
+                        maxRotation: 45,
+                        minRotation: 45,
+                        font: { size: 10 }
+                    },
+                    grid: {
+                        color: isDarkMode ? '#4a5568' : '#e0e0e0'
+                    }
+                },
+                y: {
+                    stacked: true,
+                    ticks: {
+                        color: isDarkMode ? '#e4e6eb' : '#2c3e50'
+                    },
+                    grid: {
+                        color: isDarkMode ? '#4a5568' : '#e0e0e0'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        color: isDarkMode ? '#e4e6eb' : '#2c3e50',
+                        font: { size: 12 }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        title: function (context) {
+                            return context[0].label.replace(' 🌙', ' (Ramadan)');
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Expand prayer chart to fullscreen
+document.getElementById('expandPrayerChart').addEventListener('click', () => {
+    showFullscreenChart('Prayer Statistics - 2 Years Trend (104 weeks)', prayerStatsData, 'prayer');
+});
+
+// Expand activity chart to fullscreen
+document.getElementById('expandActivityChart').addEventListener('click', () => {
+    showFullscreenChart('Daily Activities Statistics - 2 Years Trend (104 weeks)', activityStatsData, 'activity');
+});
+
+// Show fullscreen chart
+function showFullscreenChart(title, data, type) {
+    const modal = document.getElementById('fullscreenChartModal');
+    const titleElement = document.getElementById('fullscreenChartTitle');
+    const canvas = document.getElementById('fullscreenChart');
+
+    titleElement.textContent = title;
+    modal.style.display = 'block';
+
+    if (fullscreenChartInstance) {
+        fullscreenChartInstance.destroy();
+    }
+
+    const isDarkMode = document.body.classList.contains('dark-mode');
+
+    const labels = data.map(s => {
+        const isRamadan = ramadanWeeks.has(s.week);
+        return isRamadan ? `${s.week} 🌙` : s.week;
+    });
+
+    fullscreenChartInstance = new Chart(canvas, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Not Done',
+                    data: data.map(s => s.not_done),
+                    backgroundColor: '#6c757d',
+                    stack: 'stack0'
+                },
+                {
+                    label: 'Late (Orange)',
+                    data: data.map(s => s.late),
+                    backgroundColor: '#ff8c00',
+                    stack: 'stack0'
+                },
+                {
+                    label: 'On Time (Green)',
+                    data: data.map(s => s.on_time),
+                    backgroundColor: '#27ae60',
+                    stack: 'stack0'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    stacked: true,
+                    ticks: {
+                        color: isDarkMode ? '#e4e6eb' : '#2c3e50',
+                        maxRotation: 90,
+                        minRotation: 45,
+                        font: { size: 11 }
+                    },
+                    grid: {
+                        color: isDarkMode ? '#4a5568' : '#e0e0e0'
+                    }
+                },
+                y: {
+                    stacked: true,
+                    ticks: {
+                        color: isDarkMode ? '#e4e6eb' : '#2c3e50',
+                        font: { size: 12 }
+                    },
+                    grid: {
+                        color: isDarkMode ? '#4a5568' : '#e0e0e0'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        color: isDarkMode ? '#e4e6eb' : '#2c3e50',
+                        font: { size: 14 }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        title: function (context) {
+                            return context[0].label.replace(' 🌙', ' (Ramadan)');
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Close fullscreen chart
+document.getElementById('closeFullscreenChart').addEventListener('click', () => {
+    document.getElementById('fullscreenChartModal').style.display = 'none';
+    if (fullscreenChartInstance) {
+        fullscreenChartInstance.destroy();
+        fullscreenChartInstance = null;
+    }
+});
+
+// Export to Excel
+document.getElementById('exportExcelBtn').addEventListener('click', async () => {
+    try {
+        const response = await fetch(`${API_BASE}/api/statistics/export-excel`);
+        const blob = await response.blob();
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `athan-center-statistics-${Date.now()}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+
+        alert('✅ Statistics exported successfully!');
+    } catch (error) {
+        console.error('Error exporting Excel:', error);
+        alert('❌ Error exporting statistics: ' + error.message);
+    }
+});

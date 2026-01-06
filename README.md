@@ -50,7 +50,7 @@ Athan Center provides accurate prayer times with automatic Athan playback throug
 - 📍 **Customizable location & prayer times** using ICS link (Prayer WebCal)
 - 🔈 **Friday Coran recitation** - Individual enable/disable
 - 🔇 **Skip specific prayer athan** - : Mute next athan only for example
-- 🎵 **Simplified statistics** to improve your practices (next version !)
+- 🎵 **Simplified statistics & history ** to improve your practices
 - 📱 **Responsive interface** - Accessible from mobile/tablet/desktop
 - 🌐 **REST API** - Remote control (mute, stop audio, etc.)
 - 🔄 **Automatic updates** - Prayer times updated daily at 7 PM

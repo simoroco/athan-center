@@ -8,6 +8,8 @@
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="statistics-styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 
 <body>
@@ -77,6 +79,9 @@
         <div class="actions">
             <button id="skipNextBtn" class="action-btn warning-btn" style="display: none;">
                 🔇 Mute next Athan
+            </button>
+            <button id="statisticsBtn" class="action-btn">
+                📊 History & Statistics
             </button>
             <button id="settingsBtn" class="action-btn">
                 ⚙️ Settings
@@ -396,9 +401,76 @@
             </div>
         </div>
 
+        <!-- Statistics Modal -->
+        <div id="statisticsModal" class="modal">
+            <div class="modal-content statistics-modal-content">
+                <span class="close" id="closeStatistics">&times;</span>
+                <h2>📊 History & Statistics</h2>
+
+                <div class="statistics-actions" style="margin-bottom: 20px;">
+                    <button id="exportExcelBtn" class="btn" style="background: #27ae60;">
+                        📥 Export to Excel
+                    </button>
+                </div>
+
+                <!-- Prayer Statistics Section -->
+                <div class="statistics-section">
+                    <h3>🕌 Prayer Statistics</h3>
+
+                    <div class="stats-grid">
+                        <div class="stats-card">
+                            <h4>Last Week Summary</h4>
+                            <canvas id="prayerPieChart"></canvas>
+                        </div>
+
+                        <div class="stats-card stats-card-large">
+                            <h4>2 Years Trend (104 weeks)</h4>
+                            <div style="position: relative;">
+                                <canvas id="prayerBarChart"></canvas>
+                                <button id="expandPrayerChart" class="expand-chart-btn" title="View fullscreen">
+                                    ⛶ Expand
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Activity Statistics Section -->
+                <div class="statistics-section">
+                    <h3>📖 Daily Activities Statistics</h3>
+
+                    <div class="stats-grid">
+                        <div class="stats-card">
+                            <h4>Last Week Summary</h4>
+                            <canvas id="activityPieChart"></canvas>
+                        </div>
+
+                        <div class="stats-card stats-card-large">
+                            <h4>2 Years Trend (104 weeks)</h4>
+                            <div style="position: relative;">
+                                <canvas id="activityBarChart"></canvas>
+                                <button id="expandActivityChart" class="expand-chart-btn" title="View fullscreen">
+                                    ⛶ Expand
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fullscreen Chart Modal -->
+        <div id="fullscreenChartModal" class="fullscreen-modal" style="display: none;">
+            <div class="fullscreen-modal-content">
+                <button id="closeFullscreenChart" class="fullscreen-close-btn">✕ Close</button>
+                <h3 id="fullscreenChartTitle"></h3>
+                <canvas id="fullscreenChart"></canvas>
+            </div>
+        </div>
+
         <footer>
             <img src="logo.png" alt="Athan Center logo" class="app-logo">
-            <p>© 2025 Athan Center - 3.2</p>
+            <p>© 2025 Athan Center - 3.3</p>
         </footer>
     </div>
 

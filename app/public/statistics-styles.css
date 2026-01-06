@@ -1,0 +1,198 @@
+/* Statistics Modal Styles */
+.statistics-modal-content {
+    max-width: 95%;
+    width: 1400px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.statistics-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.statistics-section {
+    margin-bottom: 40px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 12px;
+}
+
+.statistics-section h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #2c3e50;
+    font-size: 1.5rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 20px;
+}
+
+.stats-card {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.stats-card h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #34495e;
+    font-size: 1.1rem;
+}
+
+.stats-card canvas {
+    max-height: 300px;
+}
+
+.stats-card-large canvas {
+    max-height: 400px;
+}
+
+.expand-chart-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+    z-index: 10;
+}
+
+.expand-chart-btn:hover {
+    background: #2980b9;
+    transform: scale(1.05);
+}
+
+/* Fullscreen Chart Modal */
+.fullscreen-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.fullscreen-modal-content {
+    width: 100%;
+    height: 100%;
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.fullscreen-modal-content h3 {
+    margin: 0 0 20px 0;
+    color: #2c3e50;
+    font-size: 1.8rem;
+}
+
+.fullscreen-modal-content canvas {
+    flex: 1;
+    max-height: calc(100% - 80px);
+}
+
+.fullscreen-close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: bold;
+    transition: all 0.3s;
+    z-index: 10;
+}
+
+.fullscreen-close-btn:hover {
+    background: #c0392b;
+    transform: scale(1.05);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .statistics-modal-content {
+        width: 95%;
+    }
+}
+
+@media (max-width: 768px) {
+    .statistics-modal-content {
+        width: 98%;
+        padding: 15px;
+    }
+
+    .statistics-section {
+        padding: 15px;
+    }
+
+    .stats-card {
+        padding: 15px;
+    }
+
+    .fullscreen-modal-content {
+        padding: 15px;
+    }
+
+    .fullscreen-close-btn {
+        padding: 8px 16px;
+        font-size: 1rem;
+    }
+}
+
+/* Dark Mode Support */
+body.dark-mode .statistics-section {
+    background: #2d3748;
+}
+
+body.dark-mode .statistics-section h3 {
+    color: #e4e6eb;
+}
+
+body.dark-mode .stats-card {
+    background: #1a202c;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .stats-card h4 {
+    color: #e4e6eb;
+}
+
+body.dark-mode .fullscreen-modal {
+    background: rgba(0, 0, 0, 0.98);
+}
+
+body.dark-mode .fullscreen-modal-content {
+    background: #1a202c;
+}
+
+body.dark-mode .fullscreen-modal-content h3 {
+    color: #e4e6eb;
+}

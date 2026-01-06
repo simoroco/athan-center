@@ -10,6 +10,7 @@ const ical = require('ical');
 const player = require('play-sound')({});
 const { spawn } = require('child_process');
 const os = require('os');
+const ExcelJS = require('exceljs');
 
 const app = express();
 const PORT = 7777;
@@ -122,6 +123,16 @@ db.exec(`
         checked INTEGER DEFAULT 0,
         checked_at TEXT DEFAULT NULL,
         UNIQUE(date, activity_name)
+    );
+
+    CREATE TABLE IF NOT EXISTS hijri_dates (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        gregorian_date TEXT NOT NULL UNIQUE,
+        hijri_year INTEGER NOT NULL,
+        hijri_month INTEGER NOT NULL,
+        hijri_day INTEGER NOT NULL,
+        hijri_month_name TEXT NOT NULL,
+        is_ramadan INTEGER DEFAULT 0
     );
 `);
 
@@ -758,6 +769,8 @@ function playQuran() {
 cron.schedule('0 0 * * *', () => {
     log('Running daily prayer times update...');
     fetchPrayerTimes();
+    log('Running daily Hijri dates update...');
+    updateHijriDates();
 }, {
     timezone: "Europe/Paris"
 });
@@ -962,6 +975,406 @@ app.post('/api/daily-activities/toggle', (req, res) => {
 
         res.json({ success: true, checked: newChecked });
     } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ===== HIJRI DATES APIs =====
+
+// Function to fetch Hijri dates from API
+async function fetchHijriDates(startDate, endDate) {
+    try {
+        const dates = [];
+        const current = new Date(startDate);
+        const end = new Date(endDate);
+        let successCount = 0;
+        let errorCount = 0;
+
+        while (current <= end) {
+            const timestamp = Math.floor(current.getTime() / 1000);
+            try {
+                const response = await axios.get(`https://api.aladhan.com/v1/gToH/${timestamp}`, {
+                    timeout: 5000
+                });
+                if (response.data && response.data.data && response.data.data.hijri) {
+                    const hijri = response.data.data.hijri;
+                    const gregorianDate = formatDateLocal(current);
+
+                    dates.push({
+                        gregorian_date: gregorianDate,
+                        hijri_year: parseInt(hijri.year),
+                        hijri_month: parseInt(hijri.month.number),
+                        hijri_day: parseInt(hijri.day),
+                        hijri_month_name: hijri.month.en,
+                        is_ramadan: hijri.month.number === '9' ? 1 : 0
+                    });
+                    successCount++;
+                }
+                // Rate limiting: wait 500ms between requests to avoid 429 errors
+                await new Promise(resolve => setTimeout(resolve, 500));
+            } catch (error) {
+                errorCount++;
+                // Only log every 50th error to avoid spam
+                if (errorCount % 50 === 0) {
+                    logError(`Hijri API errors: ${errorCount} failed, ${successCount} succeeded`);
+                }
+                // If rate limited (429), wait longer
+                if (error.response && error.response.status === 429) {
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                }
+            }
+            current.setDate(current.getDate() + 1);
+        }
+
+        log(`Hijri dates fetch completed: ${successCount} succeeded, ${errorCount} failed`);
+        return dates;
+    } catch (error) {
+        logError('Error in fetchHijriDates:', error);
+        return [];
+    }
+}
+
+// Function to update Hijri dates in database
+async function updateHijriDates() {
+    try {
+        log('🌙 Starting Hijri dates update...');
+
+        // Get dates for next 2 years
+        const today = new Date();
+        const twoYearsLater = new Date();
+        twoYearsLater.setFullYear(today.getFullYear() + 2);
+
+        const hijriDates = await fetchHijriDates(today, twoYearsLater);
+
+        if (hijriDates.length > 0) {
+            const insertStmt = db.prepare(`
+                INSERT OR REPLACE INTO hijri_dates 
+                (gregorian_date, hijri_year, hijri_month, hijri_day, hijri_month_name, is_ramadan)
+                VALUES (?, ?, ?, ?, ?, ?)
+            `);
+
+            hijriDates.forEach(date => {
+                insertStmt.run(
+                    date.gregorian_date,
+                    date.hijri_year,
+                    date.hijri_month,
+                    date.hijri_day,
+                    date.hijri_month_name,
+                    date.is_ramadan
+                );
+            });
+
+            log(`✅ Hijri dates updated successfully: ${hijriDates.length} dates inserted`);
+        } else {
+            log('⚠️ No Hijri dates fetched');
+        }
+    } catch (error) {
+        logError('Error updating Hijri dates:', error);
+    }
+}
+
+// GET - Retrieve Ramadan weeks for statistics
+app.get('/api/hijri/ramadan-weeks', (req, res) => {
+    try {
+        const ramadanDates = db.prepare(`
+            SELECT gregorian_date, hijri_year 
+            FROM hijri_dates 
+            WHERE is_ramadan = 1
+            ORDER BY gregorian_date
+        `).all();
+
+        res.json({ success: true, ramadan_dates: ramadanDates });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ===== STATISTICS APIs =====
+
+// Helper function to get week number (ISO week, Monday = start of week)
+function getWeekNumber(date) {
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+    const yearStart = new Date(d.getFullYear(), 0, 1);
+    const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+    return { year: d.getFullYear(), week: weekNo };
+}
+
+// GET - Prayer statistics for last 104 weeks (2 years)
+app.get('/api/statistics/prayers', (req, res) => {
+    try {
+        const today = new Date();
+        const twoYearsAgo = new Date();
+        twoYearsAgo.setFullYear(today.getFullYear() - 2);
+
+        const startDate = formatDateLocal(twoYearsAgo);
+        const endDate = formatDateLocal(today);
+
+        // Get all prayer checks for the period
+        const prayerChecks = db.prepare(`
+            SELECT date, prayer_name, checked
+            FROM prayer_checks
+            WHERE date >= ? AND date <= ?
+            ORDER BY date
+        `).all(startDate, endDate);
+
+        // Get all prayers for the period to know which prayers existed
+        const allPrayers = db.prepare(`
+            SELECT date, prayer_name
+            FROM prayers
+            WHERE date >= ? AND date <= ?
+            AND prayer_name IN ('Fajr | Sobh', 'Dohr', 'Asr', 'Maghrib', 'Isha')
+            ORDER BY date
+        `).all(startDate, endDate);
+
+        // Group by week
+        const weeklyStats = {};
+
+        allPrayers.forEach(prayer => {
+            const weekInfo = getWeekNumber(prayer.date);
+            const weekKey = `${weekInfo.year}-W${String(weekInfo.week).padStart(2, '0')}`;
+
+            if (!weeklyStats[weekKey]) {
+                weeklyStats[weekKey] = {
+                    week: weekKey,
+                    year: weekInfo.year,
+                    weekNumber: weekInfo.week,
+                    not_done: 0,
+                    on_time: 0,
+                    late: 0,
+                    total_prayers: 0
+                };
+            }
+
+            weeklyStats[weekKey].total_prayers++;
+
+            // Find if this prayer was checked
+            const check = prayerChecks.find(c => c.date === prayer.date && c.prayer_name === prayer.prayer_name);
+
+            if (!check || check.checked === 0) {
+                weeklyStats[weekKey].not_done++;
+            } else if (check.checked === 1) {
+                weeklyStats[weekKey].on_time++;
+            } else if (check.checked === 2) {
+                weeklyStats[weekKey].late++;
+            }
+        });
+
+        // Convert to array and calculate percentages
+        const statsArray = Object.values(weeklyStats).map(week => ({
+            ...week,
+            on_time_percent: week.total_prayers > 0 ? (week.on_time / week.total_prayers * 100).toFixed(1) : 0,
+            total_completed_percent: week.total_prayers > 0 ? ((week.on_time + week.late) / week.total_prayers * 100).toFixed(1) : 0
+        }));
+
+        res.json({ success: true, statistics: statsArray });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// GET - Daily activities statistics for last 104 weeks (2 years)
+app.get('/api/statistics/activities', (req, res) => {
+    try {
+        const today = new Date();
+        const twoYearsAgo = new Date();
+        twoYearsAgo.setFullYear(today.getFullYear() - 2);
+
+        const startDate = formatDateLocal(twoYearsAgo);
+        const endDate = formatDateLocal(today);
+
+        // Get all activity checks for the period
+        const activityChecks = db.prepare(`
+            SELECT date, activity_name, checked
+            FROM daily_activities
+            WHERE date >= ? AND date <= ?
+            ORDER BY date
+        `).all(startDate, endDate);
+
+        // Generate all possible dates and activities
+        const weeklyStats = {};
+        const activities = ['Read Coran', 'Tasbih & Dikr'];
+
+        const current = new Date(twoYearsAgo);
+        const end = new Date(today);
+
+        while (current <= end) {
+            const dateStr = formatDateLocal(current);
+            const weekInfo = getWeekNumber(dateStr);
+            const weekKey = `${weekInfo.year}-W${String(weekInfo.week).padStart(2, '0')}`;
+
+            if (!weeklyStats[weekKey]) {
+                weeklyStats[weekKey] = {
+                    week: weekKey,
+                    year: weekInfo.year,
+                    weekNumber: weekInfo.week,
+                    not_done: 0,
+                    on_time: 0,
+                    late: 0,
+                    total_activities: 0
+                };
+            }
+
+            activities.forEach(activity => {
+                weeklyStats[weekKey].total_activities++;
+
+                const check = activityChecks.find(c => c.date === dateStr && c.activity_name === activity);
+
+                if (!check || check.checked === 0) {
+                    weeklyStats[weekKey].not_done++;
+                } else if (check.checked === 1) {
+                    weeklyStats[weekKey].on_time++;
+                } else if (check.checked === 2) {
+                    weeklyStats[weekKey].late++;
+                }
+            });
+
+            current.setDate(current.getDate() + 1);
+        }
+
+        // Convert to array and calculate percentages
+        const statsArray = Object.values(weeklyStats).map(week => ({
+            ...week,
+            on_time_percent: week.total_activities > 0 ? (week.on_time / week.total_activities * 100).toFixed(1) : 0,
+            total_completed_percent: week.total_activities > 0 ? ((week.on_time + week.late) / week.total_activities * 100).toFixed(1) : 0
+        }));
+
+        res.json({ success: true, statistics: statsArray });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// GET - Export statistics to Excel
+app.get('/api/statistics/export-excel', async (req, res) => {
+    try {
+        const workbook = new ExcelJS.Workbook();
+
+        // Fetch prayer statistics
+        const prayerStatsResponse = await axios.get(`http://localhost:${PORT}/api/statistics/prayers`);
+        const prayerStats = prayerStatsResponse.data.statistics;
+
+        // Fetch activity statistics
+        const activityStatsResponse = await axios.get(`http://localhost:${PORT}/api/statistics/activities`);
+        const activityStats = activityStatsResponse.data.statistics;
+
+        // Fetch Ramadan weeks
+        const ramadanResponse = await axios.get(`http://localhost:${PORT}/api/hijri/ramadan-weeks`);
+        const ramadanDates = ramadanResponse.data.ramadan_dates;
+
+        // Create Ramadan weeks set
+        const ramadanWeeks = new Set();
+        ramadanDates.forEach(rd => {
+            const weekInfo = getWeekNumber(rd.gregorian_date);
+            ramadanWeeks.add(`${weekInfo.year}-W${String(weekInfo.week).padStart(2, '0')}`);
+        });
+
+        // Sheet 1: Prayer Statistics
+        const prayerSheet = workbook.addWorksheet('Prayer Statistics');
+        prayerSheet.columns = [
+            { header: 'Week', key: 'week', width: 15 },
+            { header: 'Year', key: 'year', width: 10 },
+            { header: 'Week Number', key: 'weekNumber', width: 15 },
+            { header: 'Not Done', key: 'not_done', width: 12 },
+            { header: 'On Time (Green)', key: 'on_time', width: 18 },
+            { header: 'Late (Orange)', key: 'late', width: 15 },
+            { header: 'Total Prayers', key: 'total_prayers', width: 15 },
+            { header: '% On Time', key: 'on_time_percent', width: 12 },
+            { header: '% Completed', key: 'total_completed_percent', width: 15 },
+            { header: 'Ramadan', key: 'is_ramadan', width: 12 }
+        ];
+
+        prayerStats.forEach(stat => {
+            prayerSheet.addRow({
+                ...stat,
+                is_ramadan: ramadanWeeks.has(stat.week) ? 'Yes' : 'No'
+            });
+        });
+
+        // Style header row
+        prayerSheet.getRow(1).font = { bold: true };
+        prayerSheet.getRow(1).fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FF27AE60' }
+        };
+
+        // Highlight Ramadan weeks
+        prayerSheet.eachRow((row, rowNumber) => {
+            if (rowNumber > 1 && row.getCell('is_ramadan').value === 'Yes') {
+                row.getCell('week').font = { color: { argb: 'FFFF0000' }, bold: true };
+            }
+        });
+
+        // Sheet 2: Activity Statistics
+        const activitySheet = workbook.addWorksheet('Activity Statistics');
+        activitySheet.columns = [
+            { header: 'Week', key: 'week', width: 15 },
+            { header: 'Year', key: 'year', width: 10 },
+            { header: 'Week Number', key: 'weekNumber', width: 15 },
+            { header: 'Not Done', key: 'not_done', width: 12 },
+            { header: 'On Time (Green)', key: 'on_time', width: 18 },
+            { header: 'Late (Orange)', key: 'late', width: 15 },
+            { header: 'Total Activities', key: 'total_activities', width: 18 },
+            { header: '% On Time', key: 'on_time_percent', width: 12 },
+            { header: '% Completed', key: 'total_completed_percent', width: 15 },
+            { header: 'Ramadan', key: 'is_ramadan', width: 12 }
+        ];
+
+        activityStats.forEach(stat => {
+            activitySheet.addRow({
+                ...stat,
+                is_ramadan: ramadanWeeks.has(stat.week) ? 'Yes' : 'No'
+            });
+        });
+
+        // Style header row
+        activitySheet.getRow(1).font = { bold: true };
+        activitySheet.getRow(1).fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FF3498DB' }
+        };
+
+        // Highlight Ramadan weeks
+        activitySheet.eachRow((row, rowNumber) => {
+            if (rowNumber > 1 && row.getCell('is_ramadan').value === 'Yes') {
+                row.getCell('week').font = { color: { argb: 'FFFF0000' }, bold: true };
+            }
+        });
+
+        // Sheet 3: Summary
+        const summarySheet = workbook.addWorksheet('Summary');
+        summarySheet.addRow(['Athan Center - Statistics Export']);
+        summarySheet.addRow(['Export Date:', new Date().toLocaleString()]);
+        summarySheet.addRow([]);
+        summarySheet.addRow(['Prayer Statistics Summary']);
+        summarySheet.addRow(['Total Weeks:', prayerStats.length]);
+        summarySheet.addRow(['Total Prayers Tracked:', prayerStats.reduce((sum, s) => sum + s.total_prayers, 0)]);
+        summarySheet.addRow(['Total On Time:', prayerStats.reduce((sum, s) => sum + s.on_time, 0)]);
+        summarySheet.addRow(['Total Late:', prayerStats.reduce((sum, s) => sum + s.late, 0)]);
+        summarySheet.addRow(['Total Not Done:', prayerStats.reduce((sum, s) => sum + s.not_done, 0)]);
+        summarySheet.addRow([]);
+        summarySheet.addRow(['Activity Statistics Summary']);
+        summarySheet.addRow(['Total Weeks:', activityStats.length]);
+        summarySheet.addRow(['Total Activities Tracked:', activityStats.reduce((sum, s) => sum + s.total_activities, 0)]);
+        summarySheet.addRow(['Total On Time:', activityStats.reduce((sum, s) => sum + s.on_time, 0)]);
+        summarySheet.addRow(['Total Late:', activityStats.reduce((sum, s) => sum + s.late, 0)]);
+        summarySheet.addRow(['Total Not Done:', activityStats.reduce((sum, s) => sum + s.not_done, 0)]);
+
+        summarySheet.getCell('A1').font = { bold: true, size: 16 };
+        summarySheet.getColumn(1).width = 30;
+        summarySheet.getColumn(2).width = 20;
+
+        // Generate Excel file
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename=athan-center-statistics-${Date.now()}.xlsx`);
+
+        await workbook.xlsx.write(res);
+        res.end();
+    } catch (error) {
+        logError('Error exporting Excel:', error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -2496,6 +2909,13 @@ app.listen(PORT, '0.0.0.0', () => {
                 log(`[Startup] ⏭️ Skipped server audio (audio_output is '${audioOutput}' - browser only)`);
             }
         }
+    });
+
+    // Load initial Hijri dates on startup
+    updateHijriDates().then(() => {
+        log('Initial Hijri dates loaded');
+    }).catch(error => {
+        logError('Failed to load initial Hijri dates:', error);
     });
 
     // Log Friday Quran status at startup
