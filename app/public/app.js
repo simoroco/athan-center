@@ -716,7 +716,7 @@ async function generateYearCalendar(year) {
 
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
         'July', 'August', 'September', 'October', 'November', 'December'];
-    const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
     const today = getServerSyncedDate();
     const todayStr = formatDateLocal(today);
@@ -767,7 +767,10 @@ async function generateYearCalendar(year) {
         const firstDay = new Date(year, month, 1);
         const lastDay = new Date(year, month + 1, 0);
         const daysInMonth = lastDay.getDate();
-        const startingDayOfWeek = firstDay.getDay();
+        // Convert JS getDay() (0=Sunday) to our calendar (0=Monday)
+        const jsDay = firstDay.getDay();
+        const startingDayOfWeek = (jsDay + 6) % 7; // 0=Monday, 1=Tuesday, ..., 6=Sunday
+        console.log(`📅 [calendar]: month=${month}, jsDay=${jsDay} -> startingDayOfWeek=${startingDayOfWeek} (0=Monday)`);
 
         html += `
             <div class="calendar-month">
@@ -778,7 +781,7 @@ async function generateYearCalendar(year) {
                 <div class="calendar-days">
         `;
 
-        // Empty cells for days before month starts
+        // Empty cells for days before month starts (Monday = 0)
         for (let i = 0; i < startingDayOfWeek; i++) {
             html += '<div class="calendar-day empty"></div>';
         }
@@ -4084,11 +4087,30 @@ function showFullscreenChart(title, data, type) {
 }
 
 // Close fullscreen chart
-document.getElementById('closeFullscreenChart').addEventListener('click', () => {
-    document.getElementById('fullscreenChartModal').style.display = 'none';
+function closeFullscreenChartModal() {
+    const modal = document.getElementById('fullscreenChartModal');
+    modal.style.display = 'none';
     if (fullscreenChartInstance) {
         fullscreenChartInstance.destroy();
         fullscreenChartInstance = null;
+    }
+}
+
+document.getElementById('closeFullscreenChart').addEventListener('click', closeFullscreenChartModal);
+
+// Close fullscreen chart modal on outside click
+window.addEventListener('click', (event) => {
+    const modal = document.getElementById('fullscreenChartModal');
+    if (event.target === modal) {
+        closeFullscreenChartModal();
+    }
+});
+
+// Close fullscreen chart modal with Escape key
+document.addEventListener('keydown', (event) => {
+    const modal = document.getElementById('fullscreenChartModal');
+    if ((event.key === 'Escape' || event.key === 'Esc') && modal.style.display === 'block') {
+        closeFullscreenChartModal();
     }
 });
 

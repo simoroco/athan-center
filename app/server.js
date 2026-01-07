@@ -180,6 +180,7 @@ for (let day = 0; day <= 6; day++) {
     });
 }
 log('✅ Prayer schedule matrix initialized: 5 prayers × 7 days = 35 entries');
+log('📅 prayer_schedule table: 0=Monday, 1=Tuesday, ..., 6=Sunday');
 
 // Initialize skip_next with migration for new columns
 // First, check if the new columns exist
@@ -218,12 +219,14 @@ let audioSupportCacheTime = 0;
 const AUDIO_SUPPORT_CACHE_DURATION = 60000; // 1 minute cache
 
 // Initialize muted_weekdays (0=Sunday, 1=Monday, ..., 6=Saturday)
+// NOTE: This table uses JS getDay() convention (0=Sunday) for compatibility
 const weekdays = [0, 1, 2, 3, 4, 5, 6];
 const initWeekday = db.prepare('INSERT OR IGNORE INTO muted_weekdays (weekday, muted) VALUES (?, 0)');
 weekdays.forEach(day => initWeekday.run(day));
 
 // Verify and log current weekday mute status
 log('\n===== WEEKDAY MUTE STATUS =====');
+log('📅 muted_weekdays table: 0=Sunday (JS getDay() convention)');
 const currentWeekdayMutes = db.prepare('SELECT * FROM muted_weekdays ORDER BY weekday').all();
 const weekdayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 currentWeekdayMutes.forEach(day => {
@@ -565,6 +568,7 @@ function playAthan(prayerName) {
             const jsDay = new Date().getDay();
             const dayIndex = (jsDay + 6) % 7; // 0=Monday, 1=Tuesday, ..., 6=Sunday
             const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+            log(`[playAthan] Today is ${dayNames[dayIndex]} (jsDay=${jsDay} -> dayIndex=${dayIndex})`);
 
             // Check prayer_schedule matrix (unified control)
             const scheduleEntry = db.prepare('SELECT enabled FROM prayer_schedule WHERE prayer_name = ? AND day_of_week = ?')
