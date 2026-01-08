@@ -314,6 +314,14 @@ header h1 {
     transform: translateX(5px);
 }
 
+.activity-item.past {
+    opacity: 0.5;
+}
+
+.activity-item.past .activity-name {
+    color: #6c757d !important;
+}
+
 .activity-name {
     font-size: 1.3rem;
     font-weight: 700;

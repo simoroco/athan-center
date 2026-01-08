@@ -2211,11 +2211,14 @@ async function loadDailyActivities() {
                 checkMark = '<span class="prayer-redcheck-mark">✓</span>';
             }
 
+            // Determine if activity is in the past (same logic as prayers)
+            const isPast = selectedDate < today;
+            const activityClass = isPast ? 'activity-item past' : 'activity-item';
             const canToggle = !isFutureDate;
             const itemStyle = canToggle ? 'cursor: pointer;' : 'cursor: not-allowed;';
 
             return `
-                <div class="activity-item" data-date="${selectedDate}" data-activity="${activity.name}" data-can-toggle="${canToggle}" style="${itemStyle}">
+                <div class="${activityClass}" data-date="${selectedDate}" data-activity="${activity.name}" data-can-toggle="${canToggle}" style="${itemStyle}">
                     <div class="activity-name">${checkMark}${activity.icon} ${activity.name}</div>
                 </div>
             `;

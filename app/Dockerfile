@@ -1,7 +1,13 @@
 FROM node:20-alpine
 
-# Install minimal dependencies (skip audio packages if not available)
-RUN echo "Configuring minimal dependencies..."
+# Install audio dependencies for Linux (Sox + ALSA)
+RUN echo "Installing audio dependencies..." && \
+    apk add --no-cache \
+    sox \
+    alsa-utils \
+    alsa-lib \
+    alsa-plugins-pulse \
+    && echo "✅ Audio dependencies installed successfully"
 
 # Création du répertoire de l'application
 WORKDIR /app
