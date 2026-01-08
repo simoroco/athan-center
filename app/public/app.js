@@ -717,6 +717,16 @@ async function generateYearCalendar(year) {
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
         'July', 'August', 'September', 'October', 'November', 'December'];
     const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    
+    // Helper function to get ISO week number
+    function getWeekNumber(date) {
+        const d = new Date(date);
+        d.setHours(0, 0, 0, 0);
+        d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+        const yearStart = new Date(d.getFullYear(), 0, 1);
+        const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        return weekNo;
+    }
 
     const today = getServerSyncedDate();
     const todayStr = formatDateLocal(today);
@@ -775,15 +785,22 @@ async function generateYearCalendar(year) {
         html += `
             <div class="calendar-month">
                 <div class="calendar-month-header">${monthNames[month]} ${year}</div>
-                <div class="calendar-weekdays">
-                    ${weekdays.map(day => `<div class="calendar-weekday">${day}</div>`).join('')}
+                <div class="calendar-header-row">
+                    <div class="calendar-week-header">W</div>
+                    <div class="calendar-weekdays-wrapper">
+                        ${weekdays.map(day => `<div class="calendar-weekday">${day}</div>`).join('')}
+                    </div>
                 </div>
-                <div class="calendar-days">
+                <div class="calendar-body">
         `;
 
+        // Generate calendar rows with week numbers
+        let currentWeekDays = [];
+        let weekStarted = false;
+        
         // Empty cells for days before month starts (Monday = 0)
         for (let i = 0; i < startingDayOfWeek; i++) {
-            html += '<div class="calendar-day empty"></div>';
+            currentWeekDays.push('<div class="calendar-day empty"></div>');
         }
 
         // Days of the month
@@ -831,7 +848,37 @@ async function generateYearCalendar(year) {
                 dayContent += '</div>';
             }
 
-            html += `<div class="${classes}" data-date="${dateStr}">${dayContent}</div>`;
+            currentWeekDays.push(`<div class="${classes}" data-date="${dateStr}">${dayContent}</div>`);
+            
+            // If we've completed a week (7 days) or it's the last day of the month
+            if (currentWeekDays.length === 7 || day === daysInMonth) {
+                // Get week number for the first non-empty day of this week
+                let weekNum = '';
+                for (let i = 0; i < currentWeekDays.length; i++) {
+                    if (!currentWeekDays[i].includes('empty')) {
+                        const weekDay = day - (currentWeekDays.length - 1 - i);
+                        const weekDate = new Date(year, month, weekDay);
+                        weekNum = getWeekNumber(weekDate);
+                        break;
+                    }
+                }
+                
+                // Fill remaining days if it's the last week
+                while (currentWeekDays.length < 7) {
+                    currentWeekDays.push('<div class="calendar-day empty"></div>');
+                }
+                
+                // Output the week row
+                html += `
+                    <div class="calendar-week-row">
+                        <div class="calendar-week-number">${weekNum}</div>
+                        <div class="calendar-days-row">
+                            ${currentWeekDays.join('')}
+                        </div>
+                    </div>
+                `;
+                currentWeekDays = [];
+            }
         }
 
         html += `
