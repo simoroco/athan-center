@@ -3592,7 +3592,6 @@ async function loadStatistics() {
         renderActivityBarChart();
     } catch (error) {
         console.error('Error loading statistics:', error);
-        alert('Error loading statistics: ' + error.message);
     }
 }
 
