@@ -1264,9 +1264,9 @@ function setupEventListeners() {
                 body: JSON.stringify({ key: 'volume', value: volume })
             });
 
-            // If Fajr volume is synced (checkbox unchecked), update it too
+            // If Fajr volume is synced (checkbox checked), update it too
             const syncFajrVolumeCheckbox = document.getElementById('syncFajrVolume');
-            if (syncFajrVolumeCheckbox && !syncFajrVolumeCheckbox.checked) {
+            if (syncFajrVolumeCheckbox && syncFajrVolumeCheckbox.checked) {
                 const fajrVolumeSlider = document.getElementById('fajrVolumeSlider');
                 const fajrVolumeValue = document.getElementById('fajrVolumeValue');
                 if (fajrVolumeSlider && fajrVolumeValue) {
@@ -1359,25 +1359,25 @@ function setupEventListeners() {
         });
     }
 
-    // Sync Fajr volume checkbox (checked = independent volume, unchecked = synced with main)
+    // Sync Fajr volume checkbox (checked = synced with main, unchecked = independent volume)
     if (syncFajrVolumeCheckbox) {
         syncFajrVolumeCheckbox.addEventListener('change', async (e) => {
-            const useIndependentVolume = e.target.checked;
+            const isSynced = e.target.checked;
             try {
                 await fetch(`${API_BASE}/api/settings`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ key: 'sync_fajr_volume', value: useIndependentVolume ? '1' : '0' })
+                    body: JSON.stringify({ key: 'sync_fajr_volume', value: isSynced ? '1' : '0' })
                 });
 
-                // Enable/disable Fajr volume slider based on independent status AND server audio availability
+                // Enable/disable Fajr volume slider based on sync status AND server audio availability
                 const audioOutput = document.getElementById('audioOutput').value;
                 const isServerEnabled = audioOutput !== 'browser';
-                // Fajr slider is enabled only if server is enabled AND independent volume is active
-                setFajrVolumeSliderEnabled(isServerEnabled && useIndependentVolume);
+                // Fajr slider is enabled only if server is enabled AND volume is NOT synced (independent)
+                setFajrVolumeSliderEnabled(isServerEnabled && !isSynced);
 
                 // If switching to synced mode, update Fajr volume to match main volume
-                if (!useIndependentVolume && volumeSlider && fajrVolumeSlider && fajrVolumeValue) {
+                if (isSynced && volumeSlider && fajrVolumeSlider && fajrVolumeValue) {
                     const mainVolume = volumeSlider.value;
                     fajrVolumeSlider.value = mainVolume;
                     fajrVolumeValue.textContent = mainVolume;
@@ -2661,12 +2661,12 @@ async function loadSettings() {
             }
         }
 
-        // Update sync Fajr volume checkbox (checked = independent volume, unchecked = synced)
+        // Update sync Fajr volume checkbox (checked = synced with main, unchecked = independent)
         if (settings.sync_fajr_volume !== undefined) {
             const syncFajrVolumeCheckbox = document.getElementById('syncFajrVolume');
             if (syncFajrVolumeCheckbox) {
-                const useIndependentVolume = settings.sync_fajr_volume === '1';
-                syncFajrVolumeCheckbox.checked = useIndependentVolume;
+                const isSynced = settings.sync_fajr_volume === '1';
+                syncFajrVolumeCheckbox.checked = isSynced;
 
                 const audioOutput = settings.audio_output || 'both';
                 const isServerEnabled = audioOutput !== 'browser';
@@ -2676,10 +2676,10 @@ async function loadSettings() {
                     setSyncFajrVolumeCheckboxEnabled(isServerEnabled);
                 }
 
-                // Enable/disable Fajr volume slider based on independent status AND server audio availability
+                // Enable/disable Fajr volume slider based on sync status AND server audio availability
                 if (typeof setFajrVolumeSliderEnabled === 'function') {
-                    // Fajr slider is enabled only if server is enabled AND independent volume is active
-                    setFajrVolumeSliderEnabled(isServerEnabled && useIndependentVolume);
+                    // Fajr slider is enabled only if server is enabled AND volume is NOT synced (independent)
+                    setFajrVolumeSliderEnabled(isServerEnabled && !isSynced);
                 }
             }
         }

@@ -609,20 +609,21 @@ function playAthan(prayerName) {
         // For Fajr prayer, check if we should use the specific Fajr volume
         let volumePercent = 50;
         if (prayerName === 'Fajr | Sobh') {
-            // Check if Fajr volume is independent (not synced with main volume)
+            // Check if Fajr volume is synced with main volume
+            // sync_fajr_volume: '0' = independent (use fajr_volume), '1' = synced (use volume)
             const syncFajrVolumeRow = db.prepare('SELECT value FROM settings WHERE key = ?').get('sync_fajr_volume');
-            const useFajrVolume = syncFajrVolumeRow ? syncFajrVolumeRow.value === '1' : false;
+            const isSynced = syncFajrVolumeRow ? syncFajrVolumeRow.value === '1' : false;
 
-            if (useFajrVolume) {
-                // Use specific Fajr volume
-                const fajrVolumeRow = db.prepare('SELECT value FROM settings WHERE key = ?').get('fajr_volume');
-                volumePercent = fajrVolumeRow ? parseInt(fajrVolumeRow.value) : 50;
-                log(`[playAthan] Using specific Fajr volume: ${volumePercent}%`);
-            } else {
+            if (isSynced) {
                 // Use main volume (synced)
                 const volumeRow = db.prepare('SELECT value FROM settings WHERE key = ?').get('volume');
                 volumePercent = volumeRow ? parseInt(volumeRow.value) : 50;
                 log(`[playAthan] Using synced main volume for Fajr: ${volumePercent}%`);
+            } else {
+                // Use specific Fajr volume (independent)
+                const fajrVolumeRow = db.prepare('SELECT value FROM settings WHERE key = ?').get('fajr_volume');
+                volumePercent = fajrVolumeRow ? parseInt(fajrVolumeRow.value) : 50;
+                log(`[playAthan] Using independent Fajr volume: ${volumePercent}%`);
             }
         } else {
             // Use main volume for all other prayers
