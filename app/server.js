@@ -515,12 +515,12 @@ function playStartupSound() {
             return;
         }
 
-        // Get volume (x4: 100% on UI = 400% on server)
+        // Get volume (100% on UI = 100% on server, no amplification)
         const volumeRow = db.prepare('SELECT value FROM settings WHERE key = ?').get('volume');
         const volumePercent = volumeRow ? parseInt(volumeRow.value) : 50;
-        const volumeLevel = ((volumePercent / 100) * 4).toFixed(2); // x4 multiplier
+        const volumeLevel = (volumePercent / 100).toFixed(2);
 
-        log(`[playStartupSound] 🔊 Playing startup sound: ${startupAudioPath} (${fileStats.size} bytes) at UI volume ${volumePercent}% (server: ${volumeLevel}x)`);
+        log(`[playStartupSound] 🔊 Playing startup sound: ${startupAudioPath} (${fileStats.size} bytes) at volume ${volumePercent}% (sox: ${volumeLevel})`);
 
         const { args, env } = buildSoxArgs(volumeLevel, startupAudioPath, []);
 
@@ -609,21 +609,21 @@ function playAthan(prayerName) {
         // For Fajr prayer, check if we should use the specific Fajr volume
         let volumePercent = 50;
         if (prayerName === 'Fajr | Sobh') {
-            // Check if Fajr volume is synced with main volume
-            // sync_fajr_volume: '0' = independent (use fajr_volume), '1' = synced (use volume)
+            // Check if Fajr has a different volume enabled
+            // sync_fajr_volume: '1' = different volume enabled (use fajr_volume), '0' = synced with main (use volume)
             const syncFajrVolumeRow = db.prepare('SELECT value FROM settings WHERE key = ?').get('sync_fajr_volume');
-            const isSynced = syncFajrVolumeRow ? syncFajrVolumeRow.value === '1' : false;
+            const useDifferentVolume = syncFajrVolumeRow ? syncFajrVolumeRow.value === '1' : false;
 
-            if (isSynced) {
+            if (useDifferentVolume) {
+                // Use specific Fajr volume (different volume enabled)
+                const fajrVolumeRow = db.prepare('SELECT value FROM settings WHERE key = ?').get('fajr_volume');
+                volumePercent = fajrVolumeRow ? parseInt(fajrVolumeRow.value) : 50;
+                log(`[playAthan] Using different Fajr volume: ${volumePercent}%`);
+            } else {
                 // Use main volume (synced)
                 const volumeRow = db.prepare('SELECT value FROM settings WHERE key = ?').get('volume');
                 volumePercent = volumeRow ? parseInt(volumeRow.value) : 50;
                 log(`[playAthan] Using synced main volume for Fajr: ${volumePercent}%`);
-            } else {
-                // Use specific Fajr volume (independent)
-                const fajrVolumeRow = db.prepare('SELECT value FROM settings WHERE key = ?').get('fajr_volume');
-                volumePercent = fajrVolumeRow ? parseInt(fajrVolumeRow.value) : 50;
-                log(`[playAthan] Using independent Fajr volume: ${volumePercent}%`);
             }
         } else {
             // Use main volume for all other prayers
@@ -631,11 +631,11 @@ function playAthan(prayerName) {
             volumePercent = volumeRow ? parseInt(volumeRow.value) : 50;
         }
 
-        // Convert 0-100 to 0.0-4.0 for sox (x4: 100% on UI = 400% on server)
-        const volumeLevel = ((volumePercent / 100) * 4).toFixed(2);
+        // Convert 0-100 to 0.0-1.0 for sox (100% on UI = 100% on server, no amplification)
+        const volumeLevel = (volumePercent / 100).toFixed(2);
 
         if (fs.existsSync(audioPath)) {
-            log(`[playAthan] 🔊 BACKEND AUDIO PLAYING for ${prayerName}: ${audioPath} at UI volume ${volumePercent}% (server: ${volumeLevel}x)`);
+            log(`[playAthan] 🔊 BACKEND AUDIO PLAYING for ${prayerName}: ${audioPath} at volume ${volumePercent}% (sox: ${volumeLevel})`);
 
             // Use sox play command with -v for volume control and selected audio card
             // For test athan, only play the first 30 seconds
@@ -713,11 +713,11 @@ function playQuran() {
         log(`[playQuran] Quran file: ${quranFile}`);
         log(`[playQuran] Full path: ${quranPath}`);
 
-        // Retrieve volume (x4: 100% on UI = 400% on server)
+        // Retrieve volume (100% on UI = 100% on server, no amplification)
         const volumeRow = db.prepare('SELECT value FROM settings WHERE key = ?').get('volume');
         const volumePercent = volumeRow ? parseInt(volumeRow.value) : 50;
-        const volumeLevel = ((volumePercent / 100) * 4).toFixed(2);
-        log(`[playQuran] Volume: UI ${volumePercent}% -> Server ${volumeLevel}x (x4 multiplier)`);
+        const volumeLevel = (volumePercent / 100).toFixed(2);
+        log(`[playQuran] Volume: ${volumePercent}% (sox: ${volumeLevel})`);
 
         if (fs.existsSync(quranPath)) {
             log(`[playQuran] ✅ File exists, starting playback...`);
@@ -2019,7 +2019,7 @@ app.get('/api/test-athan-server', (req, res) => {
 
         const volumeRow = db.prepare('SELECT value FROM settings WHERE key = ?').get('volume');
         const volumePercent = volumeRow ? parseInt(volumeRow.value) : 50;
-        const volumeLevel = ((volumePercent / 100) * 4).toFixed(2); // x4 multiplier
+        const volumeLevel = (volumePercent / 100).toFixed(2);
 
         if (!fs.existsSync(audioPath)) {
             logError(`Athan file not found for test: ${audioPath}`);
@@ -2075,7 +2075,7 @@ app.get('/api/test-quran-server', (req, res) => {
 
         const volumeRow = db.prepare('SELECT value FROM settings WHERE key = ?').get('volume');
         const volumePercent = volumeRow ? parseInt(volumeRow.value) : 50;
-        const volumeLevel = ((volumePercent / 100) * 4).toFixed(2); // x4 multiplier
+        const volumeLevel = (volumePercent / 100).toFixed(2);
 
         if (!fs.existsSync(quranPath)) {
             logError(`Quran file not found for test: ${quranPath}`);
@@ -2614,7 +2614,7 @@ app.post('/api/test-quran', (req, res) => {
 
         const volumeRow = db.prepare('SELECT value FROM settings WHERE key = ?').get('volume');
         const volumePercent = volumeRow ? parseInt(volumeRow.value) : 50;
-        const volumeLevel = ((volumePercent / 100) * 4).toFixed(2); // x4 multiplier
+        const volumeLevel = (volumePercent / 100).toFixed(2);
 
         if (!fs.existsSync(quranPath)) {
             logError(`Quran file not found for test: ${quranPath}`);
