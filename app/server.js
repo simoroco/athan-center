@@ -515,11 +515,12 @@ function playStartupSound() {
             return;
         }
 
-        // Get volume (100% on UI = 100% on server, no amplification)
+        // Get volume (slider value divided by 4 for actual playback)
         const volumeRow = db.prepare('SELECT value FROM settings WHERE key = ?').get('volume');
         const volumePercent = volumeRow ? parseInt(volumeRow.value) : 50;
-        const volumeLevel = (volumePercent / 100).toFixed(2);
-
+        const volumeLevel = (volumePercent / 400).toFixed(2);
+        // const volumeLevel = (volumePercent / 100).toFixed(2);
+        
         log(`[playStartupSound] 🔊 Playing startup sound: ${startupAudioPath} (${fileStats.size} bytes) at volume ${volumePercent}% (sox: ${volumeLevel})`);
 
         const { args, env } = buildSoxArgs(volumeLevel, startupAudioPath, []);
@@ -631,8 +632,8 @@ function playAthan(prayerName) {
             volumePercent = volumeRow ? parseInt(volumeRow.value) : 50;
         }
 
-        // Convert 0-100 to 0.0-1.0 for sox (100% on UI = 100% on server, no amplification)
-        const volumeLevel = (volumePercent / 100).toFixed(2);
+        // Convert slider value to sox volume (divided by 4: 100% slider = 25% actual volume)
+        const volumeLevel = (volumePercent / 400).toFixed(2);
 
         if (fs.existsSync(audioPath)) {
             log(`[playAthan] 🔊 BACKEND AUDIO PLAYING for ${prayerName}: ${audioPath} at volume ${volumePercent}% (sox: ${volumeLevel})`);
@@ -713,10 +714,12 @@ function playQuran() {
         log(`[playQuran] Quran file: ${quranFile}`);
         log(`[playQuran] Full path: ${quranPath}`);
 
-        // Retrieve volume (100% on UI = 100% on server, no amplification)
+        // Retrieve volume (slider value divided by 4 for actual playback)
         const volumeRow = db.prepare('SELECT value FROM settings WHERE key = ?').get('volume');
         const volumePercent = volumeRow ? parseInt(volumeRow.value) : 50;
-        const volumeLevel = (volumePercent / 100).toFixed(2);
+        const volumeLevel = (volumePercent / 400).toFixed(2);
+        // const volumeLevel = (volumePercent / 100).toFixed(2);
+        
         log(`[playQuran] Volume: ${volumePercent}% (sox: ${volumeLevel})`);
 
         if (fs.existsSync(quranPath)) {
