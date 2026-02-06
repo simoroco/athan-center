@@ -35,6 +35,7 @@ Athan Center provides accurate prayer times with automatic Athan playback throug
 
 - [✨ Key Features](#-key-features)
 - [⚡ Quick Start](#-quick-start)
+- [🖥️ Demo](#-demo)
 - [🚀 Production Deployment](#-production-deployment)
 - [⚙️ How does it work?](#-how-does-it-work)
 - [🔌 Remote control API](#-remote-control-api)
