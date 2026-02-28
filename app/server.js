@@ -4,6 +4,9 @@ const cron = require('node-cron');
 const schedule = require('node-schedule');
 const path = require('path');
 const fs = require('fs');
+const https = require('https');
+const http = require('http');
+const { execSync } = require('child_process');
 const Database = require('better-sqlite3');
 const axios = require('axios');
 const ical = require('ical');
@@ -13,7 +16,47 @@ const os = require('os');
 const ExcelJS = require('exceljs');
 
 const app = express();
-const PORT = 7777;
+const PORT = 7777;         // HTTPS port
+const HTTP_PORT = 7780;    // HTTP redirect port
+
+// Internal axios instance for self-calls (ignores self-signed cert)
+const internalAxios = axios.create({
+    httpsAgent: new https.Agent({ rejectUnauthorized: false })
+});
+// Will be set after server starts to use the correct protocol
+let INTERNAL_BASE_URL = `http://localhost:${PORT}`;
+
+// ===== HTTPS CERTIFICATE MANAGEMENT =====
+const CERTS_DIR = path.join(__dirname, 'certs');
+const CERT_FILE = path.join(CERTS_DIR, 'cert.pem');
+const KEY_FILE = path.join(CERTS_DIR, 'key.pem');
+
+function ensureSSLCertificates() {
+    // Create certs directory if it doesn't exist
+    if (!fs.existsSync(CERTS_DIR)) {
+        fs.mkdirSync(CERTS_DIR, { recursive: true });
+    }
+
+    // If both cert and key exist, use them (custom or previously generated)
+    if (fs.existsSync(CERT_FILE) && fs.existsSync(KEY_FILE)) {
+        console.log('[SSL] ✅ Using existing SSL certificates from /app/certs/');
+        return { cert: fs.readFileSync(CERT_FILE), key: fs.readFileSync(KEY_FILE) };
+    }
+
+    // Auto-generate self-signed certificate
+    console.log('[SSL] 🔐 No SSL certificates found, generating self-signed certificate...');
+    try {
+        execSync(`openssl req -x509 -newkey rsa:2048 -keyout "${KEY_FILE}" -out "${CERT_FILE}" -days 3650 -nodes -subj "/CN=athan-center/O=Athan Center/C=FR"`, {
+            stdio: 'pipe'
+        });
+        console.log('[SSL] ✅ Self-signed SSL certificate generated successfully (valid 10 years)');
+        return { cert: fs.readFileSync(CERT_FILE), key: fs.readFileSync(KEY_FILE) };
+    } catch (error) {
+        console.error('[SSL] ❌ Failed to generate SSL certificate:', error.message);
+        console.error('[SSL] ⚠️  Falling back to HTTP only on port ' + PORT);
+        return null;
+    }
+}
 
 // ===== LOGGING UTILITY WITH TIMESTAMP =====
 function getTimestamp() {
@@ -1259,7 +1302,7 @@ app.get('/api/statistics/activities', (req, res) => {
 
         // Generate all possible dates and activities
         const weeklyStats = {};
-        const activities = ['Read Coran', 'Tasbih & Dikr'];
+        const activities = ['Read Coran', 'Pray Nawafil', 'Tasbih & Dikr'];
 
         const current = new Date(twoYearsAgo);
         const end = new Date(today);
@@ -1317,15 +1360,15 @@ app.get('/api/statistics/export-excel', async (req, res) => {
         const workbook = new ExcelJS.Workbook();
 
         // Fetch prayer statistics
-        const prayerStatsResponse = await axios.get(`http://localhost:${PORT}/api/statistics/prayers`);
+        const prayerStatsResponse = await internalAxios.get(`${INTERNAL_BASE_URL}/api/statistics/prayers`);
         const prayerStats = prayerStatsResponse.data.statistics;
 
         // Fetch activity statistics
-        const activityStatsResponse = await axios.get(`http://localhost:${PORT}/api/statistics/activities`);
+        const activityStatsResponse = await internalAxios.get(`${INTERNAL_BASE_URL}/api/statistics/activities`);
         const activityStats = activityStatsResponse.data.statistics;
 
         // Fetch Ramadan weeks
-        const ramadanResponse = await axios.get(`http://localhost:${PORT}/api/hijri/ramadan-weeks`);
+        const ramadanResponse = await internalAxios.get(`${INTERNAL_BASE_URL}/api/hijri/ramadan-weeks`);
         const ramadanDates = ramadanResponse.data.ramadan_dates;
 
         // Create Ramadan weeks set
@@ -2946,12 +2989,15 @@ app.get('/api/check-friday-quran', (req, res) => {
     }
 });
 
-// Start server - listen on all network interfaces (0.0.0.0) to allow remote access
-app.listen(PORT, '0.0.0.0', () => {
-    const serverIP = getServerIPAddress();
-    log(`Athan Center server running on port ${PORT}`);
-    log(`📱 Access locally:  http://localhost:${PORT}`);
-    log(`🌐 Access remotely: http://${serverIP}:${PORT}`);
+// ===== START SERVER WITH HTTPS + HTTP REDIRECT =====
+function onServerReady(protocol, serverIP) {
+    INTERNAL_BASE_URL = `${protocol}://localhost:${PORT}`;
+    log(`Athan Center server running with ${protocol.toUpperCase()}`);
+    log(`📱 Access locally:  ${protocol}://localhost:${PORT}`);
+    log(`🌐 Access remotely: ${protocol}://${serverIP}:${PORT}`);
+    if (protocol === 'https') {
+        log(`🔀 HTTP redirect active on port ${HTTP_PORT} → ${protocol}://...:${PORT}`);
+    }
 
     // Load initial prayer times on startup
     fetchPrayerTimes().then(() => {
@@ -3023,7 +3069,33 @@ app.listen(PORT, '0.0.0.0', () => {
 
         lastSystemTime = now;
     }, 10000); // Check every 10 seconds
-});
+}
+
+// Try to start with HTTPS, fallback to HTTP
+const sslCerts = ensureSSLCertificates();
+const serverIP = getServerIPAddress();
+
+if (sslCerts) {
+    // Start HTTPS server on PORT (7777)
+    https.createServer(sslCerts, app).listen(PORT, '0.0.0.0', () => {
+        onServerReady('https', serverIP);
+    });
+
+    // Start HTTP redirect server on HTTP_PORT (7780)
+    const httpRedirectApp = express();
+    httpRedirectApp.use((req, res) => {
+        const host = req.headers.host ? req.headers.host.replace(`:${HTTP_PORT}`, `:${PORT}`) : `localhost:${PORT}`;
+        res.redirect(301, `https://${host}${req.url}`);
+    });
+    http.createServer(httpRedirectApp).listen(HTTP_PORT, '0.0.0.0', () => {
+        log(`[SSL] 🔀 HTTP redirect server listening on port ${HTTP_PORT}`);
+    });
+} else {
+    // Fallback: start HTTP server on PORT (7777) if SSL failed
+    app.listen(PORT, '0.0.0.0', () => {
+        onServerReady('http', serverIP);
+    });
+}
 
 // Graceful shutdown handlers
 process.on('SIGTERM', () => {

@@ -1662,7 +1662,7 @@ function setupEventListeners() {
             '⚠️ Are you sure you want to reset all prayer checks and daily activities?\n\n' +
             'This will remove all check marks (✓) from:\n' +
             '• All prayers in the database\n' +
-            '• All daily activities (Coran & Tasbih)\n\n' +
+            '• All daily activities (Coran, Nawafil & Tasbih)\n\n' +
             'This action cannot be undone.'
         );
 
@@ -2192,9 +2192,10 @@ async function loadDailyActivities() {
             }
         }
 
-        // Define the two activities
+        // Define the three activities
         const activities = [
             { name: 'Read Coran', icon: '📖' },
+            { name: 'Pray Nawafil', icon: '🤲' },
             { name: 'Tasbih & Dikr', icon: '📿' }
         ];
 

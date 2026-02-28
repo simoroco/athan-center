@@ -7,7 +7,8 @@ RUN echo "Installing audio dependencies..." && \
     alsa-utils \
     alsa-lib \
     alsa-plugins-pulse \
-    && echo "✅ Audio dependencies installed successfully"
+    openssl \
+    && echo "✅ Audio & SSL dependencies installed successfully"
 
 # Création du répertoire de l'application
 WORKDIR /app
@@ -39,7 +40,7 @@ RUN mkdir -p /app/audio_seed /app/data_seed && \
 RUN chmod +x /app/entrypoint.sh
 
 # Exposition du port
-EXPOSE 7777
+EXPOSE 7777 7780
 
 # Utiliser l'entrypoint pour initialiser les volumes
 ENTRYPOINT ["/app/entrypoint.sh"]
