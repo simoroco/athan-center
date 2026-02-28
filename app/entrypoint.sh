@@ -63,19 +63,35 @@ else
     echo "✅ USB audio card detected: card $USB_CARD"
 fi
 
-# Create ALSA configuration file to use the detected card
+# Create ALSA configuration file with plug + dmix and large buffers for Raspberry Pi 5
+# - 'plug' handles automatic format/rate conversion (prevents format mismatch stalls)
+# - 'dmix' provides software mixing with large buffers (prevents under-runs)
+# - period_size 8192 / buffer_size 65536 = ~1.5s of audio buffered at 44100Hz
 cat > /root/.asoundrc << EOF
-pcm.!default {
-    type hw
-    card $USB_CARD
+pcm.dmixer {
+    type dmix
+    ipc_key 1024
+    ipc_key_add_uid false
+    slave {
+        pcm "hw:$USB_CARD"
+        period_size 8192
+        buffer_size 65536
+        rate 44100
+    }
 }
+
+pcm.!default {
+    type plug
+    slave.pcm "dmixer"
+}
+
 ctl.!default {
     type hw
     card $USB_CARD
 }
 EOF
 
-echo "✅ ALSA configured to use card $USB_CARD"
+echo "✅ ALSA configured with plug+dmix and large buffers (65536) for Raspberry Pi 5 (card $USB_CARD)"
 
 # Set AUDIODRIVER to force sox to use ALSA directly
 export AUDIODRIVER=alsa
@@ -89,6 +105,9 @@ if aplay -l 2>/dev/null | grep -q "card"; then
 else
     echo "⚠️  No audio devices detected by aplay"
 fi
+
+echo "🔊 ALSA .asoundrc configuration:"
+cat /root/.asoundrc
 
 # Execute the main command (node server.js)
 exec "$@"

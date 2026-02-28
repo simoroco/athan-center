@@ -474,10 +474,23 @@ function updateAsoundrc(audioCard) {
         return; // Don't modify .asoundrc, use what entrypoint.sh created
     }
 
-    const asoundrcContent = `pcm.!default {
-    type hw
-    card ${audioCard}
+    const asoundrcContent = `pcm.dmixer {
+    type dmix
+    ipc_key 1024
+    ipc_key_add_uid false
+    slave {
+        pcm "hw:${audioCard}"
+        period_size 8192
+        buffer_size 65536
+        rate 44100
+    }
 }
+
+pcm.!default {
+    type plug
+    slave.pcm "dmixer"
+}
+
 ctl.!default {
     type hw
     card ${audioCard}
@@ -506,6 +519,10 @@ function buildSoxArgs(volumeLevel, audioPath, additionalArgs = []) {
 
     // Add volume
     args.push('-v', volumeLevel);
+    
+    // Add buffer optimization for Raspberry Pi 5 to prevent under-runs
+    args.push('--buffer', '131072');  // Large 128KB buffer for sox input processing
+    args.push('-q');                  // Quiet mode to reduce CPU overhead
 
     // Add audio file path
     args.push(audioPath);
@@ -519,11 +536,13 @@ function buildSoxArgs(volumeLevel, audioPath, additionalArgs = []) {
 
     // Create environment with AUDIODRIVER set to alsa
     // This forces sox to use ALSA directly instead of libao
+    // AUDIODEV=default ensures sox uses our plug+dmix chain from .asoundrc
     const env = {
         ...process.env,
-        AUDIODRIVER: 'alsa'
+        AUDIODRIVER: 'alsa',
+        AUDIODEV: 'default'
     };
-    log(`[buildSoxArgs] AUDIODRIVER: ${env.AUDIODRIVER}`);
+    log(`[buildSoxArgs] AUDIODRIVER: ${env.AUDIODRIVER}, AUDIODEV: ${env.AUDIODEV}`);
 
     return { args, env };
 }
@@ -1302,7 +1321,7 @@ app.get('/api/statistics/activities', (req, res) => {
 
         // Generate all possible dates and activities
         const weeklyStats = {};
-        const activities = ['Read Coran', 'Pray Nawafil', 'Tasbih & Dikr'];
+        const activities = ['Read Coran', 'Tasbih & Dikr', 'Pray Nawafil'];
 
         const current = new Date(twoYearsAgo);
         const end = new Date(today);
