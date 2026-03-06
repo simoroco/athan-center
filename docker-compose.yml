@@ -8,7 +8,7 @@ services:
     network_mode: ${NETWORK_MODE:-bridge}  # Dev defaults to bridge for compatibility
     ports:
       - "7777:7777"
-      - "7780:7780"
+      - "7778:7778"
     volumes:
       # DEV: Bind mount for easy modification of audio and data files
       - ./app/data:/app/data    # Database persistence

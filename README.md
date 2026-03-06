@@ -67,7 +67,7 @@ npm install
 npm run dev
 ```
 
-- Default UI: `http://localhost:7777`
+- Default UI: [http://localhost:7777](http://localhost:7777/) or [https://localhost:7778](https://localhost:7778/)
 - Configure location via [Prayer WebCal ICS](https://prayerwebcal.dsultan.com/)
 - Docker image: [simoroco/athan-center](https://hub.docker.com/r/simoroco/athan-center)
 
@@ -104,8 +104,8 @@ Use the **automatic deployment script** that works on all platforms:
 mkdir athan-center && cd athan-center
 
 # Download deployment files
-wget https://raw.githubusercontent.com/your-username/athan-center/main/prod_deploy/docker-compose.yml
-wget https://raw.githubusercontent.com/your-username/athan-center/main/prod_deploy/start.sh
+wget https://raw.githubusercontent.com/simoroco/athan-center/main/prod_deploy/docker-compose.yml
+wget https://raw.githubusercontent.com/simoroco/athan-center/main/prod_deploy/start.sh
 chmod +x start.sh
 
 # Start (auto-detects OS and configures accordingly)
@@ -141,7 +141,7 @@ Using 'start.sh' is recommended for MacOS and Windows platforms only. It's not r
 
 ## 🔌 Remote control API
 
-All endpoints are available on `http://IP:7777/api`.
+All endpoints are available on `http://IP:7777/api` and `https://IP:7778/api`.
 
 | Action | Endpoint | Notes |
 | --- | --- | --- |

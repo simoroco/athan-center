@@ -40,7 +40,7 @@ RUN mkdir -p /app/audio_seed /app/data_seed && \
 RUN chmod +x /app/entrypoint.sh
 
 # Exposition du port
-EXPOSE 7777 7780
+EXPOSE 7777 7778
 
 # Utiliser l'entrypoint pour initialiser les volumes
 ENTRYPOINT ["/app/entrypoint.sh"]

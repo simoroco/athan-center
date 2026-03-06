@@ -8,6 +8,7 @@ services:
     network_mode: ${NETWORK_MODE:-host}
     ports:
       - "7777:7777"  # Used only in bridge mode (macOS/Windows)
+      - "7778:7778"  # HTTPS port - used only in bridge mode
     volumes:
       # PRODUCTION VOLUMES - Auto-created by Docker if they don't exist
       # The container automatically initializes empty folders with default files

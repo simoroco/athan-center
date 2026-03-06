@@ -16,15 +16,15 @@ const os = require('os');
 const ExcelJS = require('exceljs');
 
 const app = express();
-const PORT = 7777;         // HTTPS port
-const HTTP_PORT = 7780;    // HTTP redirect port
+const HTTP_PORT = 7777;    // HTTP port (primary)
+const HTTPS_PORT = 7778;   // HTTPS port
 
 // Internal axios instance for self-calls (ignores self-signed cert)
 const internalAxios = axios.create({
     httpsAgent: new https.Agent({ rejectUnauthorized: false })
 });
 // Will be set after server starts to use the correct protocol
-let INTERNAL_BASE_URL = `http://localhost:${PORT}`;
+let INTERNAL_BASE_URL = `http://localhost:${HTTP_PORT}`;
 
 // ===== HTTPS CERTIFICATE MANAGEMENT =====
 const CERTS_DIR = path.join(__dirname, 'certs');
@@ -53,7 +53,7 @@ function ensureSSLCertificates() {
         return { cert: fs.readFileSync(CERT_FILE), key: fs.readFileSync(KEY_FILE) };
     } catch (error) {
         console.error('[SSL] ❌ Failed to generate SSL certificate:', error.message);
-        console.error('[SSL] ⚠️  Falling back to HTTP only on port ' + PORT);
+        console.error('[SSL] ⚠️  SSL certificate generation failed, HTTPS will not be available');
         return null;
     }
 }
@@ -3008,15 +3008,13 @@ app.get('/api/check-friday-quran', (req, res) => {
     }
 });
 
-// ===== START SERVER WITH HTTPS + HTTP REDIRECT =====
-function onServerReady(protocol, serverIP) {
-    INTERNAL_BASE_URL = `${protocol}://localhost:${PORT}`;
-    log(`Athan Center server running with ${protocol.toUpperCase()}`);
-    log(`📱 Access locally:  ${protocol}://localhost:${PORT}`);
-    log(`🌐 Access remotely: ${protocol}://${serverIP}:${PORT}`);
-    if (protocol === 'https') {
-        log(`🔀 HTTP redirect active on port ${HTTP_PORT} → ${protocol}://...:${PORT}`);
-    }
+// ===== START SERVER WITH HTTP (primary) + HTTPS (optional) =====
+function onServerReady(serverIP) {
+    INTERNAL_BASE_URL = `http://localhost:${HTTP_PORT}`;
+    log(`Athan Center server running`);
+    log(`📱 Access locally:  http://localhost:${HTTP_PORT}`);
+    log(`🌐 Access remotely: http://${serverIP}:${HTTP_PORT}`);
+    log(`🔒 HTTPS also available on port ${HTTPS_PORT}`);
 
     // Load initial prayer times on startup
     fetchPrayerTimes().then(() => {
@@ -3090,29 +3088,18 @@ function onServerReady(protocol, serverIP) {
     }, 10000); // Check every 10 seconds
 }
 
-// Try to start with HTTPS, fallback to HTTP
+// Start HTTP server on HTTP_PORT (7777) - primary, no redirect
 const sslCerts = ensureSSLCertificates();
 const serverIP = getServerIPAddress();
 
-if (sslCerts) {
-    // Start HTTPS server on PORT (7777)
-    https.createServer(sslCerts, app).listen(PORT, '0.0.0.0', () => {
-        onServerReady('https', serverIP);
-    });
+http.createServer(app).listen(HTTP_PORT, '0.0.0.0', () => {
+    onServerReady(serverIP);
+});
 
-    // Start HTTP redirect server on HTTP_PORT (7780)
-    const httpRedirectApp = express();
-    httpRedirectApp.use((req, res) => {
-        const host = req.headers.host ? req.headers.host.replace(`:${HTTP_PORT}`, `:${PORT}`) : `localhost:${PORT}`;
-        res.redirect(301, `https://${host}${req.url}`);
-    });
-    http.createServer(httpRedirectApp).listen(HTTP_PORT, '0.0.0.0', () => {
-        log(`[SSL] 🔀 HTTP redirect server listening on port ${HTTP_PORT}`);
-    });
-} else {
-    // Fallback: start HTTP server on PORT (7777) if SSL failed
-    app.listen(PORT, '0.0.0.0', () => {
-        onServerReady('http', serverIP);
+// Start HTTPS server on HTTPS_PORT (7778) if SSL certs are available
+if (sslCerts) {
+    https.createServer(sslCerts, app).listen(HTTPS_PORT, '0.0.0.0', () => {
+        log(`[HTTPS] ✅ HTTPS server listening on port ${HTTPS_PORT}`);
     });
 }
 
