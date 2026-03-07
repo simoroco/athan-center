@@ -709,7 +709,7 @@ async function playFullQuran() {
 }
 
 // Generate yearly calendar
-function generateYearCalendar(year) {
+async function generateYearCalendar(year) {
     const calendarGrid = document.getElementById('calendarGrid');
     const currentYearSpan = document.getElementById('currentYear');
     currentYearSpan.textContent = year;
@@ -721,6 +721,45 @@ function generateYearCalendar(year) {
     const today = getServerSyncedDate();
     const todayStr = formatDateLocal(today);
     const selectedStr = formatDateLocal(currentDate);
+
+    // Fetch Ramadan dates
+    let ramadanDates = new Set();
+    try {
+        const response = await fetch(`${API_BASE}/api/hijri/ramadan-weeks`);
+        const data = await response.json();
+        console.log('📅 Ramadan API response:', data);
+        if (data.success && data.ramadan_dates) {
+            data.ramadan_dates.forEach(rd => {
+                ramadanDates.add(rd.gregorian_date);
+            });
+            console.log(`✅ Loaded ${ramadanDates.size} Ramadan dates for calendar`);
+            if (ramadanDates.size > 0) {
+                const firstDate = Array.from(ramadanDates)[0];
+                console.log(`First Ramadan date: ${firstDate}`);
+            }
+        } else {
+            console.warn('⚠️ No Ramadan dates in API response');
+        }
+    } catch (error) {
+        console.error('❌ Error fetching Ramadan dates:', error);
+    }
+
+    // Fetch prayer checks for the year
+    let prayerChecksByDate = {};
+    try {
+        const response = await fetch(`${API_BASE}/api/prayer-checks-range?year=${year}`);
+        const data = await response.json();
+        if (data.success && data.checks) {
+            data.checks.forEach(check => {
+                if (!prayerChecksByDate[check.date]) {
+                    prayerChecksByDate[check.date] = [];
+                }
+                prayerChecksByDate[check.date].push(check);
+            });
+        }
+    } catch (error) {
+        console.error('Error fetching prayer checks:', error);
+    }
 
     let html = '';
 
@@ -758,7 +797,38 @@ function generateYearCalendar(year) {
                 classes += ' selected';
             }
 
-            html += `<div class="${classes}" data-date="${dateStr}">${day}</div>`;
+            // Check if this day is in Ramadan
+            const isRamadan = ramadanDates.has(dateStr);
+
+            // Check prayer status for this day
+            let prayerSymbol = '';
+            if (prayerChecksByDate[dateStr]) {
+                const checks = prayerChecksByDate[dateStr];
+                const mainPrayers = ['Fajr | Sobh', 'Dohr', 'Asr', 'Maghrib', 'Isha'];
+                const checkedPrayers = checks.filter(c => c.checked > 0 && mainPrayers.includes(c.prayer_name));
+
+                if (checkedPrayers.length === 5) {
+                    // All 5 prayers checked
+                    const allGreen = checkedPrayers.every(c => c.checked === 1);
+                    prayerSymbol = allGreen
+                        ? '<span class="prayer-check-green">✓</span>'
+                        : '<span class="prayer-check-orange">✓</span>';
+                } else if (checkedPrayers.length > 0) {
+                    // Some prayers checked but not all 5
+                    prayerSymbol = '<span class="prayer-check-orange">✓</span>';
+                }
+            }
+
+            // Build day content
+            let dayContent = `<span class="calendar-day-number">${day}</span>`;
+            if (prayerSymbol || isRamadan) {
+                dayContent += '<div class="calendar-day-symbols">';
+                if (prayerSymbol) dayContent += prayerSymbol;
+                if (isRamadan) dayContent += '<span class="ramadan-moon">🌙</span>';
+                dayContent += '</div>';
+            }
+
+            html += `<div class="${classes}" data-date="${dateStr}">${dayContent}</div>`;
         }
 
         html += `
@@ -1010,6 +1080,10 @@ function setupEventListeners() {
             }
             if (modal.style.display === 'block') {
                 modal.style.display = 'none';
+            }
+            const statsModal = document.getElementById('statisticsModal');
+            if (statsModal && statsModal.style.display === 'block') {
+                statsModal.style.display = 'none';
             }
         }
     });
@@ -1902,6 +1976,7 @@ async function loadPrayers() {
         updateDateButtons();
         await updateWeekdayMuteBanner();
         await loadDailyActivities();
+        await checkRamadanForCurrentDate();
 
         // Determine if we should show next prayer card
         const today = getServerSyncedDate();
@@ -2211,12 +2286,30 @@ function displayNextPrayer(prayer) {
     const card = document.getElementById('nextPrayerCard');
 
     // Update content BEFORE showing the card to avoid flashing empty data
-    document.querySelector('.next-prayer-name').textContent = getPrayerName(prayer.prayer_name);
+    updatePrayerName(prayer.prayer_name);
+
     document.querySelector('.next-prayer-time').textContent = prayer.prayer_time;
 
     // Only show the card after content is updated
     card.style.display = 'block';
 
+}
+
+// Helper function to update prayer name with Ramadan moon inline
+function updatePrayerName(prayerName) {
+    const nameDiv = document.querySelector('.next-prayer-name');
+    const prayerNameText = getPrayerName(prayerName);
+    const ramadanSpan = nameDiv.querySelector('#ramadanMoonCard');
+
+    // Clear text nodes
+    nameDiv.childNodes.forEach(node => {
+        if (node.nodeType === Node.TEXT_NODE) {
+            node.remove();
+        }
+    });
+
+    // Insert prayer name before ramadan span
+    nameDiv.insertBefore(document.createTextNode(prayerNameText), ramadanSpan);
 }
 
 // Hide the next prayer card
@@ -2272,7 +2365,7 @@ function startCountdown() {
             if (timeSincePrayerTime < fifteenMinutes) {
                 // Still within 15-minute window - keep showing the current prayer with "Time to pray"
                 document.querySelector('.next-prayer-label').textContent = 'Time to pray';
-                document.querySelector('.next-prayer-name').textContent = getPrayerName(currentPrayerInProgress.prayer_name);
+                updatePrayerName(currentPrayerInProgress.prayer_name);
                 document.querySelector('.next-prayer-time').textContent = currentPrayerInProgress.prayer_time;
 
                 const remainingMs = fifteenMinutes - timeSincePrayerTime;
@@ -2335,7 +2428,7 @@ function startCountdown() {
             }
 
             document.querySelector('.next-prayer-label').textContent = 'Time to pray';
-            document.querySelector('.next-prayer-name').textContent = getPrayerName(nextPrayer.prayer_name);
+            updatePrayerName(nextPrayer.prayer_name);
             document.querySelector('.next-prayer-time').textContent = nextPrayer.prayer_time;
             document.querySelector('.next-prayer-countdown').textContent = '15m 0s remaining';
         }
@@ -3407,6 +3500,30 @@ function getPrayerName(name) {
     return names[name] || name;
 }
 
+// Check if current date is in Ramadan and show moon in footer and card
+async function checkRamadanForCurrentDate() {
+    try {
+        const dateStr = formatDateLocal(currentDate);
+        const response = await fetch(`${API_BASE}/api/hijri/ramadan-weeks`);
+        const data = await response.json();
+
+        const ramadanMoonFooter = document.getElementById('ramadanMoonFooter');
+        const ramadanMoonCard = document.getElementById('ramadanMoonCard');
+
+        if (data.success && data.ramadan_dates) {
+            const isRamadan = data.ramadan_dates.some(rd => rd.gregorian_date === dateStr);
+            if (ramadanMoonFooter) {
+                ramadanMoonFooter.style.display = isRamadan ? 'inline' : 'none';
+            }
+            if (ramadanMoonCard) {
+                ramadanMoonCard.style.display = isRamadan ? 'inline' : 'none';
+            }
+        }
+    } catch (error) {
+        console.error('Error checking Ramadan for current date:', error);
+    }
+}
+
 // Expose functions globally for inline handlers
 window.togglePrayer = togglePrayer;
 window.toggleWeekday = toggleWeekday;
@@ -3429,8 +3546,16 @@ document.getElementById('statisticsBtn').addEventListener('click', async () => {
 });
 
 // Close statistics modal
+const statisticsModal = document.getElementById('statisticsModal');
 document.getElementById('closeStatistics').addEventListener('click', () => {
-    document.getElementById('statisticsModal').style.display = 'none';
+    statisticsModal.style.display = 'none';
+});
+
+// Close statistics modal on outside click
+window.addEventListener('click', (event) => {
+    if (event.target === statisticsModal) {
+        statisticsModal.style.display = 'none';
+    }
 });
 
 // Load all statistics data
@@ -3478,6 +3603,54 @@ function getWeekNumberFromDate(dateStr) {
     return { year: d.getFullYear(), week: weekNo };
 }
 
+// Generate 104 complete weeks with data or empty
+function generate104Weeks(statsData) {
+    const weeks = [];
+    const now = new Date();
+
+    // Create a map of existing data
+    const dataMap = new Map();
+    if (statsData && statsData.length > 0) {
+        statsData.forEach(stat => {
+            dataMap.set(stat.week, stat);
+        });
+    }
+
+    // Get current week's Monday
+    const currentWeekInfo = getWeekNumberFromDate(formatDateLocal(now));
+
+    // Find the Monday of the current ISO week
+    const currentMonday = new Date(now);
+    const dayOfWeek = currentMonday.getDay();
+    const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // If Sunday (0), go back 6 days; else go to Monday
+    currentMonday.setDate(currentMonday.getDate() + daysToMonday);
+    currentMonday.setHours(0, 0, 0, 0);
+
+    // Generate 104 weeks backwards from current Monday
+    for (let i = 103; i >= 0; i--) {
+        const monday = new Date(currentMonday);
+        monday.setDate(monday.getDate() - (i * 7));
+
+        const weekInfo = getWeekNumberFromDate(formatDateLocal(monday));
+        const weekStr = `${weekInfo.year}-W${String(weekInfo.week).padStart(2, '0')}`;
+
+        if (dataMap.has(weekStr)) {
+            weeks.push(dataMap.get(weekStr));
+        } else {
+            weeks.push({
+                week: weekStr,
+                not_done: 0,
+                on_time: 0,
+                late: 0,
+                total_prayers: 0,
+                total_activities: 0
+            });
+        }
+    }
+
+    return weeks;
+}
+
 // Get last week data
 function getLastWeekData(statsData) {
     if (!statsData || statsData.length === 0) return null;
@@ -3511,7 +3684,7 @@ function renderPrayerPieChart() {
     prayerPieChartInstance = new Chart(ctx, {
         type: 'pie',
         data: {
-            labels: ['Not Done', 'On Time (Green)', 'Late (Orange)'],
+            labels: ['Not Done', 'On Time', 'Late'],
             datasets: [{
                 data: [lastWeekData.not_done, lastWeekData.on_time, lastWeekData.late],
                 backgroundColor: ['#6c757d', '#27ae60', '#ff8c00'],
@@ -3550,30 +3723,28 @@ function renderPrayerPieChart() {
 function renderPrayerBarChart() {
     const ctx = document.getElementById('prayerBarChart');
 
-    if (!prayerStatsData || prayerStatsData.length === 0) {
-        ctx.getContext('2d').fillText('No data available', 10, 50);
-        return;
-    }
-
     if (prayerBarChartInstance) {
         prayerBarChartInstance.destroy();
     }
 
     const isDarkMode = document.body.classList.contains('dark-mode');
 
+    // Generate 104 complete weeks (always show all 104 weeks)
+    const completeData = generate104Weeks(prayerStatsData);
+
     // Determine how many weeks to show based on screen width
     let weeksToShow = 52; // Default: 1 year
     if (window.innerWidth < 768) {
-        weeksToShow = 4; // Mobile: 1 month
+        weeksToShow = 13; // Mobile: ~3 months
     } else if (window.innerWidth < 1200) {
         weeksToShow = 26; // Tablet: 6 months
     }
 
-    const recentData = prayerStatsData.slice(-weeksToShow);
+    const recentData = completeData.slice(-weeksToShow);
 
     const labels = recentData.map(s => {
         const isRamadan = ramadanWeeks.has(s.week);
-        return isRamadan ? `${s.week} 🌙` : s.week;
+        return isRamadan ? `🌙 ${s.week}` : s.week;
     });
 
     prayerBarChartInstance = new Chart(ctx, {
@@ -3588,13 +3759,13 @@ function renderPrayerBarChart() {
                     stack: 'stack0'
                 },
                 {
-                    label: 'Late (Orange)',
+                    label: 'Late',
                     data: recentData.map(s => s.late),
                     backgroundColor: '#ff8c00',
                     stack: 'stack0'
                 },
                 {
-                    label: 'On Time (Green)',
+                    label: 'On Time',
                     data: recentData.map(s => s.on_time),
                     backgroundColor: '#27ae60',
                     stack: 'stack0'
@@ -3673,7 +3844,7 @@ function renderActivityPieChart() {
     activityPieChartInstance = new Chart(ctx, {
         type: 'pie',
         data: {
-            labels: ['Not Done', 'On Time (Green)', 'Late (Orange)'],
+            labels: ['Not Done', 'On Time', 'Late'],
             datasets: [{
                 data: [lastWeekData.not_done, lastWeekData.on_time, lastWeekData.late],
                 backgroundColor: ['#6c757d', '#27ae60', '#ff8c00'],
@@ -3712,30 +3883,28 @@ function renderActivityPieChart() {
 function renderActivityBarChart() {
     const ctx = document.getElementById('activityBarChart');
 
-    if (!activityStatsData || activityStatsData.length === 0) {
-        ctx.getContext('2d').fillText('No data available', 10, 50);
-        return;
-    }
-
     if (activityBarChartInstance) {
         activityBarChartInstance.destroy();
     }
 
     const isDarkMode = document.body.classList.contains('dark-mode');
 
+    // Generate 104 complete weeks (always show all 104 weeks)
+    const completeData = generate104Weeks(activityStatsData);
+
     // Determine how many weeks to show based on screen width
     let weeksToShow = 52; // Default: 1 year
     if (window.innerWidth < 768) {
-        weeksToShow = 4; // Mobile: 1 month
+        weeksToShow = 13; // Mobile: ~3 months
     } else if (window.innerWidth < 1200) {
         weeksToShow = 26; // Tablet: 6 months
     }
 
-    const recentData = activityStatsData.slice(-weeksToShow);
+    const recentData = completeData.slice(-weeksToShow);
 
     const labels = recentData.map(s => {
         const isRamadan = ramadanWeeks.has(s.week);
-        return isRamadan ? `${s.week} 🌙` : s.week;
+        return isRamadan ? `🌙 ${s.week}` : s.week;
     });
 
     activityBarChartInstance = new Chart(ctx, {
@@ -3750,13 +3919,13 @@ function renderActivityBarChart() {
                     stack: 'stack0'
                 },
                 {
-                    label: 'Late (Orange)',
+                    label: 'Late',
                     data: recentData.map(s => s.late),
                     backgroundColor: '#ff8c00',
                     stack: 'stack0'
                 },
                 {
-                    label: 'On Time (Green)',
+                    label: 'On Time',
                     data: recentData.map(s => s.on_time),
                     backgroundColor: '#27ae60',
                     stack: 'stack0'
@@ -3811,12 +3980,12 @@ function renderActivityBarChart() {
 
 // Expand prayer chart to fullscreen
 document.getElementById('expandPrayerChart').addEventListener('click', () => {
-    showFullscreenChart('Prayer Statistics - 2 Years Trend (104 weeks)', prayerStatsData, 'prayer');
+    showFullscreenChart("Prayer Statistics - 2 Years' Histogram", prayerStatsData, 'prayer');
 });
 
 // Expand activity chart to fullscreen
 document.getElementById('expandActivityChart').addEventListener('click', () => {
-    showFullscreenChart('Daily Activities Statistics - 2 Years Trend (104 weeks)', activityStatsData, 'activity');
+    showFullscreenChart("Daily Activities Statistics - 2 Years' Histogram", activityStatsData, 'activity');
 });
 
 // Show fullscreen chart
@@ -3834,9 +4003,12 @@ function showFullscreenChart(title, data, type) {
 
     const isDarkMode = document.body.classList.contains('dark-mode');
 
-    const labels = data.map(s => {
+    // Generate 104 complete weeks for fullscreen view
+    const completeData = generate104Weeks(data);
+
+    const labels = completeData.map(s => {
         const isRamadan = ramadanWeeks.has(s.week);
-        return isRamadan ? `${s.week} 🌙` : s.week;
+        return isRamadan ? `🌙 ${s.week}` : s.week;
     });
 
     fullscreenChartInstance = new Chart(canvas, {
@@ -3846,19 +4018,19 @@ function showFullscreenChart(title, data, type) {
             datasets: [
                 {
                     label: 'Not Done',
-                    data: data.map(s => s.not_done),
+                    data: completeData.map(s => s.not_done),
                     backgroundColor: '#6c757d',
                     stack: 'stack0'
                 },
                 {
-                    label: 'Late (Orange)',
-                    data: data.map(s => s.late),
+                    label: 'Late',
+                    data: completeData.map(s => s.late),
                     backgroundColor: '#ff8c00',
                     stack: 'stack0'
                 },
                 {
-                    label: 'On Time (Green)',
-                    data: data.map(s => s.on_time),
+                    label: 'On Time',
+                    data: completeData.map(s => s.on_time),
                     backgroundColor: '#27ae60',
                     stack: 'stack0'
                 }

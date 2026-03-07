@@ -17,7 +17,9 @@
 
         <div id="nextPrayerCard" class="next-prayer-card" style="display: none;">
             <div class="next-prayer-label">Next Prayer</div>
-            <div class="next-prayer-name"></div>
+            <div class="next-prayer-name">
+                <span id="ramadanMoonCard" class="ramadan-moon-card" style="display: none;">🌙</span>
+            </div>
             <div class="next-prayer-time"></div>
             <div class="next-prayer-countdown"></div>
         </div>
@@ -51,7 +53,7 @@
                 🧎 Go Today (<br>
                 <span id="todayDate" class="btn-date"></span>)
             </button>
-            <button id="calendarBtn" class="nav-btn calendar-btn">
+            <button id="calendarBtn" class="nav-btn calendar-btn" style="opacity: 0.7;">
                 📅 Calendar (<br>
                 <span id="currentDate" class="btn-date"></span>)
             </button>
@@ -424,7 +426,7 @@
                         </div>
 
                         <div class="stats-card stats-card-large">
-                            <h4>2 Years Trend (104 weeks)</h4>
+                            <h4>2 Years' Histogram</h4>
                             <div style="position: relative;">
                                 <canvas id="prayerBarChart"></canvas>
                                 <button id="expandPrayerChart" class="expand-chart-btn" title="View fullscreen">
@@ -446,7 +448,7 @@
                         </div>
 
                         <div class="stats-card stats-card-large">
-                            <h4>2 Years Trend (104 weeks)</h4>
+                            <h4>2 Years' Histogram</h4>
                             <div style="position: relative;">
                                 <canvas id="activityBarChart"></canvas>
                                 <button id="expandActivityChart" class="expand-chart-btn" title="View fullscreen">
@@ -469,8 +471,11 @@
         </div>
 
         <footer>
-            <img src="logo.png" alt="Athan Center logo" class="app-logo">
-            <p>© 2025 Athan Center - 3.3</p>
+            <div class="footer-content">
+                <span id="ramadanMoonFooter" class="ramadan-moon-footer" style="display: none;">🌙</span>
+                <img src="logo.png" alt="Athan Center logo" class="app-logo">
+                <p>© 2025 Athan Center - 3.5</p>
+            </div>
         </footer>
     </div>
 

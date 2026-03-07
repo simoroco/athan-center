@@ -883,6 +883,29 @@ app.get('/api/prayer-checks/:date', (req, res) => {
     }
 });
 
+// GET - Retrieve prayer checks for a year range
+app.get('/api/prayer-checks-range', (req, res) => {
+    try {
+        const { year } = req.query;
+        if (!year) {
+            return res.status(400).json({ error: 'year parameter is required' });
+        }
+
+        const startDate = `${year}-01-01`;
+        const endDate = `${year}-12-31`;
+
+        const checks = db.prepare(`
+            SELECT date, prayer_name, checked 
+            FROM prayer_checks 
+            WHERE date >= ? AND date <= ?
+        `).all(startDate, endDate);
+
+        res.json({ success: true, checks });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // POST - Toggle prayer check
 // Supports 3 states: 0 (unchecked) → 2 (orange) → 1 (green) → 0 (unchecked)
 app.post('/api/prayer-checks/toggle', (req, res) => {
@@ -984,6 +1007,7 @@ app.post('/api/daily-activities/toggle', (req, res) => {
 // Function to fetch Hijri dates from API
 async function fetchHijriDates(startDate, endDate) {
     try {
+        log(`📅 Fetching Hijri dates from ${formatDateLocal(startDate)} to ${formatDateLocal(endDate)}`);
         const dates = [];
         const current = new Date(startDate);
         const end = new Date(endDate);
@@ -991,29 +1015,40 @@ async function fetchHijriDates(startDate, endDate) {
         let errorCount = 0;
 
         while (current <= end) {
-            const timestamp = Math.floor(current.getTime() / 1000);
+            const dateStr = formatDateLocal(current);
+            const [year, month, day] = dateStr.split('-');
+
             try {
-                const response = await axios.get(`https://api.aladhan.com/v1/gToH/${timestamp}`, {
-                    timeout: 5000
-                });
-                if (response.data && response.data.data && response.data.data.hijri) {
+                // Use gToH endpoint with DD-MM-YYYY format
+                const url = `https://api.aladhan.com/v1/gToH/${day}-${month}-${year}`;
+                const response = await axios.get(url, { timeout: 5000 });
+
+                if (response.data && response.data.code === 200 && response.data.data && response.data.data.hijri) {
                     const hijri = response.data.data.hijri;
-                    const gregorianDate = formatDateLocal(current);
 
                     dates.push({
-                        gregorian_date: gregorianDate,
+                        gregorian_date: dateStr,
                         hijri_year: parseInt(hijri.year),
                         hijri_month: parseInt(hijri.month.number),
                         hijri_day: parseInt(hijri.day),
                         hijri_month_name: hijri.month.en,
-                        is_ramadan: hijri.month.number === '9' ? 1 : 0
+                        is_ramadan: hijri.month.number === 9 || hijri.month.number === '9' ? 1 : 0
                     });
                     successCount++;
+
+                    // Log first successful fetch
+                    if (successCount === 1) {
+                        log(`✅ First Hijri date fetched: ${dateStr} = ${hijri.day} ${hijri.month.en} ${hijri.year} (Ramadan: ${hijri.month.number === 9 || hijri.month.number === '9'})`);
+                    }
                 }
-                // Rate limiting: wait 500ms between requests to avoid 429 errors
-                await new Promise(resolve => setTimeout(resolve, 500));
+                // Rate limiting: wait 100ms between requests
+                await new Promise(resolve => setTimeout(resolve, 100));
             } catch (error) {
                 errorCount++;
+                // Log first error with details
+                if (errorCount === 1) {
+                    logError(`❌ First Hijri API error for ${dateStr}:`, error.message);
+                }
                 // Only log every 50th error to avoid spam
                 if (errorCount % 50 === 0) {
                     logError(`Hijri API errors: ${errorCount} failed, ${successCount} succeeded`);
@@ -1026,10 +1061,10 @@ async function fetchHijriDates(startDate, endDate) {
             current.setDate(current.getDate() + 1);
         }
 
-        log(`Hijri dates fetch completed: ${successCount} succeeded, ${errorCount} failed`);
+        log(`✅ Hijri dates fetch completed: ${successCount} succeeded, ${errorCount} failed out of ${successCount + errorCount} total`);
         return dates;
     } catch (error) {
-        logError('Error in fetchHijriDates:', error);
+        logError('❌ Error in fetchHijriDates:', error);
         return [];
     }
 }
@@ -1039,12 +1074,16 @@ async function updateHijriDates() {
     try {
         log('🌙 Starting Hijri dates update...');
 
-        // Get dates for next 2 years
+        // Get dates for 2 years in the past and 1 year in the future
         const today = new Date();
-        const twoYearsLater = new Date();
-        twoYearsLater.setFullYear(today.getFullYear() + 2);
+        const twoYearsAgo = new Date();
+        twoYearsAgo.setFullYear(today.getFullYear() - 2);
+        const oneYearLater = new Date();
+        oneYearLater.setFullYear(today.getFullYear() + 1);
 
-        const hijriDates = await fetchHijriDates(today, twoYearsLater);
+        log(`📆 Date range: ${formatDateLocal(twoYearsAgo)} to ${formatDateLocal(oneYearLater)}`);
+
+        const hijriDates = await fetchHijriDates(twoYearsAgo, oneYearLater);
 
         if (hijriDates.length > 0) {
             const insertStmt = db.prepare(`
@@ -1053,6 +1092,7 @@ async function updateHijriDates() {
                 VALUES (?, ?, ?, ?, ?, ?)
             `);
 
+            let ramadanCount = 0;
             hijriDates.forEach(date => {
                 insertStmt.run(
                     date.gregorian_date,
@@ -1062,14 +1102,20 @@ async function updateHijriDates() {
                     date.hijri_month_name,
                     date.is_ramadan
                 );
+                if (date.is_ramadan === 1) ramadanCount++;
             });
 
-            log(`✅ Hijri dates updated successfully: ${hijriDates.length} dates inserted`);
+            log(`✅ Hijri dates updated successfully: ${hijriDates.length} dates inserted (${ramadanCount} Ramadan days)`);
+
+            // Verify data in database
+            const dbCount = db.prepare('SELECT COUNT(*) as count FROM hijri_dates').get();
+            const ramadanDbCount = db.prepare('SELECT COUNT(*) as count FROM hijri_dates WHERE is_ramadan = 1').get();
+            log(`📊 Database verification: ${dbCount.count} total dates, ${ramadanDbCount.count} Ramadan dates`);
         } else {
             log('⚠️ No Hijri dates fetched');
         }
     } catch (error) {
-        logError('Error updating Hijri dates:', error);
+        logError('❌ Error updating Hijri dates:', error);
     }
 }
 
@@ -1084,6 +1130,17 @@ app.get('/api/hijri/ramadan-weeks', (req, res) => {
         `).all();
 
         res.json({ success: true, ramadan_dates: ramadanDates });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// POST - Manual trigger for Hijri dates update (for testing)
+app.post('/api/hijri/update', async (req, res) => {
+    try {
+        log('🔧 Manual Hijri update triggered');
+        await updateHijriDates();
+        res.json({ success: true, message: 'Hijri dates update completed' });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -1277,8 +1334,8 @@ app.get('/api/statistics/export-excel', async (req, res) => {
             { header: 'Year', key: 'year', width: 10 },
             { header: 'Week Number', key: 'weekNumber', width: 15 },
             { header: 'Not Done', key: 'not_done', width: 12 },
-            { header: 'On Time (Green)', key: 'on_time', width: 18 },
-            { header: 'Late (Orange)', key: 'late', width: 15 },
+            { header: 'On Time', key: 'on_time', width: 18 },
+            { header: 'Late', key: 'late', width: 15 },
             { header: 'Total Prayers', key: 'total_prayers', width: 15 },
             { header: '% On Time', key: 'on_time_percent', width: 12 },
             { header: '% Completed', key: 'total_completed_percent', width: 15 },
@@ -1314,8 +1371,8 @@ app.get('/api/statistics/export-excel', async (req, res) => {
             { header: 'Year', key: 'year', width: 10 },
             { header: 'Week Number', key: 'weekNumber', width: 15 },
             { header: 'Not Done', key: 'not_done', width: 12 },
-            { header: 'On Time (Green)', key: 'on_time', width: 18 },
-            { header: 'Late (Orange)', key: 'late', width: 15 },
+            { header: 'On Time', key: 'on_time', width: 18 },
+            { header: 'Late', key: 'late', width: 15 },
             { header: 'Total Activities', key: 'total_activities', width: 18 },
             { header: '% On Time', key: 'on_time_percent', width: 12 },
             { header: '% Completed', key: 'total_completed_percent', width: 15 },
@@ -2911,12 +2968,8 @@ app.listen(PORT, '0.0.0.0', () => {
         }
     });
 
-    // Load initial Hijri dates on startup
-    updateHijriDates().then(() => {
-        log('Initial Hijri dates loaded');
-    }).catch(error => {
-        logError('Failed to load initial Hijri dates:', error);
-    });
+    // Hijri dates will be loaded by the daily cron job at midnight
+    log('Hijri dates will be updated by daily cron job');
 
     // Log Friday Quran status at startup
     log('\n========== FRIDAY QURAN STATUS AT STARTUP ==========');

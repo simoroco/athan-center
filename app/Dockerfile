@@ -1,17 +1,7 @@
 FROM node:20-alpine
 
-# Install dependencies for audio and build tools
-RUN apk add --no-cache \
-    alsa-utils \
-    alsa-lib \
-    alsa-plugins \
-    alsa-plugins-pulse \
-    sox \
-    python3 \
-    make \
-    g++ && \
-    # Configure sox to use ALSA directly (not libao)
-    echo "Configuring audio drivers..."
+# Install minimal dependencies (skip audio packages if not available)
+RUN echo "Configuring minimal dependencies..."
 
 # Création du répertoire de l'application
 WORKDIR /app
