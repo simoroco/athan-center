@@ -348,12 +348,18 @@ async function checkSkipNextStatus() {
             muteType = 'manual';
         }
 
-        // Check if next prayer is disabled in general settings
+        // Check if next prayer is disabled in schedule matrix for the specific day
         if (nextPrayer && nextPrayer.prayer_name) {
-            const settingsResponse = await fetch(`${API_BASE}/api/prayer-settings/${nextPrayer.prayer_name}`);
-            const settingsData = await settingsResponse.json();
+            const scheduleResponse = await fetch(`${API_BASE}/api/prayer-schedule`);
+            const schedule = await scheduleResponse.json();
+            // Determine which day the next prayer falls on
+            const nextPrayerDate = nextPrayer.date || todayStr;
+            const nextPrayerDateObj = new Date(nextPrayerDate + 'T00:00:00');
+            const jsDay = nextPrayerDateObj.getDay(); // 0=Sunday
+            const dayIndex = (jsDay + 6) % 7; // Convert to matrix: 0=Monday...6=Sunday
+            const entry = schedule.find(s => s.prayer_name === nextPrayer.prayer_name && s.day_of_week === dayIndex);
 
-            if (settingsData && settingsData.enabled === 0) {
+            if (entry && entry.enabled === 0) {
                 isMuted = true;
                 muteType = 'general';
                 mutedPrayerName = nextPrayer.prayer_name;
@@ -3036,11 +3042,16 @@ async function updateWeekdayMuteBanner() {
             hasOtherMuteActive = true;
         }
 
-        // Check if next prayer is disabled in general settings
+        // Check if next prayer is disabled in schedule matrix for the specific day
         if (!hasOtherMuteActive && nextPrayer && nextPrayer.prayer_name) {
-            const settingsResponse = await fetch(`${API_BASE}/api/prayer-settings/${nextPrayer.prayer_name}`);
-            const settingsData = await settingsResponse.json();
-            if (settingsData && settingsData.enabled === 0) {
+            const scheduleResponse = await fetch(`${API_BASE}/api/prayer-schedule`);
+            const schedule = await scheduleResponse.json();
+            const nextPrayerDate = nextPrayer.date || formatDateLocal(today);
+            const nextPrayerDateObj = new Date(nextPrayerDate + 'T00:00:00');
+            const jsDay = nextPrayerDateObj.getDay();
+            const dayIndex = (jsDay + 6) % 7;
+            const entry = schedule.find(s => s.prayer_name === nextPrayer.prayer_name && s.day_of_week === dayIndex);
+            if (entry && entry.enabled === 0) {
                 hasOtherMuteActive = true;
             }
         }

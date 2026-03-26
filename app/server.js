@@ -1706,18 +1706,26 @@ app.post('/api/settings', (req, res) => {
 });
 
 // GET - Retrieve per-prayer settings (now uses prayer_schedule matrix)
-// Returns enabled=1 if prayer is enabled for ALL days, 0 otherwise
+// Optional query param ?day=<0-6> to check a specific day (0=Monday...6=Sunday)
+// Without ?day, checks the current day of the week
 app.get('/api/prayer-settings', (req, res) => {
     try {
         const mainPrayers = ['Fajr | Sobh', 'Dohr', 'Asr', 'Maghrib', 'Isha'];
+        // Determine which day to check
+        let dayIndex;
+        if (req.query.day !== undefined) {
+            dayIndex = parseInt(req.query.day);
+        } else {
+            const jsDay = new Date().getDay(); // 0=Sunday
+            dayIndex = (jsDay + 6) % 7; // Convert to matrix: 0=Monday...6=Sunday
+        }
         const settings = mainPrayers.map(prayerName => {
-            // A prayer is considered "enabled" if it's enabled for ALL 7 days
-            const disabledCount = db.prepare(
-                'SELECT COUNT(*) as count FROM prayer_schedule WHERE prayer_name = ? AND enabled = 0'
-            ).get(prayerName).count;
+            const entry = db.prepare(
+                'SELECT enabled FROM prayer_schedule WHERE prayer_name = ? AND day_of_week = ?'
+            ).get(prayerName, dayIndex);
             return {
                 prayer_name: prayerName,
-                enabled: disabledCount === 0 ? 1 : 0
+                enabled: entry ? entry.enabled : 1
             };
         });
         res.json(settings);
@@ -1727,17 +1735,25 @@ app.get('/api/prayer-settings', (req, res) => {
 });
 
 // GET - Retrieve specific prayer settings (now uses prayer_schedule matrix)
-// Returns enabled=1 if prayer is enabled for ALL days, 0 otherwise
+// Optional query param ?day=<0-6> to check a specific day (0=Monday...6=Sunday)
+// Without ?day, checks the current day of the week
 app.get('/api/prayer-settings/:prayerName', (req, res) => {
     try {
         const { prayerName } = req.params;
-        // A prayer is considered "enabled" if it's enabled for ALL 7 days
-        const disabledCount = db.prepare(
-            'SELECT COUNT(*) as count FROM prayer_schedule WHERE prayer_name = ? AND enabled = 0'
-        ).get(prayerName).count;
+        // Determine which day to check
+        let dayIndex;
+        if (req.query.day !== undefined) {
+            dayIndex = parseInt(req.query.day);
+        } else {
+            const jsDay = new Date().getDay(); // 0=Sunday
+            dayIndex = (jsDay + 6) % 7; // Convert to matrix: 0=Monday...6=Sunday
+        }
+        const entry = db.prepare(
+            'SELECT enabled FROM prayer_schedule WHERE prayer_name = ? AND day_of_week = ?'
+        ).get(prayerName, dayIndex);
         res.json({
             prayer_name: prayerName,
-            enabled: disabledCount === 0 ? 1 : 0
+            enabled: entry ? entry.enabled : 1
         });
     } catch (error) {
         res.status(500).json({ error: error.message });
