@@ -247,20 +247,21 @@ header h1 {
     font-family: 'Consolas', 'Courier New', monospace;
 }
 
-.prayer-check-mark {
-    color: #2a6dd1;
+.prayer-check-mark,
+.prayer-redcheck-mark {
     font-weight: bold;
     font-size: 1.5rem;
     line-height: 1;
     margin-left: 8px;
+    font-family: 'Apple Braille', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.prayer-check-mark {
+    color: #2a6dd1;
 }
 
 .prayer-redcheck-mark {
     color: #ff8c00;
-    font-weight: bold;
-    font-size: 1.5rem;
-    line-height: 1;
-    margin-left: 8px;
 }
 
 .prayer-time {
@@ -1707,6 +1708,23 @@ body.dark-mode .warning-btn {
 body.dark-mode .warning-btn:hover {
     background: rgba(94, 36, 36, 0.8);
     color: #fecaca;
+}
+
+/* Settings modal: red help texts and warnings → light red in dark mode */
+body.dark-mode #settingsModal [style*="color: #8B0000"],
+body.dark-mode #settingsModal [style*="color:#8B0000"],
+body.dark-mode #settingsModal [style*="color: #8b0000"],
+body.dark-mode #settingsModal [style*="color: rgb(139, 0, 0)"],
+body.dark-mode #settingsModal .help-text[style*="#8B0000"],
+body.dark-mode #settingsModal .help-text[style*="#8b0000"],
+body.dark-mode #volumeWarning,
+body.dark-mode #fajrVolumeWarning,
+body.dark-mode .audio-output-warning,
+body.dark-mode #serverAudioSupport[style*="#8B0000"],
+body.dark-mode #serverAudioSupport[style*="#8b0000"],
+body.dark-mode #serverAudioSupport[style*="rgb(139, 0, 0)"],
+body.dark-mode #serverAudioSupport[style*="rgb(139,0,0)"] {
+    color: #ef4444 !important;
 }
 
 /* ===== Floating Audio Notification Banner ===== */
