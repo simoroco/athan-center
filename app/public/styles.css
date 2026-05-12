@@ -10,12 +10,29 @@ html {
     -ms-touch-action: pan-x pan-y;
 }
 
+:root {
+    /* The image's gold door (arch + base) is ~41.4% of image width (425/1024),
+       centered horizontally, with the arch top at ~30% of image height (460/1536).
+       We scale the bg so the door width equals the container content width,
+       then shift vertically so the arch top aligns with the next-prayer-card top.
+       Door-width capped at 480px so content fits a desktop viewport without scroll;
+       image-width grows to viewport size to keep the mosaic borders covering edges. */
+    --door-width: min(480px, calc(100vw - 20px));
+    --bg-image-width: max(calc(var(--door-width) * 2.41), 100vw);
+    --bg-image-height: calc(var(--bg-image-width) * 1.5);
+    --bg-y-offset: calc(20px - var(--bg-image-height) * 0.30);
+}
+
 body {
     font-family: 'Apple Braille', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #F0F4FF;
+    background: #F0F4FF url('background.png') no-repeat;
+    background-size: var(--bg-image-width) auto;
+    background-position: center var(--bg-y-offset);
+    background-attachment: scroll;
     min-height: 100vh;
-    padding: 20px;
+    padding: 10px;
     color: #333;
+    overflow-x: hidden;
     touch-action: pan-x pan-y;
     -webkit-text-size-adjust: 100%;
     -moz-text-size-adjust: 100%;
@@ -23,12 +40,12 @@ body {
 }
 
 .container {
-    max-width: 800px;
+    max-width: var(--door-width);
     margin: 0 auto;
-    background: white;
-    border-radius: 20px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    overflow: hidden;
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
+    overflow: visible;
 }
 
 header {
@@ -59,23 +76,27 @@ header h1 {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px;
-    gap: 10px;
+    padding: 8px 15px;
+    gap: 8px;
 }
 
 .nav-btn {
-    padding: 10px 20px;
-    background: rgba(248, 249, 250, 0.65);
-    color: #495057;
-    border: 1px solid #e9ecef;
-    border-radius: 12px;
+    padding: 8px 14px;
+    background: rgba(255, 255, 255, 0.4);
+    color: #1a1a1a;
+    text-shadow:
+        0 0 3px rgba(255, 255, 255, 0.95),
+        0 0 6px rgba(255, 255, 255, 0.7),
+        0 1px 3px rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    border-radius: 10px;
     cursor: pointer;
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 600;
     transition: all 0.3s;
     flex: 1;
-    min-width: 120px;
-    min-height: 68px;
+    min-width: 0;
+    min-height: 48px;
     text-align: center;
     white-space: nowrap;
     line-height: 1.5;
@@ -86,8 +107,8 @@ header h1 {
 }
 
 .nav-btn:hover {
-    background: rgba(233, 236, 239, 0.85);
-    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.55);
+    transform: translateY(-1px);
 }
 
 .nav-btn .nav-btn-icon {
@@ -126,21 +147,38 @@ header h1 {
 }
 
 .next-prayer-card {
-    background: linear-gradient(135deg, #2a6dd1 0%, #114bb2 100%);
-    color: white;
-    padding: 30px;
+    background: transparent;
+    color: #1a1a1a;
+    padding: calc(var(--door-width) * 0.04) calc(var(--door-width) * 0.03);
     text-align: center;
-    margin: 20px;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(42, 109, 209, 0.3);
+    margin: 10px auto;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
     transition: all 0.3s ease;
     position: relative;
+    width: 100%;
+    max-width: var(--door-width);
+    aspect-ratio: 1.45 / 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-shadow:
+        0 0 4px rgba(255, 255, 255, 0.95),
+        0 0 8px rgba(255, 255, 255, 0.9),
+        0 0 14px rgba(255, 255, 255, 0.7),
+        0 0 22px rgba(255, 255, 255, 0.5),
+        0 2px 4px rgba(0, 0, 0, 0.3);
+    -webkit-text-stroke: 0.6px rgba(255, 255, 255, 0.5);
+    paint-order: stroke fill;
+    font-weight: 700;
 }
 
 .next-prayer-card.playing-athan {
     animation: pulsate-glow 2s ease-in-out infinite;
-    box-shadow: 0 0 30px rgba(42, 109, 209, 0.8), 0 10px 40px rgba(59, 130, 246, 0.5);
     cursor: pointer;
+    filter: drop-shadow(0 0 30px rgba(212, 175, 55, 0.9));
 }
 
 @keyframes pulsate-glow {
@@ -148,37 +186,41 @@ header h1 {
     0%,
     100% {
         transform: scale(1);
-        box-shadow: 0 0 30px rgba(42, 109, 209, 0.8), 0 10px 40px rgba(59, 130, 246, 0.5);
+        filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.8)) drop-shadow(0 0 40px rgba(212, 175, 55, 0.5));
     }
 
     50% {
         transform: scale(1.02);
-        box-shadow: 0 0 50px rgba(42, 109, 209, 1), 0 10px 50px rgba(59, 130, 246, 0.7);
+        filter: drop-shadow(0 0 40px rgba(212, 175, 55, 1)) drop-shadow(0 0 60px rgba(212, 175, 55, 0.7));
     }
 }
 
 .next-prayer-label {
-    font-size: 1rem;
-    opacity: 0.9;
-    margin-bottom: 10px;
+    font-size: calc(var(--door-width) * 0.04);
+    font-weight: 600;
+    opacity: 0.95;
+    margin-bottom: calc(var(--door-width) * 0.01);
 }
 
 .next-prayer-name {
-    font-size: 3.4rem;
-    font-weight: 700;
-    margin-bottom: 10px;
+    font-size: calc(var(--door-width) * 0.13);
+    font-weight: 800;
+    margin-bottom: calc(var(--door-width) * 0.01);
     font-family: 'Consolas', 'Courier New', monospace;
+    line-height: 1.05;
 }
 
 .next-prayer-time {
-    font-size: 3rem;
-    font-weight: 400;
-    margin-bottom: 10px;
+    font-size: calc(var(--door-width) * 0.12);
+    font-weight: 700;
+    margin-bottom: calc(var(--door-width) * 0.01);
+    line-height: 1.05;
 }
 
 .next-prayer-countdown {
-    font-size: 1.2rem;
-    opacity: 0.9;
+    font-size: calc(var(--door-width) * 0.04);
+    font-weight: 600;
+    opacity: 0.95;
 }
 
 .next-prayer-card.playing-athan .next-prayer-name,
@@ -190,11 +232,11 @@ header h1 {
 
     0%,
     100% {
-        text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        text-shadow: 0 0 10px rgba(212, 175, 55, 0.6), 0 2px 6px rgba(0, 0, 0, 0.3);
     }
 
     50% {
-        text-shadow: 0 0 20px rgba(255, 255, 255, 0.9), 0 0 30px rgba(255, 255, 255, 0.6);
+        text-shadow: 0 0 20px rgba(212, 175, 55, 0.9), 0 0 35px rgba(212, 175, 55, 0.6), 0 2px 6px rgba(0, 0, 0, 0.3);
     }
 }
 
@@ -220,31 +262,36 @@ header h1 {
 }
 
 .prayers-list {
-    padding: 20px;
+    padding: 10px 15px;
+    background: transparent;
 }
 
 .prayer-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px;
-    margin-bottom: 5px;
-    background: rgba(248, 249, 250, 0.65);
-    border: 1px solid #e9ecef;
-    border-radius: 12px;
+    padding: 10px 16px;
+    margin-bottom: 4px;
+    background: rgba(255, 255, 255, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    border-radius: 10px;
     transition: all 0.3s;
 }
 
 .prayer-item:hover {
-    background: rgba(233, 236, 239, 0.85);
-    transform: translateX(5px);
+    background: rgba(255, 255, 255, 0.55);
+    transform: translateX(3px);
 }
 
 .prayer-name {
     font-size: 1.3rem;
     font-weight: 700;
-    color: #495057;
+    color: #1a1a1a;
     font-family: 'Consolas', 'Courier New', monospace;
+    text-shadow:
+        0 0 3px rgba(255, 255, 255, 0.95),
+        0 0 6px rgba(255, 255, 255, 0.7),
+        0 1px 3px rgba(0, 0, 0, 0.25);
 }
 
 .prayer-check-mark,
@@ -266,8 +313,12 @@ header h1 {
 
 .prayer-time {
     font-size: 1.5rem;
-    font-weight: 400;
+    font-weight: 600;
     color: #2a6dd1;
+    text-shadow:
+        0 0 3px rgba(255, 255, 255, 0.95),
+        0 0 6px rgba(255, 255, 255, 0.7),
+        0 1px 3px rgba(0, 0, 0, 0.25);
 }
 
 .prayer-meta {
@@ -303,7 +354,8 @@ header h1 {
 
 /* Daily Activities Section */
 .daily-activities-section {
-    padding: 20px;
+    padding: 6px 15px;
+    background: transparent;
 }
 
 .daily-activities-content {
@@ -317,18 +369,18 @@ header h1 {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 10px 20px;
-    min-height: 68px;
-    background: rgba(248, 249, 250, 0.65);
-    border: 1px solid #e9ecef;
-    border-radius: 12px;
+    padding: 6px 12px;
+    min-height: 48px;
+    background: rgba(255, 255, 255, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    border-radius: 10px;
     transition: all 0.3s;
     min-width: 0;
 }
 
 .activity-item:hover {
-    background: rgba(233, 236, 239, 0.85);
-    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.55);
+    transform: translateY(-1px);
 }
 
 .activity-item.past {
@@ -348,39 +400,47 @@ header h1 {
 .activity-name {
     font-size: 1.3rem;
     font-weight: 700;
-    color: #495057;
+    color: #1a1a1a;
     font-family: 'Consolas', 'Courier New', monospace;
+    text-shadow:
+        0 0 3px rgba(255, 255, 255, 0.95),
+        0 0 6px rgba(255, 255, 255, 0.7),
+        0 1px 3px rgba(0, 0, 0, 0.25);
 }
 
 .actions {
     display: flex;
-    gap: 10px;
-    padding: 20px;
+    gap: 8px;
+    padding: 8px 15px 15px;
     flex-wrap: wrap;
 }
 
 .action-btn {
     flex: 1;
-    padding: 10px 20px;
-    min-height: 68px;
-    font-size: 1rem;
-    border: 1px solid #e9ecef;
-    border-radius: 12px;
+    padding: 8px 14px;
+    min-height: 48px;
+    font-size: 0.95rem;
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    border-radius: 10px;
     cursor: pointer;
     transition: all 0.3s;
     font-weight: 600;
-    min-width: 200px;
+    min-width: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    background: rgba(248, 249, 250, 0.65);
-    color: #495057;
+    background: rgba(255, 255, 255, 0.4);
+    color: #1a1a1a;
+    text-shadow:
+        0 0 3px rgba(255, 255, 255, 0.95),
+        0 0 6px rgba(255, 255, 255, 0.7),
+        0 1px 3px rgba(0, 0, 0, 0.25);
 }
 
 .action-btn:hover {
-    background: rgba(233, 236, 239, 0.85);
-    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.55);
+    transform: translateY(-1px);
 }
 
 .action-btn .action-btn-icon {
@@ -389,14 +449,14 @@ header h1 {
 }
 
 .warning-btn {
-    background: rgba(254, 226, 226, 0.7);
+    background: rgba(254, 226, 226, 0.4);
     color: #b91c1c;
-    border: 1px solid #fecaca;
-    box-shadow: 0 4px 8px rgba(220, 38, 38, 0.08);
+    border: 1px solid rgba(254, 202, 202, 0.7);
+    box-shadow: none;
 }
 
 .warning-btn:hover {
-    background: rgba(254, 202, 202, 0.85);
+    background: rgba(254, 202, 202, 0.55);
     color: #991b1b;
 }
 
@@ -470,7 +530,9 @@ footer {
 }
 
 .modal-content {
-    background-color: white;
+    background-color: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     margin: 50px auto;
     padding: 30px;
     border-radius: 15px;
@@ -1020,33 +1082,33 @@ input:checked+.slider:before {
 
 /* Skip button disabled state */
 .action-btn.disabled {
-    background: #9ca3af !important;
+    background: transparent !important;
     cursor: not-allowed !important;
-    opacity: 0.6;
+    opacity: 0.5;
 }
 
 .action-btn.disabled:hover {
     transform: none !important;
-    background: #9ca3af !important;
+    background: transparent !important;
 }
 
 /* Mute button when already activated (muted): same look as normal action button + red text */
 .action-btn.warning-btn.disabled,
 .action-btn.warning-btn.disabled:hover {
-    background: rgba(248, 249, 250, 0.65) !important;
+    background: transparent !important;
     color: #b91c1c !important;
-    border: 1px solid #e9ecef !important;
+    border: none !important;
     cursor: not-allowed !important;
-    opacity: 0.6;
+    opacity: 0.5;
     transform: none !important;
     box-shadow: none !important;
 }
 
 body.dark-mode .action-btn.warning-btn.disabled,
 body.dark-mode .action-btn.warning-btn.disabled:hover {
-    background: rgba(45, 55, 72, 0.65) !important;
-    color: #fca5a5 !important;
-    border: 1px solid #4a5568 !important;
+    background: transparent !important;
+    color: #ef4444 !important;
+    border: none !important;
 }
 
 /* Grey out all buttons during audio playback */
@@ -1363,52 +1425,52 @@ button.audio-playing-disabled:hover {
    =========================== */
 
 body.dark-mode {
-    background: #0d1733;
+    background:
+        linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)),
+        url('background.png') no-repeat;
+    background-size: cover, var(--bg-image-width) auto;
+    background-position: center, center var(--bg-y-offset);
     color: #e4e6eb;
 }
 
 body.dark-mode .container {
-    background: #1c1e26;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
-}
-
-body.dark-mode header {
-    background: linear-gradient(135deg, #114bb2 0%, #1E3A8A 100%);
+    background: transparent;
+    box-shadow: none;
 }
 
 body.dark-mode .next-prayer-card {
-    background: linear-gradient(135deg, #114bb2 0%, #1E3A8A 100%);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    background: transparent;
+    box-shadow: none;
 }
 
 body.dark-mode .next-prayer-card.playing-athan {
-    box-shadow: 0 0 30px rgba(17, 75, 178, 0.8), 0 10px 40px rgba(30, 58, 138, 0.5);
+    box-shadow: none;
 }
 
 body.dark-mode .date-navigation button {
-    background: rgba(45, 55, 72, 0.65);
-    color: #e4e6eb;
-    border: 1px solid #4a5568;
+    background: rgba(30, 30, 40, 0.4);
+    color: #f0f0f0;
+    border: 1px solid rgba(255, 255, 255, 0.25);
 }
 
 body.dark-mode .date-navigation button:hover {
-    background: rgba(74, 85, 104, 0.85);
-    border-color: #718096;
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.4);
 }
 
 body.dark-mode .prayers-list {
-    background: #252830;
+    background: transparent;
 }
 
 body.dark-mode .prayer-item {
-    background: rgba(45, 55, 72, 0.65);
-    border: 1px solid #4a5568;
-    color: #e4e6eb;
+    background: rgba(30, 30, 40, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #f0f0f0;
 }
 
 body.dark-mode .prayer-item:hover {
-    background: rgba(58, 69, 86, 0.85);
-    border-color: #718096;
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.4);
 }
 
 body.dark-mode .prayer-name {
@@ -1440,17 +1502,18 @@ body.dark-mode .prayer-item.past:not(:has(.prayer-check-mark, .prayer-redcheck-m
 }
 
 body.dark-mode .daily-activities-section {
-    background: #252830;
+    background: transparent;
 }
 
 body.dark-mode .activity-item {
-    background: rgba(45, 55, 72, 0.65);
-    border: 1px solid #4a5568;
-    color: #e4e6eb;
+    background: rgba(30, 30, 40, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #f0f0f0;
 }
 
 body.dark-mode .activity-item:hover {
-    background: rgba(58, 69, 86, 0.85);
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.4);
 }
 
 body.dark-mode .activity-name {
@@ -1469,7 +1532,7 @@ body.dark-mode .settings-btn:hover {
 }
 
 body.dark-mode .modal-content {
-    background: #1c1e26;
+    background: rgba(28, 30, 38, 0.92);
     color: #e4e6eb;
 }
 
@@ -1690,24 +1753,25 @@ body.dark-mode .app-version {
 }
 
 body.dark-mode .action-btn {
-    background: rgba(45, 55, 72, 0.65);
-    border: 1px solid #4a5568;
-    color: #e4e6eb;
+    background: rgba(30, 30, 40, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #f0f0f0;
 }
 
 body.dark-mode .action-btn:hover {
-    background: rgba(74, 85, 104, 0.85);
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.4);
 }
 
 body.dark-mode .warning-btn {
-    background: rgba(74, 28, 28, 0.6);
-    color: #fca5a5;
-    border: 1px solid #5e2424;
+    background: rgba(74, 28, 28, 0.4);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.35);
 }
 
 body.dark-mode .warning-btn:hover {
-    background: rgba(94, 36, 36, 0.8);
-    color: #fecaca;
+    background: rgba(94, 36, 36, 0.55);
+    color: #ef4444;
 }
 
 /* Settings modal: red help texts and warnings → light red in dark mode */
