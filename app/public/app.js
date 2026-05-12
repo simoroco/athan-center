@@ -1986,7 +1986,7 @@ function updateDateButtons() {
         } else {
             prevLabel = ' Previous Day';
         }
-        prevDayBtn.innerHTML = `<span class="nav-btn-icon">⬅️</span><span class="nav-btn-label">${prevLabel}</span>`;
+        prevDayBtn.innerHTML = `<span class="nav-btn-icon"><svg class="nav-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></span><span class="nav-btn-label">${prevLabel}</span>`;
     }
 
     // Update nextDay button label
@@ -2001,7 +2001,7 @@ function updateDateButtons() {
         } else {
             nextLabel = 'Next Day ';
         }
-        nextDayBtn.innerHTML = `<span class="nav-btn-label">${nextLabel}</span><span class="nav-btn-icon">➡️</span>`;
+        nextDayBtn.innerHTML = `<span class="nav-btn-label">${nextLabel}</span><span class="nav-btn-icon"><svg class="nav-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>`;
     }
 
     // Update calendar button with natural labels
@@ -2021,7 +2021,7 @@ function updateDateButtons() {
         } else {
             calendarLabel = currentWeekday;
         }
-        calendarBtn.innerHTML = `<span class="nav-btn-icon">📅</span><span class="nav-btn-label"> ${calendarLabel} (<br></span><span class="btn-date">${currentDateStr}</span><span class="nav-btn-label">)</span>`;
+        calendarBtn.innerHTML = `<span class="nav-btn-icon">📅</span><span class="nav-btn-label"> ${calendarLabel} (</span><span class="btn-date">${currentDateStr}</span><span class="nav-btn-label">)</span>`;
     }
 
     // Disable todayBtn when viewing today's prayers
