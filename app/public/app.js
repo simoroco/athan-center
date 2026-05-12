@@ -2414,6 +2414,30 @@ function updatePrayerName(prayerName) {
 
     // Insert prayer name before ramadan span
     nameDiv.insertBefore(document.createTextNode(prayerNameText), ramadanSpan);
+
+    // Auto-fit: if the prayer name would wrap on a second line, shrink the
+    // font-size progressively until it fits on a single line.
+    fitPrayerNameOnOneLine(nameDiv);
+}
+
+// Shrink the .next-prayer-name font until its content fits on one line
+// (scrollWidth <= clientWidth). Reset to the CSS default first so it grows
+// back when the name is short again.
+function fitPrayerNameOnOneLine(nameDiv) {
+    if (!nameDiv) nameDiv = document.querySelector('.next-prayer-name');
+    if (!nameDiv) return;
+    nameDiv.style.fontSize = '';
+    requestAnimationFrame(() => {
+        const baseSize = parseFloat(getComputedStyle(nameDiv).fontSize) || 0;
+        if (!baseSize) return;
+        let size = baseSize;
+        let guard = 0;
+        while (nameDiv.scrollWidth > nameDiv.clientWidth + 1 && size > 10 && guard < 40) {
+            size *= 0.95;
+            nameDiv.style.fontSize = `${size}px`;
+            guard++;
+        }
+    });
 }
 
 // Hide the next prayer card — keep its space reserved so prayers-list and
