@@ -13,23 +13,58 @@
 </head>
 
 <body>
+    <!-- SVG icon sprite (Feather-style, monochrome, inherits currentColor) -->
+    <svg width="0" height="0" style="position:absolute;overflow:hidden" aria-hidden="true">
+        <defs>
+            <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></symbol>
+            <symbol id="i-beads" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="3.5" r="1.5" fill="currentColor"/><circle cx="12" cy="20.5" r="1.5" fill="currentColor"/><circle cx="3.5" cy="12" r="1.5" fill="currentColor"/><circle cx="20.5" cy="12" r="1.5" fill="currentColor"/></symbol>
+            <symbol id="i-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></symbol>
+            <symbol id="i-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></symbol>
+            <symbol id="i-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></symbol>
+            <symbol id="i-volume-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></symbol>
+            <symbol id="i-volume" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></symbol>
+            <symbol id="i-volume-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></symbol>
+            <symbol id="i-bar-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></symbol>
+            <symbol id="i-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></symbol>
+            <symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></symbol>
+            <symbol id="i-tool" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></symbol>
+            <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+            <symbol id="i-monitor" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></symbol>
+            <symbol id="i-type" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></symbol>
+            <symbol id="i-hourglass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12M6 22h12M6 2v4a6 6 0 0 0 12 0V2M6 22v-4a6 6 0 0 1 12 0v4"/></symbol>
+            <symbol id="i-timer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="10" y1="2" x2="14" y2="2"/><line x1="12" y1="14" x2="15" y2="11"/><circle cx="12" cy="14" r="8"/></symbol>
+            <symbol id="i-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></symbol>
+            <symbol id="i-mosque" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V10M21 21V10M3 21h18M12 2a4 4 0 0 1 4 4v4H8V6a4 4 0 0 1 4-4zM8 10v11M16 10v11M10 21v-4h4v4"/></symbol>
+            <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></symbol>
+            <symbol id="i-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
+            <symbol id="i-stop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><rect x="9" y="9" width="6" height="6" fill="currentColor"/></symbol>
+            <symbol id="i-terminal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></symbol>
+            <symbol id="i-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></symbol>
+            <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></symbol>
+            <symbol id="i-database" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></symbol>
+            <symbol id="i-expand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></symbol>
+            <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></symbol>
+            <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
+        </defs>
+    </svg>
+
     <div class="container">
 
         <div id="nextPrayerCard" class="next-prayer-card" style="display: none;">
             <div class="next-prayer-label">Next Prayer</div>
             <div class="next-prayer-name">
-                <span id="ramadanMoonCard" class="ramadan-moon-card" style="display: none;">🌙</span>
+                <span id="ramadanMoonCard" class="ramadan-moon-card" style="display: none;"><svg class="icon"><use href="#i-moon"/></svg></span>
             </div>
             <div class="next-prayer-time"></div>
             <div class="next-prayer-countdown"></div>
         </div>
 
         <div id="muteAlertBanner" class="mute-alert-banner" style="display: none;">
-            🔇 Next athan is muted
+            <svg class="icon"><use href="#i-volume-x"/></svg> Next athan is muted
         </div>
 
         <div id="weekdayMuteBanner" class="weekday-mute-banner" style="display: none;">
-            <span id="weekdayMuteText">🔇 All athans muted for today</span>
+            <span id="weekdayMuteText"><svg class="icon"><use href="#i-volume-x"/></svg> All athans muted for today</span>
         </div>
 
         <div class="prayers-list" id="prayersList">
@@ -46,10 +81,10 @@
         <div class="date-navigation">
             <button id="prevDay" class="nav-btn"><span class="nav-btn-icon"><svg class="nav-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></span><span class="nav-btn-label"> Previous Day</span></button>
             <button id="todayBtn" class="nav-btn">
-                <span class="nav-btn-icon">🧎</span><span class="nav-btn-label"> Go Today (<span id="todayDate" class="btn-date"></span>)</span>
+                <span class="nav-btn-icon"><svg class="icon"><use href="#i-home"/></svg></span><span class="nav-btn-label"> Go Today (<span id="todayDate" class="btn-date"></span>)</span>
             </button>
             <button id="calendarBtn" class="nav-btn calendar-btn" style="opacity: 0.7;">
-                <span class="nav-btn-icon">📅</span><span class="nav-btn-label"> Calendar (</span><span id="currentDate" class="btn-date"></span><span class="nav-btn-label">)</span>
+                <span class="nav-btn-icon"><svg class="icon"><use href="#i-calendar"/></svg></span><span class="nav-btn-label"> Calendar (</span><span id="currentDate" class="btn-date"></span><span class="nav-btn-label">)</span>
             </button>
             <button id="nextDay" class="nav-btn"><span class="nav-btn-label">Next Day </span><span class="nav-btn-icon"><svg class="nav-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span></button>
         </div>
@@ -58,7 +93,7 @@
         <div id="calendarModal" class="modal">
             <div class="modal-content calendar-modal-content">
                 <div class="calendar-header">
-                    <h2>📅 Select a date</h2>
+                    <h2><svg class="icon"><use href="#i-calendar"/></svg> Select a date</h2>
                     <span class="close" id="closeCalendar">&times;</span>
                 </div>
                 <div class="calendar-nav">
@@ -74,62 +109,62 @@
 
         <div class="actions">
             <button id="skipNextBtn" class="action-btn warning-btn" style="display: none;">
-                <span class="action-btn-icon">🔇</span><span class="action-btn-label"> Mute next Athan</span>
+                <span class="action-btn-icon"><svg class="icon"><use href="#i-volume-x"/></svg></span><span class="action-btn-label"> Mute next Athan</span>
             </button>
             <button id="statisticsBtn" class="action-btn">
-                <span class="action-btn-icon">📊</span><span class="action-btn-label"> History & Statistics</span>
+                <span class="action-btn-icon"><svg class="icon"><use href="#i-bar-chart"/></svg></span><span class="action-btn-label"> History & Statistics</span>
             </button>
             <button id="settingsBtn" class="action-btn">
-                <span class="action-btn-icon">⚙️</span><span class="action-btn-label"> Settings</span>
+                <span class="action-btn-icon"><svg class="icon"><use href="#i-settings"/></svg></span><span class="action-btn-label"> Settings</span>
             </button>
         </div>
 
         <div id="settingsModal" class="modal">
             <div class="modal-content">
                 <span class="close" id="closeSettings">&times;</span>
-                <h2>⚙️ Settings</h2>
+                <h2><svg class="icon"><use href="#i-settings"/></svg> Settings</h2>
                 <div class="dua-card">
-                    <span id="ramadanMoonFooter" class="ramadan-moon-footer" style="display: none;">🌙</span>
+                    <span id="ramadanMoonFooter" class="ramadan-moon-footer" style="display: none;"><svg class="icon icon-lg"><use href="#i-moon"/></svg></span>
                     <p class="dua-text arabic">لا تنسى أخاك في دعائك 🤲🙏</p>
                     <p class="dua-text english">Don't forget your brother in your du'a 🤲🙏</p>
                 </div><br><br>
 
                 <div class="settings-section settings-section-tight">
-                    <h3>🛠️ General</h3>
+                    <h3><svg class="icon"><use href="#i-tool"/></svg> General</h3>
                     <div class="update-info-card"
                         style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
 
                         <div style="margin-bottom: 4px;">
-                            <strong>📍 City: </strong>
+                            <strong><svg class="icon"><use href="#i-pin"/></svg> City: </strong>
                             <span id="updateCity">Loading...</span>
                         </div>
                         <div style="margin-bottom: 4px;">
-                            <strong>📅 Server date: </strong>
+                            <strong><svg class="icon"><use href="#i-calendar"/></svg> Server date: </strong>
                             <span id="serverDateValue">--/--/----</span>
                         </div>
                         <div style="margin-bottom: 4px;">
-                            <strong>🕐 Server time: </strong>
+                            <strong><svg class="icon"><use href="#i-clock"/></svg> Server time: </strong>
                             <span id="serverTimeValue">--:--:--</span>
                         </div>
                         <div style="margin-bottom: 4px;">
-                            <strong>🖥️ Server IP: </strong>
+                            <strong><svg class="icon"><use href="#i-monitor"/></svg> Server IP: </strong>
                             <span id="serverIpValue">Loading...</span>
                         </div>
                         <div style="margin-bottom: 4px;">
-                            <strong>🔠 Server hostname: </strong>
+                            <strong><svg class="icon"><use href="#i-type"/></svg> Server hostname: </strong>
                             <span id="serverHostnameValue">Loading...</span>
                         </div>
                         <div style="margin-bottom: 8px;">
-                            <strong>⌛️ Last prayer times update: </strong><br>
+                            <strong><svg class="icon"><use href="#i-hourglass"/></svg> Last prayer times update: </strong><br>
                             <span id="lastUpdate">Never</span>
                             <span id="prayersCount" style="color: #666; font-size: 0.9em;"></span>
                         </div>
                         <div style="margin-bottom: 8px;">
-                            <strong>⏳ Next prayer times update: </strong>
+                            <strong><svg class="icon"><use href="#i-timer"/></svg> Next prayer times update: </strong>
                             <span id="nextUpdate">Loading...</span>
                         </div>
                         <div style="margin-bottom: 8px;">
-                            <strong>🔊 Server audio & external IP/hostname access support: </strong><br>
+                            <strong><svg class="icon"><use href="#i-volume"/></svg> Server audio & external IP/hostname access support: </strong><br>
                             <span id="serverAudioSupport" style="font-weight: 600;">Loading...</span>
                         </div>
                     </div>
@@ -147,7 +182,7 @@
                 </div>
 
                 <div class="settings-section">
-                    <h3>📍 Location</h3>
+                    <h3><svg class="icon"><use href="#i-pin"/></svg> Location</h3>
                     <div class="form-group">
                         <label id="icsLabel">ICS link:</label>
                         <input type="text" id="icsUrl" class="input-field" placeholder="ICS calendar URL">
@@ -156,9 +191,9 @@
                             visit:
                             <a href="https://prayerwebcal.dsultan.com/" target="_blank">Prayer WebCal</a>
                         </p>
-                        <button id="updateLocationBtn" class="btn" style="flex: 1;">🔄 Load ICS link with athans
+                        <button id="updateLocationBtn" class="btn" style="flex: 1;"><svg class="icon"><use href="#i-refresh"/></svg> Load ICS link with athans
                             times</button><br>
-                        <button id="forceUpdateBtn" class="btn" style="flex: 1;">🔄 Update athan times now</button>
+                        <button id="forceUpdateBtn" class="btn" style="flex: 1;"><svg class="icon"><use href="#i-refresh"/></svg> Update athan times now</button>
                         <p class="help-text">
                             Prayer times are automatically updated every day at 12:00 AM<br>
                             Fetches the next 3 months - Past data is preserved<br>
@@ -168,7 +203,7 @@
                 </div>
 
                 <div id="athanCallSection" class="settings-section">
-                    <h3>🕌 Athan call</h3>
+                    <h3><svg class="icon"><use href="#i-mosque"/></svg> Athan call</h3>
                     <div class="form-group">
                         <label>Athan call audio file:</label>
                         <select id="audioFile" class="input-field">
@@ -191,7 +226,7 @@
                 </div>
 
                 <div class="settings-section">
-                    <h3>📖 Quran recitation</h3>
+                    <h3><svg class="icon"><use href="#i-book"/></svg> Quran recitation</h3>
 
                     <div class="form-group" style="margin-bottom: 15px;">
                         <label for="fridayQuranFile">Al Kahf Sourat audio file:</label>
@@ -205,7 +240,7 @@
 
                     <div class="form-group" style="margin-top: 15px;">
                         <button id="playFullQuranBtn" class="btn" style="width: 100%;">
-                            🔉 Listen to Sourat Al Kahf now
+                            <svg class="icon"><use href="#i-volume-1"/></svg> Listen to Sourat Al Kahf now
                         </button>
                         <p class="help-text" style="margin-top: 5px; font-size: 0.85em;">
                             Plays on server and/or web app (depending on audio output setting). Recitation continues
@@ -240,7 +275,7 @@
                 </div>
 
                 <div class="settings-section">
-                    <h3>🔉 Audio control</h3>
+                    <h3><svg class="icon"><use href="#i-volume-1"/></svg> Audio control</h3>
 
                     <div class="form-group" style="margin-top: 15px;">
                         <label>Audio output:</label>
@@ -272,7 +307,7 @@
                             style="width: 100%;">
                         <p id="volumeWarning"
                             style="color: #8B0000; font-weight: bold; margin-top: 8px; font-size: 0.9em; display: none;">
-                            ⚠️ WARNING: Volume above 100% may cause audio distortion or damage to speakers!
+                            <svg class="icon"><use href="#i-alert"/></svg> WARNING: Volume above 100% may cause audio distortion or damage to speakers!
                         </p>
                         <p class="help-text" style="margin-top: 5px; font-size: 0.85em;">
                             <strong>Server volume control:</strong> Browser always plays at 100%.
@@ -294,7 +329,7 @@
                             style="width: 100%;">
                         <p id="fajrVolumeWarning"
                             style="color: #8B0000; font-weight: bold; margin-top: 8px; font-size: 0.9em; display: none;">
-                            ⚠️ WARNING: Volume above 100% may cause audio distortion or damage to speakers!
+                            <svg class="icon"><use href="#i-alert"/></svg> WARNING: Volume above 100% may cause audio distortion or damage to speakers!
                         </p>
                     </div>
                     <br>
@@ -318,7 +353,7 @@
                     <div class="form-group" style="margin-top: 10px;">
                         <button id="stopAudioBtn" class="btn" style="background: #8B0000; width: 100%;"
                             onmouseover="this.style.background='#a30000'" onmouseout="this.style.background='#8B0000'">
-                            🛑 Stop playing Athan and Quran recitation
+                            <svg class="icon"><use href="#i-stop"/></svg> Stop playing Athan and Quran recitation
                         </button>
                         <p class="help-text" style="margin-bottom: 10px;">
                             Stop all audio playback (athan, Quran recitation, startup, tests) on both web app and
@@ -329,12 +364,12 @@
                     <div class="form-group" style="margin-bottom: 15px;">
                         <label style="font-weight: 600;">Athan & Quran audio tests:</label>
                         <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                            <button id="testAthanBtn" class="btn" style="flex: 1;">🔊 Test web Athan</button>
-                            <button id="testAthanServerBtn" class="btn" style="flex: 1;">🔊 Test server Athan</button>
+                            <button id="testAthanBtn" class="btn" style="flex: 1;"><svg class="icon"><use href="#i-volume"/></svg> Test web Athan</button>
+                            <button id="testAthanServerBtn" class="btn" style="flex: 1;"><svg class="icon"><use href="#i-volume"/></svg> Test server Athan</button>
                         </div>
                         <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                            <button id="testQuranBtn" class="btn" style="flex: 1;">🔊 Test web Quran</button>
-                            <button id="testQuranServerBtn" class="btn" style="flex: 1;">🔊 Test server Quran</button>
+                            <button id="testQuranBtn" class="btn" style="flex: 1;"><svg class="icon"><use href="#i-volume"/></svg> Test web Quran</button>
+                            <button id="testQuranServerBtn" class="btn" style="flex: 1;"><svg class="icon"><use href="#i-volume"/></svg> Test server Quran</button>
                         </div>
                     </div>
 
@@ -350,17 +385,17 @@
                             style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
                             <div style="margin-bottom: 10px;" id="apis-web-list">
                                 <strong>
-                                    📖 Get next prayer (text): </strong><br><code id="nextPrayerTextCommand"
+                                    <svg class="icon"><use href="#i-book"/></svg> Get next prayer (text): </strong><br><code id="nextPrayerTextCommand"
                                     class="inline-code">Loading...</code><br><strong>
-                                    🔊 Test Athan on server (30 seconds): </strong><br><code id="testAthanServerCommand"
+                                    <svg class="icon"><use href="#i-volume"/></svg> Test Athan on server (30 seconds): </strong><br><code id="testAthanServerCommand"
                                     class="inline-code">Loading...</code><br><strong>
-                                    🔊 Test Quran on server (30 seconds): </strong><br><code id="testQuranServerCommand"
+                                    <svg class="icon"><use href="#i-volume"/></svg> Test Quran on server (30 seconds): </strong><br><code id="testQuranServerCommand"
                                     class="inline-code">Loading...</code><br><strong>
-                                    🚀 Mute next Athan: </strong><br><code id="muteCommand"
+                                    <svg class="icon"><use href="#i-terminal"/></svg> Mute next Athan: </strong><br><code id="muteCommand"
                                     class="inline-code">Loading...</code><br><strong>
-                                    🚀 Unmute next Athan: </strong><br><code id="unmuteCommand"
+                                    <svg class="icon"><use href="#i-terminal"/></svg> Unmute next Athan: </strong><br><code id="unmuteCommand"
                                     class="inline-code">Loading...</code><br><strong>
-                                    🚀 Stop all playing audio in the server: </strong><br><code id="stopAudioCommand"
+                                    <svg class="icon"><use href="#i-terminal"/></svg> Stop all playing audio in the server: </strong><br><code id="stopAudioCommand"
                                     class="inline-code">Loading...</code>
                             </div>
                         </div>
@@ -368,11 +403,11 @@
                 </div>
 
                 <div class="settings-section" id="settings-section-backup">
-                    <h3>💾 Backup & Restore</h3>
+                    <h3><svg class="icon"><use href="#i-database"/></svg> Backup & Restore</h3>
 
                     <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                        <button id="exportConfigBtn" class="btn" style="flex: 1;">📤 Export configuration</button>
-                        <button id="importConfigBtn" class="btn" style="flex: 1;">📥 Import configuration</button>
+                        <button id="exportConfigBtn" class="btn" style="flex: 1;"><svg class="icon"><use href="#i-upload"/></svg> Export configuration</button>
+                        <button id="importConfigBtn" class="btn" style="flex: 1;"><svg class="icon"><use href="#i-download"/></svg> Import configuration</button>
                     </div>
                     <input type="file" id="importConfigFile" accept=".csv" style="display: none;">
                     <p class="help-text">
@@ -381,17 +416,17 @@
                     <button id="resetPrayerChecksBtn" class="btn"
                         style="background: #8B0000; width: 100%; margin-bottom: 15px;"
                         onmouseover="this.style.background='#a30000'" onmouseout="this.style.background='#8B0000'">
-                        🔄 Reset prayers & activities
+                        <svg class="icon"><use href="#i-refresh"/></svg> Reset prayers & activities
                     </button>
                     <p class="help-text" style="margin-top: -10px; margin-bottom: 15px;">
-                        Remove all check marks (✓) from prayers and daily activities (Coran, Tasbih & Nawafil)
+                        Remove all check marks from prayers and daily activities (Coran, Tasbih & Nawafil)
                     </p>
                     <button id="restoreDefaultsBtn" class="btn"
                         style="background: #8B0000; width: 100%; margin-top: 10px;"
-                        onmouseover="this.style.background='#a30000'" onmouseout="this.style.background='#8B0000'">🔄
+                        onmouseover="this.style.background='#a30000'" onmouseout="this.style.background='#8B0000'"><svg class="icon"><use href="#i-refresh"/></svg>
                         Restore default configuration</button>
                     <p class="help-text" style="margin-top: 5px; color: #8B0000;">
-                        ⚠️ This will reset ALL settings to their default values
+                        <svg class="icon"><use href="#i-alert"/></svg> This will reset ALL settings to their default values
                     </p>
                 </div>
             </div>
@@ -401,17 +436,17 @@
         <div id="statisticsModal" class="modal">
             <div class="modal-content statistics-modal-content">
                 <span class="close" id="closeStatistics">&times;</span>
-                <h2>📊 History & Statistics</h2>
+                <h2><svg class="icon"><use href="#i-bar-chart"/></svg> History & Statistics</h2>
 
                 <div class="statistics-actions" style="margin-bottom: 20px;">
                     <button id="exportExcelBtn" class="btn" style="background: #27ae60;">
-                        📥 Export to Excel
+                        <svg class="icon"><use href="#i-download"/></svg> Export to Excel
                     </button>
                 </div>
 
                 <!-- Prayer Statistics Section -->
                 <div class="statistics-section">
-                    <h3>🕌 Prayer Statistics</h3>
+                    <h3><svg class="icon"><use href="#i-mosque"/></svg> Prayer Statistics</h3>
 
                     <div class="stats-grid">
                         <div class="stats-card">
@@ -424,7 +459,7 @@
                             <div style="position: relative;">
                                 <canvas id="prayerBarChart"></canvas>
                                 <button id="expandPrayerChart" class="expand-chart-btn" title="View fullscreen">
-                                    ⛶ Expand
+                                    <svg class="icon"><use href="#i-expand"/></svg> Expand
                                 </button>
                             </div>
                         </div>
@@ -433,7 +468,7 @@
 
                 <!-- Activity Statistics Section -->
                 <div class="statistics-section">
-                    <h3>📖 Daily Activities Statistics</h3>
+                    <h3><svg class="icon"><use href="#i-book"/></svg> Daily Activities Statistics</h3>
 
                     <div class="stats-grid">
                         <div class="stats-card">
@@ -446,7 +481,7 @@
                             <div style="position: relative;">
                                 <canvas id="activityBarChart"></canvas>
                                 <button id="expandActivityChart" class="expand-chart-btn" title="View fullscreen">
-                                    ⛶ Expand
+                                    <svg class="icon"><use href="#i-expand"/></svg> Expand
                                 </button>
                             </div>
                         </div>
@@ -458,7 +493,7 @@
         <!-- Fullscreen Chart Modal -->
         <div id="fullscreenChartModal" class="fullscreen-modal" style="display: none;">
             <div class="fullscreen-modal-content">
-                <button id="closeFullscreenChart" class="fullscreen-close-btn">✕ Close</button>
+                <button id="closeFullscreenChart" class="fullscreen-close-btn"><svg class="icon"><use href="#i-x"/></svg> Close</button>
                 <h3 id="fullscreenChartTitle"></h3>
                 <canvas id="fullscreenChart"></canvas>
             </div>
@@ -469,9 +504,9 @@
     <!-- Floating Audio Notification Banner -->
     <div id="audioNotificationBanner" class="audio-notification-banner" style="display: none;">
         <div class="audio-notification-content">
-            <span class="audio-notification-icon">🔊</span>
+            <span class="audio-notification-icon"><svg class="icon icon-lg"><use href="#i-volume"/></svg></span>
             <span id="audioNotificationText" class="audio-notification-text">Audio playing...</span>
-            <button id="audioNotificationClose" class="audio-notification-close" title="Close notification">✕</button>
+            <button id="audioNotificationClose" class="audio-notification-close" title="Close notification"><svg class="icon"><use href="#i-x"/></svg></button>
         </div>
     </div>
 

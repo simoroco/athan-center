@@ -67,10 +67,10 @@ header h1 {
 
 .nav-btn {
     padding: 10px 20px;
-    background: #27ae60;
-    color: white;
+    background: #f8f9fa;
+    color: #495057;
     border: none;
-    border-radius: 8px;
+    border-radius: 12px;
     cursor: pointer;
     font-size: 1rem;
     font-weight: 600;
@@ -87,15 +87,22 @@ header h1 {
 }
 
 .nav-btn:hover {
-    background: #1e8449;
+    background: #e9ecef;
     transform: translateY(-2px);
 }
 
-.nav-arrow {
+.nav-arrow,
+.icon {
     width: 1.1em;
     height: 1.1em;
-    vertical-align: middle;
+    vertical-align: -0.15em;
     display: inline-block;
+    flex-shrink: 0;
+}
+
+.icon-lg {
+    width: 1.4em;
+    height: 1.4em;
 }
 
 .btn-date {
@@ -322,7 +329,7 @@ header h1 {
     min-height: 68px;
     font-size: 1rem;
     border: none;
-    border-radius: 10px;
+    border-radius: 12px;
     cursor: pointer;
     transition: all 0.3s;
     font-weight: 600;
@@ -330,36 +337,24 @@ header h1 {
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-.action-btn {
-    background: #27ae60;
-    color: white;
+    background: #f8f9fa;
+    color: #495057;
 }
 
 .action-btn:hover {
-    background: #1e8449;
+    background: #e9ecef;
     transform: translateY(-2px);
 }
 
-#settingsBtn {
-    background: #6b7280;
-}
-
-#settingsBtn:hover {
-    background: #4b5563;
-}
-
 .warning-btn {
-    background: #ff6b6b;
-    background: #8B0000;
-    color: white;
-    box-shadow: 0 4px 8px rgba(139, 0, 0, 0.3);
+    background: #fee2e2;
+    color: #b91c1c;
+    box-shadow: 0 4px 8px rgba(220, 38, 38, 0.12);
 }
 
 .warning-btn:hover {
-    background: #ee5a52;
-    background: #a30000;
+    background: #fecaca;
+    color: #991b1b;
 }
 
 footer {
@@ -1580,6 +1575,25 @@ body.dark-mode .stop-audio-btn:hover {
 
 body.dark-mode .app-version {
     color: #a0aec0;
+}
+
+body.dark-mode .action-btn {
+    background: #2d3748;
+    color: #e4e6eb;
+}
+
+body.dark-mode .action-btn:hover {
+    background: #4a5568;
+}
+
+body.dark-mode .warning-btn {
+    background: #4a1c1c;
+    color: #fca5a5;
+}
+
+body.dark-mode .warning-btn:hover {
+    background: #5e2424;
+    color: #fecaca;
 }
 
 /* ===== Floating Audio Notification Banner ===== */

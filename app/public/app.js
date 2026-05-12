@@ -447,17 +447,18 @@ async function checkSkipNextStatus() {
         }
 
         // Show mute alert banner with appropriate message
+        const muteIcon = '<svg class="icon"><use href="#i-volume-x"/></svg> ';
         if (muteType === 'manual') {
             const prayerLabel = nextPrayer && nextPrayer.prayer_name
                 ? getPrayerName(nextPrayer.prayer_name)
                 : '';
             if (prayerLabel) {
-                muteAlert.textContent = `🔇 Next athan (${prayerLabel}) is muted`;
+                muteAlert.innerHTML = `${muteIcon}Next athan (${prayerLabel}) is muted`;
             } else {
-                muteAlert.textContent = '🔇 Next athan is muted';
+                muteAlert.innerHTML = `${muteIcon}Next athan is muted`;
             }
         } else if (muteType === 'general') {
-            muteAlert.textContent = `🔇 ${getPrayerName(mutedPrayerName)} athan is muted (general settings)`;
+            muteAlert.innerHTML = `${muteIcon}${getPrayerName(mutedPrayerName)} athan is muted (general settings)`;
         }
         muteAlert.style.display = 'block';
         muteAlert.dataset.muteType = muteType;
@@ -886,7 +887,7 @@ async function generateYearCalendar(year) {
             if (prayerSymbol || isRamadan) {
                 dayContent += '<div class="calendar-day-symbols">';
                 if (prayerSymbol) dayContent += prayerSymbol;
-                if (isRamadan) dayContent += '<span class="ramadan-moon">🌙</span>';
+                if (isRamadan) dayContent += '<span class="ramadan-moon"><svg class="icon"><use href="#i-moon"/></svg></span>';
                 dayContent += '</div>';
             }
 
@@ -2021,7 +2022,7 @@ function updateDateButtons() {
         } else {
             calendarLabel = currentWeekday;
         }
-        calendarBtn.innerHTML = `<span class="nav-btn-icon">📅</span><span class="nav-btn-label"> ${calendarLabel} (</span><span class="btn-date">${currentDateStr}</span><span class="nav-btn-label">)</span>`;
+        calendarBtn.innerHTML = `<span class="nav-btn-icon"><svg class="icon"><use href="#i-calendar"/></svg></span><span class="nav-btn-label"> ${calendarLabel} (</span><span class="btn-date">${currentDateStr}</span><span class="nav-btn-label">)</span>`;
     }
 
     // Disable todayBtn when viewing today's prayers
@@ -2229,9 +2230,9 @@ async function loadDailyActivities() {
 
         // Define the three activities
         const activities = [
-            { name: 'Read Coran', icon: '📖' },
-            { name: 'Tasbih & Dikr', icon: '📿' },
-            { name: 'Pray Nawafil', icon: '🤲' }
+            { name: 'Read Coran', icon: '<svg class="icon"><use href="#i-book"/></svg>' },
+            { name: 'Tasbih & Dikr', icon: '<svg class="icon"><use href="#i-beads"/></svg>' },
+            { name: 'Pray Nawafil', icon: '<svg class="icon"><use href="#i-heart"/></svg>' }
         ];
 
         const activitiesContent = document.getElementById('dailyActivitiesContent');
@@ -3214,7 +3215,7 @@ async function loadAudioSupport() {
                     warningMsg = document.createElement('p');
                     warningMsg.className = 'help-text audio-output-warning';
                     warningMsg.style.cssText = 'margin-top: 5px; font-size: 0.85em; color: #8B0000; font-weight: 600;';
-                    warningMsg.innerHTML = '⚠️ Server audio not available. Forced to "Web app only" mode.';
+                    warningMsg.innerHTML = '<svg class="icon"><use href="#i-alert"/></svg> Server audio not available. Forced to "Web app only" mode.';
                     audioOutputSelect.parentElement.appendChild(warningMsg);
                 }
             }
