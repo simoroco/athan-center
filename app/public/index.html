@@ -50,17 +50,16 @@
 
     <div class="container">
 
-        <div id="nextPrayerCard" class="next-prayer-card" style="display: none;">
+        <div id="nextPrayerCard" class="next-prayer-card" style="visibility: hidden;">
             <div class="next-prayer-label">Next Prayer</div>
             <div class="next-prayer-name">
                 <span id="ramadanMoonCard" class="ramadan-moon-card" style="display: none;"><svg class="icon"><use href="#i-moon"/></svg></span>
             </div>
             <div class="next-prayer-time"></div>
             <div class="next-prayer-countdown"></div>
-        </div>
-
-        <div id="muteAlertBanner" class="mute-alert-banner" style="display: none;">
-            <svg class="icon"><use href="#i-volume-x"/></svg> Next athan is muted
+            <div id="muteAlertBanner" class="mute-alert-banner" style="display: none;">
+                <svg class="icon"><use href="#i-volume-x"/></svg> Next athan is muted
+            </div>
         </div>
 
         <div id="weekdayMuteBanner" class="weekday-mute-banner" style="display: none;">
@@ -78,12 +77,12 @@
             </div>
         </div>
 
-        <div class="date-navigation">
+        <div class="date-navigation" id="date-navigation">
             <button id="prevDay" class="nav-btn"><span class="nav-btn-icon"><svg class="nav-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></span><span class="nav-btn-label"> Previous Day</span></button>
             <button id="todayBtn" class="nav-btn">
                 <span class="nav-btn-icon"><svg class="icon"><use href="#i-home"/></svg></span><span class="nav-btn-label"> Go Today (<span id="todayDate" class="btn-date"></span>)</span>
             </button>
-            <button id="calendarBtn" class="nav-btn calendar-btn" style="opacity: 0.7;">
+            <button id="calendarBtn" class="nav-btn calendar-btn">
                 <span class="nav-btn-icon"><svg class="icon"><use href="#i-calendar"/></svg></span><span class="nav-btn-text"><span class="nav-btn-label">Calendar (</span><span id="currentDate" class="btn-date"></span><span class="nav-btn-label">)</span></span>
             </button>
             <button id="nextDay" class="nav-btn"><span class="nav-btn-label">Next Day </span><span class="nav-btn-icon"><svg class="nav-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span></button>
@@ -107,7 +106,7 @@
             </div>
         </div>
 
-        <div class="actions">
+        <div class="actions" id="main-actions">
             <button id="skipNextBtn" class="action-btn warning-btn" style="display: none;">
                 <span class="action-btn-icon"><svg class="icon"><use href="#i-volume-x"/></svg></span><span class="action-btn-label"> Mute next Athan</span>
             </button>
@@ -178,7 +177,7 @@
                     <p class="help-text" style="margin-bottom: 15px;">
                         Enable dark mode for a comfortable viewing experience in low-light environments
                     </p>
-                    <p class="app-version">© 2026 Athan Center | v3.9.0</p>
+                    <p class="app-version">© 2026 Athan Center | v4.0.0</p>
                 </div>
 
                 <div class="settings-section">
@@ -191,8 +190,7 @@
                             visit:
                             <a href="https://prayerwebcal.dsultan.com/" target="_blank">Prayer WebCal</a>
                         </p>
-                        <button id="updateLocationBtn" class="btn" style="flex: 1;"><svg class="icon"><use href="#i-refresh"/></svg> Load ICS link with athans
-                            times</button><br>
+                        <button id="updateLocationBtn" class="btn" style="flex: 1;"><svg class="icon"><use href="#i-refresh"/></svg> Apply ICS link configuration</button><br>
                         <button id="forceUpdateBtn" class="btn" style="flex: 1;"><svg class="icon"><use href="#i-refresh"/></svg> Update athan times now</button>
                         <p class="help-text">
                             Prayer times are automatically updated every day at 12:00 AM<br>
@@ -395,6 +393,8 @@
                                     <svg class="icon"><use href="#i-terminal"/></svg> Unmute next Athan: </strong><br><code id="unmuteCommand"
                                     class="inline-code">Loading...</code><br><strong>
                                     <svg class="icon"><use href="#i-terminal"/></svg> Stop all playing audio in the server: </strong><br><code id="stopAudioCommand"
+                                    class="inline-code">Loading...</code><br><strong>
+                                    <svg class="icon"><use href="#i-volume-x"/></svg> Permanent silence (disable all athans for the whole week + disable Al Kahf Sourat on Friday): </strong><br><code id="permanentSilenceCommand"
                                     class="inline-code">Loading...</code>
                             </div>
                         </div>

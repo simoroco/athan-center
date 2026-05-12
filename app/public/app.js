@@ -607,6 +607,9 @@ function playAthanInBrowser(audioFile, prayerName) {
         // Real prayers: Fajr | Sobh, Dohr, Asr, Maghrib, Isha
         isRealPrayerAudio = (prayerName !== 'Test' && prayerName !== 'Startup' && prayerName !== 'PageLoad');
 
+        // Animate the card for ANY athan playback (real or Test) — not for Startup/PageLoad
+        const isAthanPlayback = (prayerName !== 'Startup' && prayerName !== 'PageLoad');
+
         // Create audio element if it doesn't exist
         if (!audioElement) {
             audioElement = new Audio();
@@ -618,6 +621,9 @@ function playAthanInBrowser(audioFile, prayerName) {
 
             audioElement.addEventListener('ended', () => {
                 enableAllButtons();
+                // Stop card animation
+                const card = document.getElementById('nextPrayerCard');
+                if (card) card.classList.remove('playing-athan');
                 // Hide notification banner when audio ends (for non-prayer audio)
                 if (!isRealPrayerAudio) {
                     hideAudioNotification();
@@ -626,15 +632,24 @@ function playAthanInBrowser(audioFile, prayerName) {
 
             audioElement.addEventListener('pause', () => {
                 enableAllButtons();
+                const card = document.getElementById('nextPrayerCard');
+                if (card) card.classList.remove('playing-athan');
                 // Note: Don't hide banner on pause - user might have manually paused
             });
 
             audioElement.addEventListener('error', (e) => {
                 console.error('[Audio] Error event triggered:', e);
                 enableAllButtons();
+                const card = document.getElementById('nextPrayerCard');
+                if (card) card.classList.remove('playing-athan');
                 // Hide notification banner on error
                 hideAudioNotification();
             });
+        }
+
+        // Start the playing-athan animation for athan playback (real + test)
+        if (isAthanPlayback && nextPrayerCard) {
+            nextPrayerCard.classList.add('playing-athan');
         }
 
         // Browser volume is always 100% (1.0) - server volume is controlled by slider
@@ -1581,9 +1596,13 @@ function setupEventListeners() {
             if (data.success) {
                 // Show notification banner for server test
                 showAudioNotification('Test Athan server playing (30s preview)');
-                // Hide notification after 30 seconds
+                // Animate the next prayer card during the server-side test
+                const card = document.getElementById('nextPrayerCard');
+                if (card) card.classList.add('playing-athan');
+                // Hide notification + stop animation after 30 seconds
                 setTimeout(() => {
                     hideAudioNotification();
+                    if (card) card.classList.remove('playing-athan');
                 }, 30000);
             } else {
                 alert('Error: ' + (data.error || 'Unknown error'));
@@ -1904,6 +1923,15 @@ function setupEventListeners() {
         nextPrayerTextCommand.title = 'Open this API URL in a new tab';
         nextPrayerTextCommand.addEventListener('click', () => {
             openUrlFromCurlCode(nextPrayerTextCommand);
+        });
+    }
+
+    const permanentSilenceCommand = document.getElementById('permanentSilenceCommand');
+    if (permanentSilenceCommand) {
+        permanentSilenceCommand.style.cursor = 'pointer';
+        permanentSilenceCommand.title = 'Open this API URL in a new tab';
+        permanentSilenceCommand.addEventListener('click', () => {
+            openUrlFromCurlCode(permanentSilenceCommand);
         });
     }
 }
@@ -2367,6 +2395,7 @@ function displayNextPrayer(prayer) {
 
     // Only show the card after content is updated
     card.style.display = 'block';
+    card.style.visibility = 'visible';
 
 }
 
@@ -2387,10 +2416,12 @@ function updatePrayerName(prayerName) {
     nameDiv.insertBefore(document.createTextNode(prayerNameText), ramadanSpan);
 }
 
-// Hide the next prayer card
+// Hide the next prayer card — keep its space reserved so prayers-list and
+// the rest of the layout stay in place even on future dates.
 function hideNextPrayerCard() {
     const card = document.getElementById('nextPrayerCard');
-    card.style.display = 'none';
+    card.style.visibility = 'hidden';
+    card.style.display = '';
 
     // Also hide mute button and banner when card is hidden
     const skipBtn = document.getElementById('skipNextBtn');
@@ -2412,7 +2443,7 @@ function startCountdown() {
         }
 
         const card = document.getElementById('nextPrayerCard');
-        if (!card || card.style.display === 'none') {
+        if (!card || card.style.display === 'none' || card.style.visibility === 'hidden') {
             // Card is hidden, don't try to update it
             return;
         }
@@ -3402,6 +3433,20 @@ async function loadServerTime() {
             } catch (urlError) {
                 console.error('Error building stop audio command URL:', urlError);
                 stopAudioCommandElement.textContent = 'Error';
+            }
+        }
+
+        const permanentSilenceCommandElement = document.getElementById('permanentSilenceCommand');
+        if (permanentSilenceCommandElement) {
+            try {
+                const permanentSilenceUrl = new URL(`${API_BASE}/api/silence/permanent`);
+                if (data.ip) {
+                    permanentSilenceUrl.hostname = data.ip;
+                }
+                permanentSilenceCommandElement.textContent = `curl ${permanentSilenceUrl.href}`;
+            } catch (urlError) {
+                console.error('Error building permanent silence command URL:', urlError);
+                permanentSilenceCommandElement.textContent = 'Error';
             }
         }
 

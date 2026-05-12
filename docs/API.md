@@ -435,6 +435,32 @@ curl http://localhost:7777/api/skip-next
 
 ---
 
+### Permanent Silence
+
+Disable **all athans for the whole week** AND **Al Kahf Sourat recitation on Friday** in a single open call.
+
+Effects:
+- Sets `enabled = 0` for every cell of the `prayer_schedule` matrix (all prayers × all days).
+- Sets `friday_quran_enabled = '0'` in `settings`.
+- Reschedules the Friday Quran cron job so it stops triggering.
+
+**Endpoint:** `GET /api/silence/permanent` (public, no auth)
+
+**Example:**
+```bash
+curl http://localhost:7777/api/silence/permanent
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Permanent silence enabled: all athans muted for the whole week and Al Kahf Sourat on Friday disabled"
+}
+```
+
+---
+
 ## Server Information
 
 ### Get Server Time

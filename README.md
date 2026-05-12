@@ -150,6 +150,7 @@ All endpoints are available on `http://IP:7777/api` and `https://IP:7778/api`.
 | Test Athan (server) | `/test-athan-server` | Plays 30 s sample through speakers |
 | Test Quran (server) | `/test-quran-server` | 30 s Quran recitation |
 | Next prayer text | `/next-prayer-text?lang=FR` | Returns next prayer in natural language (FR/EN) |
+| Permanent silence | `/silence/permanent` | Disables **all athans for the whole week** AND **Al Kahf Sourat on Friday** in one call (GET, no auth) |
 
 For complete API documentation, see [API.md](./docs/API.md).
 
