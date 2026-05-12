@@ -74,13 +74,13 @@
 
         <div class="actions">
             <button id="skipNextBtn" class="action-btn warning-btn" style="display: none;">
-                🔇 Mute next Athan
+                <span class="action-btn-icon">🔇</span><span class="action-btn-label"> Mute next Athan</span>
             </button>
             <button id="statisticsBtn" class="action-btn">
-                📊 History & Statistics
+                <span class="action-btn-icon">📊</span><span class="action-btn-label"> History & Statistics</span>
             </button>
             <button id="settingsBtn" class="action-btn">
-                ⚙️ Settings
+                <span class="action-btn-icon">⚙️</span><span class="action-btn-label"> Settings</span>
             </button>
         </div>
 
@@ -89,6 +89,7 @@
                 <span class="close" id="closeSettings">&times;</span>
                 <h2>⚙️ Settings</h2>
                 <div class="dua-card">
+                    <span id="ramadanMoonFooter" class="ramadan-moon-footer" style="display: none;">🌙</span>
                     <p class="dua-text arabic">لا تنسى أخاك في دعائك 🤲🙏</p>
                     <p class="dua-text english">Don't forget your brother in your du'a 🤲🙏</p>
                 </div><br><br>
@@ -142,6 +143,7 @@
                     <p class="help-text" style="margin-bottom: 15px;">
                         Enable dark mode for a comfortable viewing experience in low-light environments
                     </p>
+                    <p class="app-version">© 2026 Athan Center | v3.8.0</p>
                 </div>
 
                 <div class="settings-section">
@@ -462,13 +464,6 @@
             </div>
         </div>
 
-        <footer>
-            <div class="footer-content">
-                <span id="ramadanMoonFooter" class="ramadan-moon-footer" style="display: none;">🌙</span>
-                <img src="logo.png" alt="Athan Center logo" class="app-logo">
-                <p>© 2026 Athan Center | v3.8.0</p>
-            </div>
-        </footer>
     </div>
 
     <!-- Floating Audio Notification Banner -->

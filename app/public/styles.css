@@ -369,6 +369,16 @@ footer {
 .ramadan-moon-footer {
     font-size: 50px;
     line-height: 1;
+    display: block;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.app-version {
+    text-align: center;
+    color: #6c757d;
+    font-size: 0.85rem;
+    margin-top: 10px;
 }
 
 .ramadan-moon-card {
@@ -642,7 +652,8 @@ input:checked+.slider:before {
     .nav-btn {
         flex: 1 1 0;
         min-width: 0;
-        padding: 10px 6px;
+        min-height: 64px;
+        padding: 18px 6px;
         font-size: 1rem;
         white-space: nowrap;
     }
@@ -652,11 +663,11 @@ input:checked+.slider:before {
     }
 
     .nav-btn .nav-btn-icon {
-        font-size: 1.2rem;
+        font-size: 1.5rem;
     }
 
     .nav-btn .btn-date {
-        font-size: 0.9rem;
+        font-size: 1rem;
         display: inline;
         margin-top: 0;
         margin-left: 4px;
@@ -693,11 +704,27 @@ input:checked+.slider:before {
     }
 
     .actions {
-        flex-direction: column;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        gap: 6px;
+        padding: 10px;
     }
 
     .action-btn {
-        width: 100%;
+        flex: 1 1 0;
+        min-width: 0;
+        min-height: 64px;
+        padding: 18px 6px;
+        font-size: 1rem;
+        white-space: nowrap;
+    }
+
+    .action-btn .action-btn-label {
+        display: none;
+    }
+
+    .action-btn .action-btn-icon {
+        font-size: 1.5rem;
     }
 
     .modal-content {
@@ -1538,17 +1565,8 @@ body.dark-mode .stop-audio-btn:hover {
     background: #b91c1c;
 }
 
-body.dark-mode footer {
-    background: #252830;
+body.dark-mode .app-version {
     color: #a0aec0;
-}
-
-body.dark-mode footer a {
-    color: #4ade80;
-}
-
-body.dark-mode footer a:hover {
-    color: #22c55e;
 }
 
 /* ===== Floating Audio Notification Banner ===== */

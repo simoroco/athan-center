@@ -3592,7 +3592,7 @@ async function checkRamadanForCurrentDate() {
         if (data.success && data.ramadan_dates) {
             const isRamadan = data.ramadan_dates.some(rd => rd.gregorian_date === dateStr);
             if (ramadanMoonFooter) {
-                ramadanMoonFooter.style.display = isRamadan ? 'inline' : 'none';
+                ramadanMoonFooter.style.display = isRamadan ? 'block' : 'none';
             }
             if (ramadanMoonCard) {
                 ramadanMoonCard.style.display = isRamadan ? 'inline' : 'none';
