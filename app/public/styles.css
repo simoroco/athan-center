@@ -67,7 +67,7 @@ header h1 {
 
 .nav-btn {
     padding: 10px 20px;
-    background: #f8f9fa;
+    background: rgba(248, 249, 250, 0.65);
     color: #495057;
     border: none;
     border-radius: 12px;
@@ -84,11 +84,17 @@ header h1 {
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 8px;
 }
 
 .nav-btn:hover {
-    background: #e9ecef;
+    background: rgba(233, 236, 239, 0.85);
     transform: translateY(-2px);
+}
+
+.nav-btn .nav-btn-icon {
+    display: inline-flex;
+    align-items: center;
 }
 
 .nav-arrow,
@@ -226,13 +232,13 @@ header h1 {
     align-items: center;
     padding: 20px;
     margin-bottom: 5px;
-    background: #f8f9fa;
+    background: rgba(248, 249, 250, 0.65);
     border-radius: 12px;
     transition: all 0.3s;
 }
 
 .prayer-item:hover {
-    background: #e9ecef;
+    background: rgba(233, 236, 239, 0.85);
     transform: translateX(5px);
 }
 
@@ -290,14 +296,14 @@ header h1 {
     align-items: center;
     padding: 10px 20px;
     min-height: 68px;
-    background: #f8f9fa;
+    background: rgba(248, 249, 250, 0.65);
     border-radius: 12px;
     transition: all 0.3s;
     min-width: 0;
 }
 
 .activity-item:hover {
-    background: #e9ecef;
+    background: rgba(233, 236, 239, 0.85);
     transform: translateY(-2px);
 }
 
@@ -337,24 +343,42 @@ header h1 {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #f8f9fa;
+    gap: 8px;
+    background: rgba(248, 249, 250, 0.65);
     color: #495057;
 }
 
 .action-btn:hover {
-    background: #e9ecef;
+    background: rgba(233, 236, 239, 0.85);
     transform: translateY(-2px);
 }
 
+.action-btn .action-btn-icon {
+    display: inline-flex;
+    align-items: center;
+}
+
 .warning-btn {
-    background: #fee2e2;
+    background: rgba(254, 226, 226, 0.7);
     color: #b91c1c;
-    box-shadow: 0 4px 8px rgba(220, 38, 38, 0.12);
+    box-shadow: 0 4px 8px rgba(220, 38, 38, 0.08);
 }
 
 .warning-btn:hover {
-    background: #fecaca;
+    background: rgba(254, 202, 202, 0.85);
     color: #991b1b;
+}
+
+.btn-danger-light {
+    background: rgba(254, 226, 226, 0.7) !important;
+    color: #b91c1c !important;
+    box-shadow: 0 2px 5px rgba(220, 38, 38, 0.08) !important;
+    transition: all 0.3s ease;
+}
+
+.btn-danger-light:hover {
+    background: rgba(254, 202, 202, 0.85) !important;
+    color: #991b1b !important;
 }
 
 footer {
@@ -942,15 +966,15 @@ input:checked+.slider:before {
 
 /* Mute alert banner */
 .mute-alert-banner {
-    background: #8B0000;
-    color: white;
+    background: rgba(254, 226, 226, 0.7);
+    color: #b91c1c;
     padding: 16px 20px;
     text-align: center;
     font-weight: 600;
     font-size: 0.95rem;
     margin: 0 20px 10px 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(139, 0, 0, 0.3);
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(220, 38, 38, 0.08);
     cursor: pointer;
 }
 
@@ -978,48 +1002,51 @@ button.audio-playing-disabled:hover {
 }
 
 .mute-alert-banner:hover {
-    background: #a30000;
+    background: rgba(254, 202, 202, 0.85);
+    color: #991b1b;
 }
 
 /* Weekday mute banner */
 .weekday-mute-banner {
-    background: #8B0000;
-    color: white;
+    background: rgba(254, 226, 226, 0.7);
+    color: #b91c1c;
     padding: 16px 20px;
     text-align: center;
     margin: 0 20px 10px 20px;
-    border-radius: 8px;
+    border-radius: 12px;
     font-size: 0.95rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 8px rgba(139, 0, 0, 0.3);
+    box-shadow: 0 4px 8px rgba(220, 38, 38, 0.08);
 }
 
 .weekday-mute-banner:hover {
-    background: #a30000;
+    background: rgba(254, 202, 202, 0.85);
+    color: #991b1b;
 }
 
 /* Stop Audio Button */
 .stop-audio-btn {
-    background: #8B0000;
-    color: white;
+    background: rgba(254, 226, 226, 0.7);
+    color: #b91c1c;
     padding: 12px 20px;
     text-align: center;
     width: 100%;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px;
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 5px rgba(139, 0, 0, 0.3);
+    box-shadow: 0 2px 5px rgba(220, 38, 38, 0.08);
 }
 
 .stop-audio-btn:hover:not(:disabled) {
-    background: #a30000;
+    background: rgba(254, 202, 202, 0.85);
+    color: #991b1b;
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(139, 0, 0, 0.4);
+    box-shadow: 0 4px 8px rgba(220, 38, 38, 0.15);
 }
 
 .stop-audio-btn:active:not(:disabled) {
@@ -1305,13 +1332,13 @@ body.dark-mode .date-navigation {
 }
 
 body.dark-mode .date-navigation button {
-    background: #2d3748;
+    background: rgba(45, 55, 72, 0.65);
     color: #e4e6eb;
     border: 1px solid #4a5568;
 }
 
 body.dark-mode .date-navigation button:hover {
-    background: #4a5568;
+    background: rgba(74, 85, 104, 0.85);
     border-color: #718096;
 }
 
@@ -1320,13 +1347,13 @@ body.dark-mode .prayers-list {
 }
 
 body.dark-mode .prayer-item {
-    background: #2d3748;
+    background: rgba(45, 55, 72, 0.65);
     border: 1px solid #4a5568;
     color: #e4e6eb;
 }
 
 body.dark-mode .prayer-item:hover {
-    background: #3a4556;
+    background: rgba(58, 69, 86, 0.85);
     border-color: #718096;
 }
 
@@ -1343,12 +1370,12 @@ body.dark-mode .daily-activities-section {
 }
 
 body.dark-mode .activity-item {
-    background: #2d3748;
+    background: rgba(45, 55, 72, 0.65);
     color: #e4e6eb;
 }
 
 body.dark-mode .activity-item:hover {
-    background: #3a4556;
+    background: rgba(58, 69, 86, 0.85);
 }
 
 body.dark-mode .activity-name {
@@ -1564,13 +1591,29 @@ body.dark-mode .mute-alert {
     border-color: #ea580c;
 }
 
-body.dark-mode .stop-audio-btn {
-    background: #dc2626;
-    border-color: #dc2626;
+body.dark-mode .stop-audio-btn,
+body.dark-mode .btn-danger-light {
+    background: rgba(74, 28, 28, 0.6) !important;
+    color: #fca5a5 !important;
+    border-color: transparent;
 }
 
-body.dark-mode .stop-audio-btn:hover {
-    background: #b91c1c;
+body.dark-mode .stop-audio-btn:hover,
+body.dark-mode .btn-danger-light:hover {
+    background: rgba(94, 36, 36, 0.8) !important;
+    color: #fecaca !important;
+}
+
+body.dark-mode .mute-alert-banner,
+body.dark-mode .weekday-mute-banner {
+    background: rgba(74, 28, 28, 0.6);
+    color: #fca5a5;
+}
+
+body.dark-mode .mute-alert-banner:hover,
+body.dark-mode .weekday-mute-banner:hover {
+    background: rgba(94, 36, 36, 0.8);
+    color: #fecaca;
 }
 
 body.dark-mode .app-version {
@@ -1578,21 +1621,21 @@ body.dark-mode .app-version {
 }
 
 body.dark-mode .action-btn {
-    background: #2d3748;
+    background: rgba(45, 55, 72, 0.65);
     color: #e4e6eb;
 }
 
 body.dark-mode .action-btn:hover {
-    background: #4a5568;
+    background: rgba(74, 85, 104, 0.85);
 }
 
 body.dark-mode .warning-btn {
-    background: #4a1c1c;
+    background: rgba(74, 28, 28, 0.6);
     color: #fca5a5;
 }
 
 body.dark-mode .warning-btn:hover {
-    background: #5e2424;
+    background: rgba(94, 36, 36, 0.8);
     color: #fecaca;
 }
 

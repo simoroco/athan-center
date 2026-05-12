@@ -2230,9 +2230,9 @@ async function loadDailyActivities() {
 
         // Define the three activities
         const activities = [
-            { name: 'Read Coran', icon: '<svg class="icon"><use href="#i-book"/></svg>' },
-            { name: 'Tasbih & Dikr', icon: '<svg class="icon"><use href="#i-beads"/></svg>' },
-            { name: 'Pray Nawafil', icon: '<svg class="icon"><use href="#i-heart"/></svg>' }
+            { name: 'Read Coran', icon: '📖' },
+            { name: 'Tasbih & Dikr', icon: '📿' },
+            { name: 'Pray Nawafil', icon: '🤲' }
         ];
 
         const activitiesContent = document.getElementById('dailyActivitiesContent');
