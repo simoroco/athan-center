@@ -2176,7 +2176,7 @@ async function displayPrayers(prayers) {
 
         return `
             <div class="${prayerClass}" data-date="${selectedDate}" data-prayer="${prayer.prayer_name}" data-can-toggle="${canToggle}" style="${itemStyle}">
-                <div class="prayer-name">${checkMark}${getPrayerName(prayer.prayer_name)}</div>
+                <div class="prayer-name">${getPrayerName(prayer.prayer_name)}${checkMark}</div>
                 <div class="prayer-time">${prayer.prayer_time}</div>
             </div>
         `;
@@ -2256,7 +2256,7 @@ async function loadDailyActivities() {
 
             return `
                 <div class="${activityClass}" data-date="${selectedDate}" data-activity="${activity.name}" data-can-toggle="${canToggle}" style="${itemStyle}">
-                    <div class="activity-name">${checkMark}<span class="activity-icon">${activity.icon}</span> <span class="activity-label">${activity.name}</span></div>
+                    <div class="activity-name"><span class="activity-icon">${activity.icon}</span> <span class="activity-label">${activity.name}</span>${checkMark}</div>
                 </div>
             `;
         }).join('');
