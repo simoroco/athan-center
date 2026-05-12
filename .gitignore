@@ -1,0 +1,39 @@
+# ===== Data directory structure =====
+# Keep the folder structure (via .gitkeep), exclude actual data files
+
+.athan-center.log
+
+# Development files (moved to dev/)
+dev/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.claude/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Test / tooling caches
+.pytest_cache/
+.windsurf/

@@ -2040,6 +2040,24 @@ app.get('/api/skip-next/reset', (req, res) => {
     }
 });
 
+// GET - Permanent silence (public open endpoint)
+// Disables all athans for the whole week and disables Al Kahf Sourat on Friday
+app.get('/api/silence/permanent', (req, res) => {
+    try {
+        db.prepare('UPDATE prayer_schedule SET enabled = 0').run();
+        db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run('friday_quran_enabled', '0');
+        scheduleFridayQuran();
+        log('[silence/permanent] All athans disabled for whole week and Al Kahf Sourat on Friday disabled');
+        res.json({
+            success: true,
+            message: 'Permanent silence enabled: all athans muted for the whole week and Al Kahf Sourat on Friday disabled'
+        });
+    } catch (error) {
+        logError('Error in /api/silence/permanent:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // GET - Skip next status
 app.get('/api/skip-next', (req, res) => {
     try {

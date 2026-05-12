@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Athan Center - Prayer Times</title>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
@@ -38,26 +38,20 @@
 
         <!-- Daily Activities Section -->
         <div class="daily-activities-section" id="daily-activities-section">
-            <div class="daily-activities-header" id="dailyActivitiesHeader">
-                <span class="daily-activities-title">📖 | 📿 | 🤲</span>
-                <span class="daily-activities-toggle">▼</span>
-            </div>
             <div class="daily-activities-content" id="dailyActivitiesContent">
                 <!-- Activities will be loaded dynamically -->
             </div>
         </div>
 
         <div class="date-navigation">
-            <button id="prevDay" class="nav-btn">⬅️ Previous Day</button>
+            <button id="prevDay" class="nav-btn"><span class="nav-btn-icon">⬅️</span><span class="nav-btn-label"> Previous Day</span></button>
             <button id="todayBtn" class="nav-btn">
-                🧎 Go Today (<br>
-                <span id="todayDate" class="btn-date"></span>)
+                <span class="nav-btn-icon">🧎</span><span class="nav-btn-label"> Go Today (<span id="todayDate" class="btn-date"></span>)</span>
             </button>
             <button id="calendarBtn" class="nav-btn calendar-btn" style="opacity: 0.7;">
-                📅 Calendar (<br>
-                <span id="currentDate" class="btn-date"></span>)
+                <span class="nav-btn-icon">📅</span><span class="nav-btn-label"> Calendar (<br></span><span id="currentDate" class="btn-date"></span><span class="nav-btn-label">)</span>
             </button>
-            <button id="nextDay" class="nav-btn">Next Day ➡️</button>
+            <button id="nextDay" class="nav-btn"><span class="nav-btn-label">Next Day </span><span class="nav-btn-icon">➡️</span></button>
         </div>
 
         <!-- Calendar Modal -->
@@ -472,7 +466,7 @@
             <div class="footer-content">
                 <span id="ramadanMoonFooter" class="ramadan-moon-footer" style="display: none;">🌙</span>
                 <img src="logo.png" alt="Athan Center logo" class="app-logo">
-                <p>© 2026 Athan Center | v3.7.5</p>
+                <p>© 2026 Athan Center | v3.8.0</p>
             </div>
         </footer>
     </div>

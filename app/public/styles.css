@@ -4,12 +4,22 @@
     box-sizing: border-box;
 }
 
+html {
+    touch-action: pan-x pan-y;
+    -ms-content-zooming: none;
+    -ms-touch-action: pan-x pan-y;
+}
+
 body {
     font-family: 'Apple Braille', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: #f5fdf9;
     min-height: 100vh;
     padding: 20px;
     color: #333;
+    touch-action: pan-x pan-y;
+    -webkit-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
+    text-size-adjust: 100%;
 }
 
 .container {
@@ -253,65 +263,27 @@ header h1 {
     padding: 20px;
 }
 
-.daily-activities-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px 20px;
-    margin-bottom: 5px;
-    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    user-select: none;
-}
-
-.daily-activities-header:hover {
-    background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
-    transform: translateX(5px);
-}
-
-.daily-activities-title {
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: #27ae60;
-    font-family: 'Consolas', 'Courier New', monospace;
-}
-
-.daily-activities-toggle {
-    font-size: 1rem;
-    color: #27ae60;
-    transition: transform 0.3s;
-}
-
-.daily-activities-header.collapsed .daily-activities-toggle {
-    transform: rotate(-90deg);
-}
-
 .daily-activities-content {
-    max-height: 500px;
-    overflow: hidden;
-    transition: max-height 0.3s ease;
-}
-
-.daily-activities-content.collapsed {
-    max-height: 0;
+    display: flex;
+    gap: 10px;
+    flex-wrap: nowrap;
 }
 
 .activity-item {
+    flex: 1;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     padding: 20px;
-    margin-bottom: 5px;
     background: #f8f9fa;
     border-radius: 12px;
     transition: all 0.3s;
+    min-width: 0;
 }
 
 .activity-item:hover {
     background: #e9ecef;
-    transform: translateX(5px);
+    transform: translateY(-2px);
 }
 
 .activity-item.past {
@@ -657,12 +629,53 @@ input:checked+.slider:before {
     }
 
     .date-navigation {
-        flex-direction: column;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        gap: 6px;
+        padding: 10px;
     }
 
-    .nav-btn,
     .date-input {
         width: 100%;
+    }
+
+    .nav-btn {
+        flex: 1 1 0;
+        min-width: 0;
+        padding: 10px 6px;
+        font-size: 1rem;
+        white-space: nowrap;
+    }
+
+    .nav-btn .nav-btn-label {
+        display: none;
+    }
+
+    .nav-btn .nav-btn-icon {
+        font-size: 1.2rem;
+    }
+
+    .nav-btn .btn-date {
+        font-size: 0.9rem;
+        display: inline;
+        margin-top: 0;
+        margin-left: 4px;
+    }
+
+    .daily-activities-content {
+        gap: 6px;
+    }
+
+    .activity-item {
+        padding: 14px 6px;
+    }
+
+    .activity-item .activity-label {
+        display: none;
+    }
+
+    .activity-item .activity-name {
+        font-size: 1.4rem;
     }
 
     .next-prayer-name {
@@ -1292,19 +1305,6 @@ body.dark-mode .prayer-time {
 
 body.dark-mode .daily-activities-section {
     background: #252830;
-}
-
-body.dark-mode .daily-activities-header {
-    background: #2d3748;
-    color: #e4e6eb;
-}
-
-body.dark-mode .daily-activities-header:hover {
-    background: #3a4556;
-}
-
-body.dark-mode .daily-activities-title {
-    color: #ffffff;
 }
 
 body.dark-mode .activity-item {

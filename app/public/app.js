@@ -1,6 +1,43 @@
 // API configuration
 const API_BASE = window.location.origin;
 
+// ===== DISABLE BROWSER ZOOM (mobile + desktop) =====
+(function disableBrowserZoom() {
+    // Block Ctrl/⌘ + wheel (desktop pinch / wheel-zoom)
+    window.addEventListener('wheel', (e) => {
+        if (e.ctrlKey || e.metaKey) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+
+    // Block Ctrl/⌘ + (+ / - / 0 / =) keyboard zoom
+    window.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && ['+', '-', '=', '0', 'Add', 'Subtract'].includes(e.key)) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+
+    // Block iOS / Android pinch-to-zoom (gesture + multi-touch)
+    ['gesturestart', 'gesturechange', 'gestureend'].forEach((evt) => {
+        document.addEventListener(evt, (e) => e.preventDefault(), { passive: false });
+    });
+    document.addEventListener('touchmove', (e) => {
+        if (e.touches && e.touches.length > 1) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+
+    // Block iOS double-tap zoom
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', (e) => {
+        const now = Date.now();
+        if (now - lastTouchEnd <= 300) {
+            e.preventDefault();
+        }
+        lastTouchEnd = now;
+    }, { passive: false });
+})();
+
 // ===== SERVER TIME SYNCHRONIZATION MODULE =====
 // This module ensures that the client always uses the server's time
 // instead of the local browser time, preventing issues with time zones and clock drift
@@ -115,7 +152,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     loadServerTime();
     loadUpdateInfo();
     initAccordion();  // Initialize accordion after all content is loaded
-    initDailyActivitiesCollapse();  // Initialize daily activities collapse
 
     // Start countdown AFTER prayers are loaded to ensure nextPrayerCard has correct data
     startCountdown();
@@ -1940,36 +1976,32 @@ function updateDateButtons() {
 
     // Update prevDay button label
     if (prevDayBtn) {
+        let prevLabel;
         if (dayDiff === 0) {
-            // Viewing today → prevDay = "Yesterday"
-            prevDayBtn.innerHTML = '⬅️ Yesterday';
+            prevLabel = ' Yesterday';
         } else if (dayDiff === 1) {
-            // Viewing tomorrow → prevDay = "Go today"
-            prevDayBtn.innerHTML = '⬅️ Go Today';
+            prevLabel = ' Go Today';
         } else if (dayDiff === -1) {
-            // Viewing yesterday → prevDay = "Before Yesterday"
-            prevDayBtn.innerHTML = '⬅️ Before Yesterday';
+            prevLabel = ' Before Yesterday';
         } else {
-            // Default
-            prevDayBtn.innerHTML = '⬅️ Previous Day';
+            prevLabel = ' Previous Day';
         }
+        prevDayBtn.innerHTML = `<span class="nav-btn-icon">⬅️</span><span class="nav-btn-label">${prevLabel}</span>`;
     }
 
     // Update nextDay button label
     if (nextDayBtn) {
+        let nextLabel;
         if (dayDiff === 0) {
-            // Viewing today → nextDay = "Tomorrow"
-            nextDayBtn.innerHTML = 'Tomorrow ➡️';
+            nextLabel = 'Tomorrow ';
         } else if (dayDiff === 1) {
-            // Viewing tomorrow → nextDay = "After Tomorrow"
-            nextDayBtn.innerHTML = 'After Tomorrow ➡️';
+            nextLabel = 'After Tomorrow ';
         } else if (dayDiff === -1) {
-            // Viewing yesterday → nextDay = "Go today"
-            nextDayBtn.innerHTML = 'Go Today ➡️';
+            nextLabel = 'Go Today ';
         } else {
-            // Default
-            nextDayBtn.innerHTML = 'Next Day ➡️';
+            nextLabel = 'Next Day ';
         }
+        nextDayBtn.innerHTML = `<span class="nav-btn-label">${nextLabel}</span><span class="nav-btn-icon">➡️</span>`;
     }
 
     // Update calendar button with natural labels
@@ -1977,22 +2009,19 @@ function updateDateButtons() {
         const todayFormatted = formatDateLocal(today);
         const currentFormatted = formatDateLocal(currentDate);
 
+        let calendarLabel;
         if (dayDiff === 0) {
-            // Viewing today
-            calendarBtn.innerHTML = `📅 Today (<br><span class="btn-date">${currentDateStr}</span>)`;
+            calendarLabel = 'Today';
         } else if (dayDiff === 1) {
-            // Viewing tomorrow
-            calendarBtn.innerHTML = `📅 Tomorrow (<br><span class="btn-date">${currentDateStr}</span>)`;
+            calendarLabel = 'Tomorrow';
         } else if (dayDiff === -1) {
-            // Viewing yesterday
-            calendarBtn.innerHTML = `📅 Yesterday (<br><span class="btn-date">${currentDateStr}</span>)`;
+            calendarLabel = 'Yesterday';
         } else if (isSameWeek(today, currentDate) && dayDiff !== 0) {
-            // Viewing another day in the current week (before or after today)
-            calendarBtn.innerHTML = `📅 This ${currentWeekday} (<br><span class="btn-date">${currentDateStr}</span>)`;
+            calendarLabel = `This ${currentWeekday}`;
         } else {
-            // Default: show weekday name
-            calendarBtn.innerHTML = `📅 ${currentWeekday} (<br><span class="btn-date">${currentDateStr}</span>)`;
+            calendarLabel = currentWeekday;
         }
+        calendarBtn.innerHTML = `<span class="nav-btn-icon">📅</span><span class="nav-btn-label"> ${calendarLabel} (<br></span><span class="btn-date">${currentDateStr}</span><span class="nav-btn-label">)</span>`;
     }
 
     // Disable todayBtn when viewing today's prayers
@@ -2226,7 +2255,7 @@ async function loadDailyActivities() {
 
             return `
                 <div class="${activityClass}" data-date="${selectedDate}" data-activity="${activity.name}" data-can-toggle="${canToggle}" style="${itemStyle}">
-                    <div class="activity-name">${checkMark}${activity.icon} ${activity.name}</div>
+                    <div class="activity-name">${checkMark}<span class="activity-icon">${activity.icon}</span> <span class="activity-label">${activity.name}</span></div>
                 </div>
             `;
         }).join('');
@@ -2256,21 +2285,6 @@ async function loadDailyActivities() {
     } catch (error) {
         console.error('Error loading daily activities:', error);
     }
-}
-
-// Initialize daily activities collapse/expand functionality
-function initDailyActivitiesCollapse() {
-    const header = document.getElementById('dailyActivitiesHeader');
-    const content = document.getElementById('dailyActivitiesContent');
-
-    // Start collapsed by default
-    header.classList.add('collapsed');
-    content.classList.add('collapsed');
-
-    header.addEventListener('click', () => {
-        header.classList.toggle('collapsed');
-        content.classList.toggle('collapsed');
-    });
 }
 
 // Validate that nextPrayer is coherent with today's prayers list
