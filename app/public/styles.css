@@ -250,14 +250,16 @@ header h1 {
 .prayer-check-mark {
     color: #2a6dd1;
     font-weight: bold;
-    font-size: 1.4rem;
+    font-size: 1.5rem;
+    line-height: 1;
     margin-left: 8px;
 }
 
 .prayer-redcheck-mark {
     color: #ff8c00;
     font-weight: bold;
-    font-size: 1.4rem;
+    font-size: 1.5rem;
+    line-height: 1;
     margin-left: 8px;
 }
 
@@ -265,6 +267,17 @@ header h1 {
     font-size: 1.5rem;
     font-weight: 400;
     color: #2a6dd1;
+}
+
+.prayer-meta {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.prayer-meta .prayer-check-mark,
+.prayer-meta .prayer-redcheck-mark {
+    margin-left: 0;
 }
 
 .prayer-item.past {
@@ -718,6 +731,10 @@ input:checked+.slider:before {
 
     .nav-btn .nav-btn-icon {
         font-size: 1.5rem;
+    }
+
+    #calendarBtn {
+        gap: 2px;
     }
 
     .nav-btn .btn-date {
@@ -1398,7 +1415,27 @@ body.dark-mode .prayer-name {
 }
 
 body.dark-mode .prayer-time {
-    color: #114bb2;
+    color: #60A5FA !important;
+}
+
+/* Dark mode: checked prayer name + check + activity label use the same lighter blue */
+body.dark-mode .prayer-check-mark {
+    color: #60A5FA;
+}
+
+body.dark-mode .prayer-item:has(.prayer-check-mark, .prayer-redcheck-mark) .prayer-name {
+    color: #60A5FA !important;
+}
+
+body.dark-mode .activity-item:has(.prayer-check-mark, .prayer-redcheck-mark) .activity-label,
+body.dark-mode .activity-item:has(.prayer-check-mark, .prayer-redcheck-mark) .activity-name {
+    color: #60A5FA !important;
+}
+
+/* Past not-checked stays red (in both modes) */
+body.dark-mode .prayer-item.past:not(:has(.prayer-check-mark, .prayer-redcheck-mark)) .prayer-name,
+body.dark-mode .prayer-item.past:not(:has(.prayer-check-mark, .prayer-redcheck-mark)) .prayer-time {
+    color: #ef4444 !important;
 }
 
 body.dark-mode .daily-activities-section {
@@ -1526,16 +1563,10 @@ body.dark-mode .dua-card {
     border: 2px solid #4a5568;
 }
 
-body.dark-mode .dua-text {
-    color: #e4e6eb;
-}
-
-body.dark-mode .dua-text.arabic {
-    color: #114bb2;
-}
-
+body.dark-mode .dua-text,
+body.dark-mode .dua-text.arabic,
 body.dark-mode .dua-text.english {
-    color: #114bb2;
+    color: #60A5FA;
 }
 
 body.dark-mode .calendar-modal-content {

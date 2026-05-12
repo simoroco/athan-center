@@ -2176,8 +2176,8 @@ async function displayPrayers(prayers) {
 
         return `
             <div class="${prayerClass}" data-date="${selectedDate}" data-prayer="${prayer.prayer_name}" data-can-toggle="${canToggle}" style="${itemStyle}">
-                <div class="prayer-name">${getPrayerName(prayer.prayer_name)}${checkMark}</div>
-                <div class="prayer-time">${prayer.prayer_time}</div>
+                <div class="prayer-name">${getPrayerName(prayer.prayer_name)}</div>
+                <div class="prayer-meta">${checkMark}<div class="prayer-time">${prayer.prayer_time}</div></div>
             </div>
         `;
     }).join('');
