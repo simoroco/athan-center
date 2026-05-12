@@ -369,8 +369,8 @@ header h1 {
 }
 
 .prayer-name {
-    font-size: 1.15rem;
-    font-weight: 700;
+    font-size: 1.3rem;
+    font-weight: 800;
     color: var(--text-primary);
     font-family: 'Consolas', 'Courier New', monospace;
     text-shadow:
@@ -408,8 +408,8 @@ header h1 {
 }
 
 .prayer-time {
-    font-size: 1rem;
-    font-weight: 600;
+    font-size: 1.15rem;
+    font-weight: 800;
     color: var(--text-accent);
     text-shadow:
         0 0 2px var(--text-shadow-strong),
@@ -558,6 +558,14 @@ header h1 {
 .action-btn .action-btn-icon {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
+    width: 1.4em;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.action-btn .action-btn-icon svg {
+    display: block;
 }
 
 .warning-btn {
@@ -1204,6 +1212,7 @@ header h1 {
     max-width: calc(100% + calc(var(--door-width) * 0.05));
     justify-self: center;
     align-self: center;
+    margin-inline: auto;
     background: var(--color-danger-bg);
     color: var(--color-danger);
     border: 1px solid var(--color-danger-border);
