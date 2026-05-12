@@ -428,6 +428,8 @@ async function checkSkipNextStatus() {
             // Not the right date - hide both button AND banner completely
             muteAlert.style.display = 'none';
             skipBtn.style.display = 'none';
+            const cardEl = document.getElementById('nextPrayerCard');
+            if (cardEl) cardEl.classList.remove('banner-up');
             return;
         }
 
@@ -443,6 +445,8 @@ async function checkSkipNextStatus() {
         if (!shouldShowBanner) {
             // Hide banner but keep button enabled
             muteAlert.style.display = 'none';
+            const cardEl = document.getElementById('nextPrayerCard');
+            if (cardEl) cardEl.classList.remove('banner-up');
             return;
         }
 
@@ -463,6 +467,11 @@ async function checkSkipNextStatus() {
         muteAlert.style.display = 'block';
         muteAlert.dataset.muteType = muteType;
         muteAlert.dataset.prayerName = mutedPrayerName || '';
+
+        // Safety: if the banner overlaps with the prayers-list (e.g. when the
+        // card content is shorter than the banner), shift it to the top of
+        // the card via the .banner-up modifier class.
+        ensureBannerDoesNotOverlap();
 
         // Grey out the skip button if already muted
         skipBtn.classList.add('disabled');
@@ -2442,10 +2451,36 @@ function fitPrayerNameOnOneLine(nameDiv) {
 
 // Hide the next prayer card — keep its space reserved so prayers-list and
 // the rest of the layout stay in place even on future dates.
+// Make sure .mute-alert-banner never visually overlaps with .prayers-list.
+// If it does (extreme content size, narrow viewport, etc.), add .banner-up on
+// the card so the banner moves to the top.
+function ensureBannerDoesNotOverlap() {
+    requestAnimationFrame(() => {
+        const card = document.getElementById('nextPrayerCard');
+        const banner = document.getElementById('muteAlertBanner');
+        const list = document.querySelector('.prayers-list');
+        if (!card || !banner || !list) return;
+        if (banner.style.display === 'none' || banner.offsetParent === null) {
+            card.classList.remove('banner-up');
+            return;
+        }
+        // Temporarily un-shift to measure natural position
+        card.classList.remove('banner-up');
+        const bannerRect = banner.getBoundingClientRect();
+        const listRect = list.getBoundingClientRect();
+        if (bannerRect.bottom > listRect.top) {
+            card.classList.add('banner-up');
+        }
+    });
+}
+
+window.addEventListener('resize', () => ensureBannerDoesNotOverlap());
+
 function hideNextPrayerCard() {
     const card = document.getElementById('nextPrayerCard');
     card.style.visibility = 'hidden';
     card.style.display = '';
+    card.classList.remove('banner-up');
 
     // Also hide mute button and banner when card is hidden
     const skipBtn = document.getElementById('skipNextBtn');

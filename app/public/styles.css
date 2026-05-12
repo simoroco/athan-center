@@ -215,10 +215,17 @@ header h1 {
     max-width: var(--door-width);
     min-height: var(--arch-height);
     aspect-ratio: auto;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    display: grid;
+    grid-template-rows: auto auto auto auto;
+    grid-template-areas:
+        "label"
+        "name"
+        "time"
+        "countdown";
+    justify-items: center;
+    align-content: center;
     align-items: center;
+    row-gap: 0;
     text-shadow:
         0 0 2px var(--card-glow),
         0 0 5px var(--card-glow-soft),
@@ -227,6 +234,12 @@ header h1 {
     paint-order: stroke fill;
     font-weight: 700;
 }
+
+.next-prayer-label    { grid-area: label; }
+.next-prayer-name     { grid-area: name; }
+.next-prayer-time     { grid-area: time; }
+.next-prayer-countdown,
+.mute-alert-banner    { grid-area: countdown; }
 
 .next-prayer-card.playing-athan {
     animation: pulsate-glow 1.4s ease-in-out infinite;
@@ -377,6 +390,13 @@ header h1 {
     line-height: 1;
     margin-left: 8px;
     font-family: 'Apple Braille', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    text-shadow:
+        0 0 2px var(--text-shadow-strong),
+        0 0 6px var(--text-shadow-color),
+        0 0 12px var(--text-shadow-color),
+        0 1px 2px var(--text-shadow-color);
+    -webkit-text-stroke: 0.4px var(--text-shadow-color);
+    paint-order: stroke fill;
 }
 
 .prayer-check-mark {
@@ -410,6 +430,7 @@ header h1 {
 .prayer-meta .prayer-check-mark,
 .prayer-meta .prayer-redcheck-mark {
     margin-left: 0;
+    margin-right: 8px;
 }
 
 .prayer-item.past {
@@ -1175,13 +1196,14 @@ header h1 {
 
 /* Mute alert banner */
 .mute-alert-banner {
-    /* Overlaid on top of the next-prayer-countdown line inside the card.
-       Width matches a .prayer-item (98% of .prayers-list which is 85% of container = ~83.3%). */
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    bottom: calc(var(--door-width) * 0.025 - 10px);
-    width: 83.3%;
+    /* Banner shares the same grid cell as .next-prayer-countdown.
+       When visible (JS sets display: block), it covers the countdown text.
+       Width matches a .prayer-item exactly: 0.98 × 0.85 = 0.833 × container width.
+       Use calc on door-width so it ignores the card's inner padding. */
+    width: calc(var(--door-width) * 0.833);
+    max-width: calc(100% + calc(var(--door-width) * 0.05));
+    justify-self: center;
+    align-self: center;
     background: var(--color-danger-bg);
     color: var(--color-danger);
     border: 1px solid var(--color-danger-border);
@@ -1193,6 +1215,27 @@ header h1 {
     box-shadow: 0 4px 8px rgba(220, 38, 38, 0.08);
     cursor: pointer;
     z-index: 10;
+}
+
+/* When the mute alert is visible, hide the countdown underneath. */
+.next-prayer-card:has(.mute-alert-banner:not([style*="display: none"])) .next-prayer-countdown {
+    visibility: hidden;
+}
+
+/* Safety modifier (set by JS via ensureBannerDoesNotOverlap) — if the banner
+   would overlap with .prayers-list, snap it to the top of the card. */
+.next-prayer-card.banner-up .mute-alert-banner {
+    grid-area: label;
+}
+
+.next-prayer-card.banner-up .next-prayer-label {
+    visibility: hidden;
+}
+
+/* The countdown remains visible when the banner moves up (it no longer shares
+   the same cell). */
+.next-prayer-card.banner-up:has(.mute-alert-banner:not([style*="display: none"])) .next-prayer-countdown {
+    visibility: visible;
 }
 
 /* Skip button disabled state */
@@ -1897,27 +1940,45 @@ body.dark-mode .audio-notification-content {
     .container {
         max-width: 760px;
         display: grid;
-        grid-template-columns: 1fr var(--door-width) 1fr;
+        /* 4 columns:
+           1 = activities sidebar (1fr)
+           2 = left half of door (door-width / 2)
+           3 = right half of door (door-width / 2)
+           4 = actions sidebar (1fr)
+        */
+        grid-template-columns:
+            minmax(0, 1fr)
+            calc((var(--door-width) - 6px) / 2)
+            calc((var(--door-width) - 6px) / 2)
+            minmax(0, 1fr);
         grid-template-areas:
-            ".            card     ."
-            ".            weekday  ."
-            "activities   prayers  actions"
-            ".            date     .";
-        column-gap: 12px;
+            ".          card     card     ."
+            ".          weekday  weekday  ."
+            "activities prayers  prayers  actions"
+            "prev       today    cal      next";
+        column-gap: 6px;
         align-items: start;
         justify-items: center;
     }
 
-    #nextPrayerCard       { grid-area: card; justify-self: center; }
-    #weekdayMuteBanner    { grid-area: weekday; }
-    .prayers-list         { grid-area: prayers; }
+    #nextPrayerCard           { grid-area: card; justify-self: center; }
+    #weekdayMuteBanner        { grid-area: weekday; }
+    .prayers-list             { grid-area: prayers; }
     .daily-activities-section { grid-area: activities; width: 100%; align-self: start; }
-    .actions              { grid-area: actions; width: 100%; align-self: start; }
-    .date-navigation      { grid-area: date; width: var(--door-width); }
+    .actions                  { grid-area: actions; width: 100%; align-self: start; }
+
+    /* Date-navigation buttons are placed directly into the grid */
+    .date-navigation {
+        display: contents;
+    }
+    #prevDay      { grid-area: prev; width: 100%; }
+    #todayBtn     { grid-area: today; width: 100%; }
+    #calendarBtn  { grid-area: cal; width: 100%; }
+    #nextDay      { grid-area: next; width: 100%; }
 
     /* Reduce card margin-bottom by 20px on desktop */
     .next-prayer-card {
-        margin-bottom: calc(var(--bg-image-height) * 0.02 - 43px);
+        margin-bottom: calc(var(--bg-image-height) * 0.02 - 68px);
     }
 
     /* Vertical layout for sidebars */
@@ -1950,20 +2011,37 @@ body.dark-mode .audio-notification-content {
     .action-btn {
         width: 100%;
         padding: 10px 12px;
-        font-size: 0.85rem;
+        font-size: 1.15rem;
         gap: 8px;
         justify-content: flex-start;
     }
 
-    /* Nav buttons fill date-navigation row width and show their labels */
+    /* Nav buttons fill their grid cell and show labels horizontally */
     .nav-btn {
-        font-size: 0.85rem;
-        padding: 8px 10px;
+        font-size: 1.15rem;
+        padding: 10px 12px;
+        justify-content: flex-start;
+        gap: 8px;
     }
 
-    /* Activity name allows label to display naturally */
+    /* prevDay: default left alignment.
+       todayBtn and calendarBtn: centered (middle column).
+       nextDay: right-aligned. */
+    #todayBtn,
+    #calendarBtn {
+        justify-content: center;
+    }
+
+    #nextDay {
+        justify-content: flex-end;
+    }
+
+    /* Activity name allows label to display naturally with the same size as prayer-name */
     .activity-name {
-        font-size: 1rem;
+        font-size: 1.15rem;
         white-space: nowrap;
     }
+
+    /* Mute alert banner: grid-placement handles positioning,
+       so no specific desktop override needed. */
 }
