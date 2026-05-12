@@ -845,160 +845,153 @@ input:checked+.slider:before {
 }
 
 /* Responsive */
-@media (max-width: 768px) {
-    body {
-        padding: 8px;
-        /* Mobile: shift bg image down by 100px */
-        background-position: center, center calc(var(--bg-y-offset) + 100px);
-    }
+/* ====== UNIFIED DESIGN (mobile design applied to all viewports) ====== */
 
-    /* Mobile: push the whole container down by 50px */
-    .container {
-        margin-top: 50px;
-    }
+body {
+    padding: 8px;
+    background-position: center, center calc(var(--bg-y-offset) + 100px);
+}
 
-    /* On mobile, reduce the gap between bg image arch and card so content sits higher */
-    .next-prayer-card {
-        margin-top: calc(var(--bg-image-height) * 0.01);
-    }
+.container {
+    margin-top: 50px;
+}
 
-    /* Mobile light/normal mode: reduce transparency on components by 30 points */
-    body:not(.dark-mode) {
-        --component-bg: rgba(255, 255, 255, 0.5);
-        --component-bg-hover: rgba(255, 255, 255, 0.7);
-        --component-border: rgba(255, 255, 255, 0.7);
-        --component-border-hover: rgba(255, 255, 255, 0.85);
-        --color-danger-bg: rgba(254, 226, 226, 0.5);
-        --color-danger-border: rgba(254, 202, 202, 0.8);
-        --color-danger-hover-bg: rgba(254, 202, 202, 0.7);
-    }
+.next-prayer-card {
+    margin-top: calc(var(--bg-image-height) * 0.01);
+}
 
-    /* Mobile light/normal mode: visible gold halo around card text */
-    body:not(.dark-mode) .next-prayer-card {
-        text-shadow:
-            0 0 3px rgba(212, 175, 55, 1),
-            0 0 7px rgba(212, 175, 55, 0.95),
-            0 0 14px rgba(212, 175, 55, 0.75),
-            0 0 22px rgba(212, 175, 55, 0.55),
-            0 1px 3px rgba(0, 0, 0, 0.45);
-        -webkit-text-stroke: 0.8px rgba(212, 175, 55, 0.85);
-    }
+body:not(.dark-mode) {
+    --component-bg: rgba(255, 255, 255, 0.5);
+    --component-bg-hover: rgba(255, 255, 255, 0.7);
+    --component-border: rgba(255, 255, 255, 0.7);
+    --component-border-hover: rgba(255, 255, 255, 0.85);
+    --color-danger-bg: rgba(254, 226, 226, 0.5);
+    --color-danger-border: rgba(254, 202, 202, 0.8);
+    --color-danger-hover-bg: rgba(254, 202, 202, 0.7);
+}
 
-    /* Mobile dark mode: black halo matching the gold halo intensity used in light mode */
-    body.dark-mode .next-prayer-card {
-        text-shadow:
-            0 0 3px rgba(0, 0, 0, 1),
-            0 0 7px rgba(0, 0, 0, 0.95),
-            0 0 14px rgba(0, 0, 0, 0.75),
-            0 0 22px rgba(0, 0, 0, 0.55),
-            0 1px 3px rgba(0, 0, 0, 0.45);
-        -webkit-text-stroke: 0.8px rgba(0, 0, 0, 0.85);
-    }
+body:not(.dark-mode) .next-prayer-card {
+    text-shadow:
+        0 0 3px rgba(212, 175, 55, 1),
+        0 0 7px rgba(212, 175, 55, 0.95),
+        0 0 14px rgba(212, 175, 55, 0.75),
+        0 0 22px rgba(212, 175, 55, 0.55),
+        0 1px 3px rgba(0, 0, 0, 0.45);
+    -webkit-text-stroke: 0.8px rgba(212, 175, 55, 0.85);
+}
 
-    /* Mobile: reduce prayer-list width by 15% (centered) */
-    .prayers-list {
-        padding: 2px 0;
-        width: 85%;
-        margin: 0 auto 21px;
-    }
+body.dark-mode .next-prayer-card {
+    text-shadow:
+        0 0 3px rgba(0, 0, 0, 1),
+        0 0 7px rgba(0, 0, 0, 0.95),
+        0 0 14px rgba(0, 0, 0, 0.75),
+        0 0 22px rgba(0, 0, 0, 0.55),
+        0 1px 3px rgba(0, 0, 0, 0.45);
+    -webkit-text-stroke: 0.8px rgba(0, 0, 0, 0.85);
+}
 
-    .prayer-item {
-        padding: 10px 10px;
-        min-height: 59px;
-    }
+.prayers-list {
+    padding: 2px 0;
+    width: 85%;
+    margin: 0 auto 21px;
+}
 
-    .daily-activities-section {
-        padding: 2px 0;
-    }
+.prayer-item {
+    padding: 10px 10px;
+    min-height: 59px;
+}
 
-    header h1 {
-        font-size: 2rem;
-    }
+.daily-activities-section {
+    padding: 2px 0;
+}
 
-    .date-navigation {
-        flex-direction: row;
-        flex-wrap: nowrap;
-        gap: 5px;
-        padding: 3px 0;
-    }
+header h1 {
+    font-size: 2rem;
+}
 
-    .date-input {
-        width: 100%;
-    }
+.date-navigation {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 5px;
+    padding: 3px 0;
+}
 
-    .nav-btn {
-        flex: 1 1 0;
-        min-width: 0;
-        min-height: 59px;
-        padding: 8px 6px;
-        font-size: 0.8rem;
-        white-space: nowrap;
-    }
+.date-input {
+    width: 100%;
+}
 
-    .nav-btn .nav-btn-label {
-        display: none;
-    }
+.nav-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 59px;
+    padding: 8px 6px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
 
-    .nav-btn .nav-btn-icon {
-        font-size: 1.5rem;
-    }
+.nav-btn .nav-btn-label {
+    display: none;
+}
 
-    #calendarBtn {
-        gap: 2px;
-    }
+.nav-btn .nav-btn-icon {
+    font-size: 1.5rem;
+}
 
-    .nav-btn .btn-date {
-        font-size: 1rem;
-        display: inline;
-        margin: 0;
-    }
+#calendarBtn {
+    gap: 2px;
+}
 
-    .daily-activities-content {
-        gap: 6px;
-    }
+.nav-btn .btn-date {
+    font-size: 1rem;
+    display: inline;
+    margin: 0;
+}
 
-    .activity-item {
-        padding: 8px 6px;
-        min-height: 59px;
-    }
+.daily-activities-content {
+    gap: 6px;
+}
 
-    .activity-item .activity-label {
-        display: none;
-    }
+.activity-item {
+    padding: 8px 6px;
+    min-height: 59px;
+}
 
-    .activity-item .activity-name {
-        font-size: 1.4rem;
-    }
+.activity-item .activity-label {
+    display: none;
+}
 
-    .actions {
-        flex-direction: row;
-        flex-wrap: nowrap;
-        gap: 5px;
-        padding: 4px 0;
-    }
+.activity-item .activity-name {
+    font-size: 1.4rem;
+}
 
-    .action-btn {
-        flex: 1 1 0;
-        min-width: 0;
-        min-height: 59px;
-        padding: 8px 6px;
-        font-size: 0.8rem;
-        white-space: nowrap;
-    }
+.actions {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 5px;
+    padding: 4px 0;
+}
 
-    .action-btn .action-btn-label {
-        display: none;
-    }
+.action-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 59px;
+    padding: 8px 6px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
 
-    .action-btn .action-btn-icon {
-        font-size: 1.5rem;
-    }
+.action-btn .action-btn-label {
+    display: none;
+}
 
-    .modal-content {
-        margin: 20px;
-        width: calc(100% - 40px);
-        padding: 20px;
-    }
+.action-btn .action-btn-icon {
+    font-size: 1.5rem;
+}
+
+.modal-content {
+    margin: 20px;
+    width: calc(100% - 40px);
+    padding: 20px;
 }
 
 
