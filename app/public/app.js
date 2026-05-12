@@ -1268,7 +1268,7 @@ function setupEventListeners() {
             volumeSlider.classList.add('volume-high');
         } else {
             volumeWarning.style.display = 'none';
-            volumeSlider.style.background = 'linear-gradient(to right, #27ae60 0%, #1e8449 100%)';
+            volumeSlider.style.background = 'linear-gradient(to right, #2a6dd1 0%, #114bb2 100%)';
             volumeSlider.classList.remove('volume-high');
         }
     }
@@ -1338,7 +1338,7 @@ function setupEventListeners() {
             fajrVolumeSlider.classList.add('volume-high');
         } else {
             fajrVolumeWarning.style.display = 'none';
-            fajrVolumeSlider.style.background = 'linear-gradient(to right, #27ae60 0%, #1e8449 100%)';
+            fajrVolumeSlider.style.background = 'linear-gradient(to right, #2a6dd1 0%, #114bb2 100%)';
             fajrVolumeSlider.classList.remove('volume-high');
         }
     }
@@ -2022,7 +2022,7 @@ function updateDateButtons() {
         } else {
             calendarLabel = currentWeekday;
         }
-        calendarBtn.innerHTML = `<span class="nav-btn-icon"><svg class="icon"><use href="#i-calendar"/></svg></span><span class="nav-btn-label"> ${calendarLabel} (</span><span class="btn-date">${currentDateStr}</span><span class="nav-btn-label">)</span>`;
+        calendarBtn.innerHTML = `<span class="nav-btn-icon"><svg class="icon"><use href="#i-calendar"/></svg></span><span class="nav-btn-text"><span class="nav-btn-label">${calendarLabel} (</span><span class="btn-date">${currentDateStr}</span><span class="nav-btn-label">)</span></span>`;
     }
 
     // Disable todayBtn when viewing today's prayers
@@ -3766,7 +3766,7 @@ function renderPrayerPieChart() {
             labels: ['Not Done', 'On Time', 'Late'],
             datasets: [{
                 data: [lastWeekData.not_done, lastWeekData.on_time, lastWeekData.late],
-                backgroundColor: ['#6c757d', '#27ae60', '#ff8c00'],
+                backgroundColor: ['#6c757d', '#2a6dd1', '#ff8c00'],
                 borderWidth: 2,
                 borderColor: isDarkMode ? '#1a202c' : '#fff'
             }]
@@ -3846,7 +3846,7 @@ function renderPrayerBarChart() {
                 {
                     label: 'On Time',
                     data: recentData.map(s => s.on_time),
-                    backgroundColor: '#27ae60',
+                    backgroundColor: '#2a6dd1',
                     stack: 'stack0'
                 }
             ]
@@ -3926,7 +3926,7 @@ function renderActivityPieChart() {
             labels: ['Not Done', 'On Time', 'Late'],
             datasets: [{
                 data: [lastWeekData.not_done, lastWeekData.on_time, lastWeekData.late],
-                backgroundColor: ['#6c757d', '#27ae60', '#ff8c00'],
+                backgroundColor: ['#6c757d', '#2a6dd1', '#ff8c00'],
                 borderWidth: 2,
                 borderColor: isDarkMode ? '#1a202c' : '#fff'
             }]
@@ -4006,7 +4006,7 @@ function renderActivityBarChart() {
                 {
                     label: 'On Time',
                     data: recentData.map(s => s.on_time),
-                    backgroundColor: '#27ae60',
+                    backgroundColor: '#2a6dd1',
                     stack: 'stack0'
                 }
             ]
@@ -4110,7 +4110,7 @@ function showFullscreenChart(title, data, type) {
                 {
                     label: 'On Time',
                     data: completeData.map(s => s.on_time),
-                    backgroundColor: '#27ae60',
+                    backgroundColor: '#2a6dd1',
                     stack: 'stack0'
                 }
             ]

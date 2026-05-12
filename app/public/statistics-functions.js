@@ -120,7 +120,7 @@ function renderPrayerPieChart() {
             labels: ['Not Done', 'On Time', 'Late'],
             datasets: [{
                 data: [prayerLast7DaysData.not_done, prayerLast7DaysData.on_time, prayerLast7DaysData.late],
-                backgroundColor: ['#6c757d', '#27ae60', '#ff8c00'],
+                backgroundColor: ['#6c757d', '#2a6dd1', '#ff8c00'],
                 borderWidth: 2,
                 borderColor: isDarkMode ? '#1a202c' : '#fff'
             }]
@@ -204,7 +204,7 @@ function renderPrayerBarChart() {
                 {
                     label: 'On Time',
                     data: recentData.map(s => s.on_time),
-                    backgroundColor: '#27ae60',
+                    backgroundColor: '#2a6dd1',
                     stack: 'stack0'
                 }
             ]
@@ -269,7 +269,7 @@ function renderActivityPieChart() {
             labels: ['Not Done', 'On Time', 'Late'],
             datasets: [{
                 data: [activityLast7DaysData.not_done, activityLast7DaysData.on_time, activityLast7DaysData.late],
-                backgroundColor: ['#6c757d', '#27ae60', '#ff8c00'],
+                backgroundColor: ['#6c757d', '#2a6dd1', '#ff8c00'],
                 borderWidth: 2,
                 borderColor: isDarkMode ? '#1a202c' : '#fff'
             }]
@@ -351,7 +351,7 @@ function renderActivityBarChart() {
                 {
                     label: 'On Time',
                     data: recentData.map(s => s.on_time),
-                    backgroundColor: '#27ae60',
+                    backgroundColor: '#2a6dd1',
                     stack: 'stack0'
                 }
             ]
@@ -445,7 +445,7 @@ function showFullscreenChart(title, data, type) {
                 {
                     label: 'On Time',
                     data: data.map(s => s.on_time),
-                    backgroundColor: '#27ae60',
+                    backgroundColor: '#2a6dd1',
                     stack: 'stack0'
                 }
             ]

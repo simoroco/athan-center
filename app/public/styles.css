@@ -12,7 +12,7 @@ html {
 
 body {
     font-family: 'Apple Braille', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #f5fdf9;
+    background: #F0F4FF;
     min-height: 100vh;
     padding: 20px;
     color: #333;
@@ -32,7 +32,7 @@ body {
 }
 
 header {
-    background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%);
+    background: linear-gradient(135deg, #2a6dd1 0%, #114bb2 100%);
     color: white;
     padding: 30px;
     text-align: center;
@@ -118,7 +118,7 @@ header h1 {
 
 .date-input {
     padding: 10px;
-    border: 2px solid #27ae60;
+    border: 2px solid #2a6dd1;
     border-radius: 8px;
     font-size: 1rem;
     flex: 2;
@@ -126,20 +126,20 @@ header h1 {
 }
 
 .next-prayer-card {
-    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    background: linear-gradient(135deg, #2a6dd1 0%, #114bb2 100%);
     color: white;
     padding: 30px;
     text-align: center;
     margin: 20px;
     border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(17, 153, 142, 0.3);
+    box-shadow: 0 10px 30px rgba(42, 109, 209, 0.3);
     transition: all 0.3s ease;
     position: relative;
 }
 
 .next-prayer-card.playing-athan {
     animation: pulsate-glow 2s ease-in-out infinite;
-    box-shadow: 0 0 30px rgba(39, 174, 96, 0.8), 0 10px 40px rgba(17, 153, 142, 0.5);
+    box-shadow: 0 0 30px rgba(42, 109, 209, 0.8), 0 10px 40px rgba(59, 130, 246, 0.5);
     cursor: pointer;
 }
 
@@ -148,12 +148,12 @@ header h1 {
     0%,
     100% {
         transform: scale(1);
-        box-shadow: 0 0 30px rgba(39, 174, 96, 0.8), 0 10px 40px rgba(17, 153, 142, 0.5);
+        box-shadow: 0 0 30px rgba(42, 109, 209, 0.8), 0 10px 40px rgba(59, 130, 246, 0.5);
     }
 
     50% {
         transform: scale(1.02);
-        box-shadow: 0 0 50px rgba(39, 174, 96, 1), 0 10px 50px rgba(17, 153, 142, 0.7);
+        box-shadow: 0 0 50px rgba(42, 109, 209, 1), 0 10px 50px rgba(59, 130, 246, 0.7);
     }
 }
 
@@ -199,12 +199,12 @@ header h1 {
 }
 
 .dua-card {
-    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    background: linear-gradient(135deg, #2a6dd1 0%, #114bb2 100%);
     color: white;
     padding: 25px;
     margin: 25px 20px 10px 20px;
     border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(17, 153, 142, 0.25);
+    box-shadow: 0 10px 30px rgba(42, 109, 209, 0.25);
     text-align: center;
 }
 
@@ -247,7 +247,7 @@ header h1 {
 }
 
 .prayer-check-mark {
-    color: #27ae60;
+    color: #2a6dd1;
     font-weight: bold;
     font-size: 1.4rem;
     margin-left: 8px;
@@ -263,7 +263,7 @@ header h1 {
 .prayer-time {
     font-size: 1.5rem;
     font-weight: 400;
-    color: #27ae60;
+    color: #2a6dd1;
 }
 
 .prayer-item.past {
@@ -283,7 +283,7 @@ header h1 {
 
 /* Checked prayer → green text */
 .prayer-item:has(.prayer-check-mark, .prayer-redcheck-mark) .prayer-name {
-    color: #27ae60 !important;
+    color: #2a6dd1 !important;
 }
 
 /* Daily Activities Section */
@@ -326,7 +326,7 @@ header h1 {
 /* Checked activity → green label */
 .activity-item:has(.prayer-check-mark, .prayer-redcheck-mark) .activity-label,
 .activity-item:has(.prayer-check-mark, .prayer-redcheck-mark) .activity-name {
-    color: #27ae60 !important;
+    color: #2a6dd1 !important;
 }
 
 .activity-name {
@@ -417,6 +417,12 @@ footer {
     display: block;
     text-align: center;
     margin-bottom: 10px;
+    color: #D4AF37;
+}
+
+.ramadan-moon-card,
+.ramadan-moon {
+    color: #D4AF37;
 }
 
 .app-version {
@@ -498,7 +504,7 @@ footer {
 }
 
 .settings-section-header.active {
-    background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%);
+    background: linear-gradient(135deg, #2a6dd1 0%, #114bb2 100%);
 }
 
 .settings-section-header.active h3 {
@@ -511,14 +517,14 @@ footer {
 
 .settings-section h3 {
     margin: 0;
-    color: #27ae60;
+    color: #2a6dd1;
     font-size: 1.1rem;
     transition: color 0.3s ease;
 }
 
 .section-toggle {
     font-size: 1.3rem;
-    color: #27ae60;
+    color: #2a6dd1;
     transition: transform 0.3s ease, color 0.3s ease;
 }
 
@@ -560,12 +566,12 @@ footer {
 
 .input-field:focus {
     outline: none;
-    border-color: #27ae60;
+    border-color: #2a6dd1;
 }
 
 .btn {
     padding: 10px 20px;
-    background: #27ae60;
+    background: #2a6dd1;
     color: white;
     border: none;
     border-radius: 8px;
@@ -576,7 +582,7 @@ footer {
 }
 
 .btn:hover {
-    background: #1e8449;
+    background: #114bb2;
     transform: translateY(-2px);
 }
 
@@ -587,7 +593,7 @@ footer {
 }
 
 .help-text a {
-    color: #27ae60;
+    color: #2a6dd1;
     text-decoration: none;
 }
 
@@ -598,13 +604,13 @@ footer {
 .server-time {
     margin: 15px 0;
     padding: 12px 20px;
-    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    background: linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%);
     color: white;
     border-radius: 10px;
     text-align: center;
     font-size: 1.1rem;
     font-weight: 600;
-    box-shadow: 0 4px 12px rgba(17, 153, 142, 0.25);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
 }
 
 .server-time #serverTimeValue {
@@ -666,7 +672,7 @@ footer {
 }
 
 input:checked+.slider {
-    background-color: #27ae60;
+    background-color: #2a6dd1;
 }
 
 input:checked+.slider:before {
@@ -838,7 +844,7 @@ input:checked+.slider:before {
     appearance: none;
     height: 8px;
     border-radius: 5px;
-    background: linear-gradient(to right, #27ae60 0%, #1e8449 100%);
+    background: linear-gradient(to right, #2a6dd1 0%, #114bb2 100%);
     outline: none;
     opacity: 0.9;
     transition: opacity 0.2s;
@@ -857,7 +863,7 @@ input:checked+.slider:before {
     background: white;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
     cursor: pointer;
-    border: 2px solid #27ae60;
+    border: 2px solid #2a6dd1;
 }
 
 .volume-slider::-moz-range-thumb {
@@ -867,7 +873,7 @@ input:checked+.slider:before {
     background: white;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
     cursor: pointer;
-    border: 2px solid #27ae60;
+    border: 2px solid #2a6dd1;
 }
 
 .volume-slider.volume-high::-webkit-slider-thumb {
@@ -896,9 +902,9 @@ input:checked+.slider:before {
 .schedule-tab {
     padding: 8px 12px;
     background: transparent;
-    border: 1px solid #27ae60;
+    border: 1px solid #2a6dd1;
     border-radius: 6px;
-    color: #27ae60;
+    color: #2a6dd1;
     cursor: pointer;
     font-size: 0.85em;
     font-weight: 500;
@@ -906,21 +912,21 @@ input:checked+.slider:before {
 }
 
 .schedule-tab:hover {
-    background: rgba(39, 174, 96, 0.1);
+    background: rgba(42, 109, 209, 0.1);
 }
 
 .schedule-tab.active {
-    background: #27ae60;
+    background: #2a6dd1;
     color: white;
 }
 
 .schedule-tab.all-tab {
-    border-color: #27ae60;
-    color: #27ae60;
+    border-color: #2a6dd1;
+    color: #2a6dd1;
 }
 
 .schedule-tab.all-tab.active {
-    background: #27ae60;
+    background: #2a6dd1;
     color: white;
 }
 
@@ -933,7 +939,7 @@ input:checked+.slider:before {
     justify-content: space-between;
     align-items: center;
     padding: 10px 0;
-    border-bottom: 1px solid rgba(39, 174, 96, 0.2);
+    border-bottom: 1px solid rgba(42, 109, 209, 0.2);
 }
 
 .schedule-prayer-row:last-child {
@@ -947,15 +953,15 @@ input:checked+.slider:before {
 .schedule-day-header {
     font-size: 1.0em;
     font-weight: 600;
-    color: #27ae60;
+    color: #2a6dd1;
     padding: 8px 0 12px 0;
-    border-bottom: 1px solid rgba(39, 174, 96, 0.3);
+    border-bottom: 1px solid rgba(42, 109, 209, 0.3);
     margin-bottom: 5px;
 }
 
 @media (prefers-color-scheme: dark) {
     .schedule-day-header {
-        color: #27ae60;
+        color: #2a6dd1;
     }
 }
 
@@ -964,14 +970,14 @@ input:checked+.slider:before {
     justify-content: space-between;
     align-items: center;
     padding: 12px 0;
-    border-bottom: 1px solid rgba(39, 174, 96, 0.4);
+    border-bottom: 1px solid rgba(42, 109, 209, 0.4);
     margin-bottom: 5px;
     color: #000;
 }
 
 .schedule-whole-day-row {
     font-weight: 600;
-    color: #27ae60;
+    color: #2a6dd1;
 }
 
 .schedule-prayer-row .toggle-switch {
@@ -1088,11 +1094,11 @@ button.audio-playing-disabled:hover {
     align-items: center;
     margin-bottom: 25px;
     padding-bottom: 15px;
-    border-bottom: 2px solid #27ae60;
+    border-bottom: 2px solid #2a6dd1;
 }
 
 .calendar-header h2 {
-    color: #27ae60;
+    color: #2a6dd1;
     margin: 0;
 }
 
@@ -1109,12 +1115,12 @@ button.audio-playing-disabled:hover {
 .current-year {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #27ae60;
+    color: #2a6dd1;
 }
 
 .calendar-nav-btn {
     padding: 10px 20px;
-    background: #27ae60;
+    background: #2a6dd1;
     color: white;
     border: none;
     border-radius: 8px;
@@ -1124,7 +1130,7 @@ button.audio-playing-disabled:hover {
 }
 
 .calendar-nav-btn:hover {
-    background: #1e8449;
+    background: #114bb2;
     transform: translateY(-2px);
 }
 
@@ -1144,18 +1150,18 @@ button.audio-playing-disabled:hover {
 }
 
 .calendar-month:hover {
-    border-color: #27ae60;
-    box-shadow: 0 4px 12px rgba(39, 174, 96, 0.15);
+    border-color: #2a6dd1;
+    box-shadow: 0 4px 12px rgba(42, 109, 209, 0.15);
 }
 
 .calendar-month-header {
     text-align: center;
     font-size: 1.1rem;
     font-weight: 700;
-    color: #27ae60;
+    color: #2a6dd1;
     margin-bottom: 12px;
     padding-bottom: 8px;
-    border-bottom: 2px solid #27ae60;
+    border-bottom: 2px solid #2a6dd1;
 }
 
 .calendar-header-row {
@@ -1170,7 +1176,7 @@ button.audio-playing-disabled:hover {
     text-align: center;
     font-size: 0.75rem;
     font-weight: 700;
-    color: #27ae60;
+    color: #2a6dd1;
     padding: 4px;
     display: flex;
     align-items: center;
@@ -1211,8 +1217,8 @@ button.audio-playing-disabled:hover {
     justify-content: center;
     font-size: 0.7rem;
     font-weight: 600;
-    color: #27ae60;
-    background: rgba(39, 174, 96, 0.1);
+    color: #2a6dd1;
+    background: rgba(42, 109, 209, 0.1);
     border-radius: 6px;
     padding: 4px;
 }
@@ -1241,7 +1247,7 @@ button.audio-playing-disabled:hover {
 }
 
 .calendar-day:hover {
-    background: #27ae60;
+    background: #2a6dd1;
     color: white;
     transform: scale(1.1);
 }
@@ -1257,14 +1263,14 @@ button.audio-playing-disabled:hover {
 }
 
 .calendar-day.today {
-    background: #27ae60;
+    background: #2a6dd1;
     color: white;
     font-weight: 700;
-    box-shadow: 0 0 0 2px #1e8449;
+    box-shadow: 0 0 0 2px #114bb2;
 }
 
 .calendar-day.selected {
-    background: #1e8449;
+    background: #114bb2;
     color: white;
     font-weight: 700;
 }
@@ -1283,7 +1289,7 @@ button.audio-playing-disabled:hover {
 }
 
 .prayer-check-green {
-    color: #27ae60;
+    color: #2a6dd1;
 }
 
 .prayer-check-orange {
@@ -1318,7 +1324,7 @@ button.audio-playing-disabled:hover {
    =========================== */
 
 body.dark-mode {
-    background: #0d1f12;
+    background: #0d1733;
     color: #e4e6eb;
 }
 
@@ -1328,16 +1334,16 @@ body.dark-mode .container {
 }
 
 body.dark-mode header {
-    background: linear-gradient(135deg, #1e7e34 0%, #155724 100%);
+    background: linear-gradient(135deg, #114bb2 0%, #1E3A8A 100%);
 }
 
 body.dark-mode .next-prayer-card {
-    background: linear-gradient(135deg, #1e7e34 0%, #155724 100%);
+    background: linear-gradient(135deg, #114bb2 0%, #1E3A8A 100%);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
 body.dark-mode .next-prayer-card.playing-athan {
-    box-shadow: 0 0 30px rgba(30, 126, 52, 0.8), 0 10px 40px rgba(21, 87, 36, 0.5);
+    box-shadow: 0 0 30px rgba(17, 75, 178, 0.8), 0 10px 40px rgba(30, 58, 138, 0.5);
 }
 
 body.dark-mode .date-navigation button {
@@ -1371,7 +1377,7 @@ body.dark-mode .prayer-name {
 }
 
 body.dark-mode .prayer-time {
-    color: #1e7e34;
+    color: #114bb2;
 }
 
 body.dark-mode .daily-activities-section {
@@ -1427,13 +1433,13 @@ body.dark-mode select {
 
 body.dark-mode .input-field:focus,
 body.dark-mode select:focus {
-    border-color: #1e7e34;
+    border-color: #114bb2;
     background: #3a4556;
 }
 
 body.dark-mode .btn:hover {
-    background: #1e7e34;
-    border-color: #1e7e34;
+    background: #114bb2;
+    border-color: #114bb2;
 }
 
 body.dark-mode .settings-section {
@@ -1490,7 +1496,7 @@ body.dark-mode .slider {
 }
 
 body.dark-mode .toggle-switch input:checked+.slider {
-    background-color: #1e7e34;
+    background-color: #114bb2;
 }
 
 body.dark-mode .dua-card {
@@ -1503,11 +1509,11 @@ body.dark-mode .dua-text {
 }
 
 body.dark-mode .dua-text.arabic {
-    color: #1e7e34;
+    color: #114bb2;
 }
 
 body.dark-mode .dua-text.english {
-    color: #1e7e34;
+    color: #114bb2;
 }
 
 body.dark-mode .calendar-modal-content {
@@ -1530,12 +1536,12 @@ body.dark-mode .calendar-month-header {
 }
 
 body.dark-mode .calendar-week-header {
-    color: #48bb78;
+    color: #3B82F6;
 }
 
 body.dark-mode .calendar-week-number {
-    color: #48bb78;
-    background: rgba(72, 187, 120, 0.15);
+    color: #3B82F6;
+    background: rgba(59, 130, 246, 0.15);
 }
 
 body.dark-mode .calendar-weekday {
@@ -1558,27 +1564,27 @@ body.dark-mode .calendar-day:hover:not(.empty) {
 }
 
 body.dark-mode .calendar-day.today {
-    background: #1e7e34;
+    background: #114bb2;
     color: white;
 }
 
 body.dark-mode .calendar-day.selected {
-    background: #155724;
+    background: #1E3A8A;
     color: white;
 }
 
 body.dark-mode code {
     background: #2d3748;
-    color: #1e7e34;
+    color: #114bb2;
     border: 1px solid #4a5568;
 }
 
 body.dark-mode a {
-    color: #4ade80;
+    color: #60A5FA;
 }
 
 body.dark-mode a:hover {
-    color: #22c55e;
+    color: #2563EB;
 }
 
 body.dark-mode .skip-next-btn {
@@ -1674,11 +1680,11 @@ body.dark-mode .warning-btn:hover {
 
     0%,
     100% {
-        box-shadow: 0 4px 20px rgba(39, 174, 96, 0.4);
+        box-shadow: 0 4px 20px rgba(42, 109, 209, 0.4);
     }
 
     50% {
-        box-shadow: 0 4px 30px rgba(39, 174, 96, 0.7);
+        box-shadow: 0 4px 30px rgba(42, 109, 209, 0.7);
     }
 }
 
@@ -1686,11 +1692,11 @@ body.dark-mode .warning-btn:hover {
     display: flex;
     align-items: center;
     gap: 12px;
-    background: linear-gradient(135deg, #27ae60, #1e8449);
+    background: linear-gradient(135deg, #2a6dd1, #114bb2);
     color: white;
     padding: 14px 20px;
     border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(39, 174, 96, 0.4);
+    box-shadow: 0 4px 20px rgba(42, 109, 209, 0.4);
     font-size: 1rem;
     font-weight: 500;
     cursor: pointer;
@@ -1699,7 +1705,7 @@ body.dark-mode .warning-btn:hover {
 
 .audio-notification-content:hover {
     transform: scale(1.02);
-    box-shadow: 0 6px 25px rgba(39, 174, 96, 0.5);
+    box-shadow: 0 6px 25px rgba(42, 109, 209, 0.5);
 }
 
 .audio-notification-icon {
@@ -1745,5 +1751,5 @@ body.dark-mode .warning-btn:hover {
 
 /* Dark mode adjustments for audio notification banner */
 body.dark-mode .audio-notification-content {
-    background: linear-gradient(135deg, #1e8449, #145a32);
+    background: linear-gradient(135deg, #114bb2, #1E3A8A);
 }
