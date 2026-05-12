@@ -1886,3 +1886,84 @@ body.dark-mode #serverAudioSupport[style*="rgb(139,0,0)"] {
 body.dark-mode .audio-notification-content {
     background: linear-gradient(135deg, #114bb2, #1E3A8A);
 }
+
+/* ============================================================
+   DESKTOP-ONLY LAYOUT (>= 769px)
+   Activities sidebar = LEFT of prayers-list (vertical)
+   Actions sidebar    = RIGHT of prayers-list (vertical)
+   Buttons widened to show their text label
+   ============================================================ */
+@media (min-width: 769px) {
+    .container {
+        max-width: 760px;
+        display: grid;
+        grid-template-columns: 1fr var(--door-width) 1fr;
+        grid-template-areas:
+            ".            card     ."
+            ".            weekday  ."
+            "activities   prayers  actions"
+            ".            date     .";
+        column-gap: 12px;
+        align-items: start;
+        justify-items: center;
+    }
+
+    #nextPrayerCard       { grid-area: card; justify-self: center; }
+    #weekdayMuteBanner    { grid-area: weekday; }
+    .prayers-list         { grid-area: prayers; }
+    .daily-activities-section { grid-area: activities; width: 100%; align-self: start; }
+    .actions              { grid-area: actions; width: 100%; align-self: start; }
+    .date-navigation      { grid-area: date; width: var(--door-width); }
+
+    /* Reduce card margin-bottom by 20px on desktop */
+    .next-prayer-card {
+        margin-bottom: calc(var(--bg-image-height) * 0.02 - 43px);
+    }
+
+    /* Vertical layout for sidebars */
+    .daily-activities-content {
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .actions {
+        flex-direction: column;
+        gap: 6px;
+        padding: 0;
+    }
+
+    /* Show text labels next to icons on desktop */
+    .nav-btn .nav-btn-label,
+    .action-btn .action-btn-label,
+    .activity-item .activity-label {
+        display: inline;
+    }
+
+    /* Smaller icons since labels are visible */
+    .nav-btn .nav-btn-icon,
+    .action-btn .action-btn-icon {
+        font-size: 1.1rem;
+    }
+
+    /* Sidebar buttons widened and aligned, with comfortable padding */
+    .activity-item,
+    .action-btn {
+        width: 100%;
+        padding: 10px 12px;
+        font-size: 0.85rem;
+        gap: 8px;
+        justify-content: flex-start;
+    }
+
+    /* Nav buttons fill date-navigation row width and show their labels */
+    .nav-btn {
+        font-size: 0.85rem;
+        padding: 8px 10px;
+    }
+
+    /* Activity name allows label to display naturally */
+    .activity-name {
+        font-size: 1rem;
+        white-space: nowrap;
+    }
+}
