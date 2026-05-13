@@ -850,7 +850,7 @@ async function generateYearCalendar(year) {
         console.log(`📅 [calendar]: month=${month}, jsDay=${jsDay} -> startingDayOfWeek=${startingDayOfWeek} (0=Monday)`);
 
         html += `
-            <div class="calendar-month">
+            <div class="calendar-month" id="calendar-month-${month}">
                 <div class="calendar-month-header">${monthNames[month]} ${year}</div>
                 <div class="calendar-header-row">
                     <div class="calendar-week-header">W</div>
@@ -1144,10 +1144,16 @@ function setupEventListeners() {
     const closeCalendar = document.getElementById('closeCalendar');
     let calendarYear = getServerSyncedDate().getFullYear();
 
-    calendarBtn.onclick = () => {
+    calendarBtn.onclick = async () => {
         calendarYear = currentDate.getFullYear();
-        generateYearCalendar(calendarYear);
+        await generateYearCalendar(calendarYear);
         calendarModal.style.display = 'block';
+        // Auto-scroll to the current month so users don't have to scroll manually on mobile
+        const currentMonth = currentDate.getMonth();
+        const monthEl = document.getElementById(`calendar-month-${currentMonth}`);
+        if (monthEl) {
+            monthEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
     };
 
     closeCalendar.onclick = () => {
@@ -1160,14 +1166,20 @@ function setupEventListeners() {
         }
     });
 
-    document.getElementById('prevYear').addEventListener('click', () => {
+    document.getElementById('prevYear').addEventListener('click', async () => {
         calendarYear--;
-        generateYearCalendar(calendarYear);
+        await generateYearCalendar(calendarYear);
+        // Scroll to top (January) when switching years
+        const firstMonth = document.getElementById('calendar-month-0');
+        if (firstMonth) firstMonth.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
 
-    document.getElementById('nextYear').addEventListener('click', () => {
+    document.getElementById('nextYear').addEventListener('click', async () => {
         calendarYear++;
-        generateYearCalendar(calendarYear);
+        await generateYearCalendar(calendarYear);
+        // Scroll to top (January) when switching years
+        const firstMonth = document.getElementById('calendar-month-0');
+        if (firstMonth) firstMonth.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
 
     // Settings modal
