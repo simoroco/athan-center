@@ -2389,20 +2389,22 @@ app.get('/api/settings/export', (req, res) => {
         const prayerChecks = db.prepare('SELECT date, prayer_name, checked, checked_at FROM prayer_checks WHERE checked > 0').all();
         log(`[EXPORT] Exporting ${prayerChecks.length} prayer checks`);
         prayerChecks.forEach(pc => {
-            csvContent += `prayer_check,${pc.date}-${pc.prayer_name},${pc.checked}|${pc.checked_at || ''}
+            // Use '::' separator (never appears in prayer names) to avoid parsing ambiguity
+            csvContent += `prayer_check,${pc.date}::${pc.prayer_name},${pc.checked}|${pc.checked_at || ''}
 `;
             const checkState = pc.checked === 1 ? 'green' : pc.checked === 2 ? 'orange' : 'unchecked';
-            log(`[EXPORT]   - ${pc.date}-${pc.prayer_name} ${checkState} (${pc.checked}) at ${pc.checked_at}`);
+            log(`[EXPORT]   - ${pc.date}::${pc.prayer_name} ${checkState} (${pc.checked}) at ${pc.checked_at}`);
         });
 
         // Export daily activities (all states: 0=unchecked, 1=green, 2=orange)
         const dailyActivities = db.prepare('SELECT date, activity_name, checked, checked_at FROM daily_activities WHERE checked > 0').all();
         log(`[EXPORT] Exporting ${dailyActivities.length} daily activities`);
         dailyActivities.forEach(da => {
-            csvContent += `daily_activity,${da.date}-${da.activity_name},${da.checked}|${da.checked_at || ''}
+            // Use '::' separator (never appears in activity names) to avoid parsing ambiguity
+            csvContent += `daily_activity,${da.date}::${da.activity_name},${da.checked}|${da.checked_at || ''}
 `;
             const checkState = da.checked === 1 ? 'green' : da.checked === 2 ? 'orange' : 'unchecked';
-            log(`[EXPORT]   - ${da.date}-${da.activity_name} ${checkState} (${da.checked}) at ${da.checked_at}`);
+            log(`[EXPORT]   - ${da.date}::${da.activity_name} ${checkState} (${da.checked}) at ${da.checked_at}`);
         });
 
         log('[EXPORT] ========== EXPORT COMPLETED ==========');
@@ -2414,6 +2416,39 @@ app.get('/api/settings/export', (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
+// ===== CONFIG IMPORT/EXPORT HELPERS =====
+
+// Parse composite key from CSV. New format uses '::' separator; legacy uses '-'.
+// Supports both new exports and old backup files for backward compatibility.
+function parseCompositeKey(key) {
+    // New robust format: "date::name" (e.g. "2026-01-08::Tasbih")
+    if (key.includes('::')) {
+        const [date, ...nameParts] = key.split('::');
+        return { date, name: nameParts.join('::') };
+    }
+    // Legacy format: "date-prayer_name" (prayer names may contain '-', so we use first 3 parts for date)
+    const parts = key.split('-');
+    // First 3 parts are YYYY, MM, DD
+    const date = parts.slice(0, 3).join('-');
+    const name = parts.slice(3).join('-');
+    return { date, name };
+}
+
+// Map legacy activity names to current frontend names.
+// This fixes imports from older versions that used different activity labels.
+function mapActivityName(rawName) {
+    const trimmed = rawName.trim();
+    const legacyMap = {
+        'Read Coran': 'Coran',
+        'Tasbih & Dikr': 'Tasbih',
+        'Tasbih and Dikr': 'Tasbih',
+        'Dikr': 'Tasbih',
+        'Nawafil prayers': 'Nawafil',
+        'Optional prayers': 'Nawafil',
+    };
+    return legacyMap[trimmed] || trimmed;
+}
 
 // POST - Import configuration from CSV
 app.post('/api/settings/import', (req, res) => {
@@ -2480,15 +2515,8 @@ app.post('/api/settings/import', (req, res) => {
                     db.prepare('UPDATE skip_next SET skip = ? WHERE id = 1').run(parseInt(value));
                     importedCount++;
                 } else if (type === 'prayer_check') {
-                    // key format: "2025-01-15-Fajr" (date-prayer_name)
-                    const [date, prayerName] = key.split('-').reduce((acc, part, idx) => {
-                        if (idx < 3) {
-                            acc[0] = acc[0] ? `${acc[0]}-${part}` : part;
-                        } else {
-                            acc[1] = acc[1] ? `${acc[1]}-${part}` : part;
-                        }
-                        return acc;
-                    }, ['', '']);
+                    // Parse composite key using robust parser (supports new '::' format and legacy '-' format)
+                    const { date, name: prayerName } = parseCompositeKey(key);
                     // value format: "checked_state|checked_at" or just "checked_at" (legacy)
                     let checkedState = 1; // default to green for legacy imports
                     let checkedAt = value || new Date().toISOString();
@@ -2502,18 +2530,13 @@ app.post('/api/settings/import', (req, res) => {
                     db.prepare('INSERT OR REPLACE INTO prayer_checks (date, prayer_name, checked, checked_at) VALUES (?, ?, ?, ?)')
                         .run(date, prayerName, checkedState, checkedAt);
                     const checkStateLabel = checkedState === 1 ? 'green' : checkedState === 2 ? 'orange' : 'unchecked';
-                    log(`[IMPORT] prayer_check: ${date}-${prayerName} ${checkStateLabel} (${checkedState})`);
+                    log(`[IMPORT] prayer_check: ${date}::${prayerName} ${checkStateLabel} (${checkedState})`);
                     importedCount++;
                 } else if (type === 'daily_activity') {
-                    // key format: "2025-01-15-Tasbih" (date-activity_name)
-                    const [date, activityName] = key.split('-').reduce((acc, part, idx) => {
-                        if (idx < 3) {
-                            acc[0] = acc[0] ? `${acc[0]}-${part}` : part;
-                        } else {
-                            acc[1] = acc[1] ? `${acc[1]} ${part}` : part;
-                        }
-                        return acc;
-                    }, ['', '']);
+                    // Parse composite key using robust parser (supports new '::' format and legacy '-' format)
+                    const { date, name: rawActivityName } = parseCompositeKey(key);
+                    // Map legacy activity names to current frontend names
+                    const activityName = mapActivityName(rawActivityName);
                     // value format: "checked_state|checked_at"
                     let checkedState = 1;
                     let checkedAt = value || new Date().toISOString();
@@ -2527,7 +2550,7 @@ app.post('/api/settings/import', (req, res) => {
                     db.prepare('INSERT OR REPLACE INTO daily_activities (date, activity_name, checked, checked_at) VALUES (?, ?, ?, ?)')
                         .run(date, activityName, checkedState, checkedAt);
                     const checkStateLabel = checkedState === 1 ? 'green' : checkedState === 2 ? 'orange' : 'unchecked';
-                    log(`[IMPORT] daily_activity: ${date}-${activityName} ${checkStateLabel} (${checkedState})`);
+                    log(`[IMPORT] daily_activity: ${date}::${activityName} ${checkStateLabel} (${checkedState})${rawActivityName !== activityName ? ' [mapped from: ' + rawActivityName + ']' : ''}`);
                     importedCount++;
                 }
             } catch (err) {

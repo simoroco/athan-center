@@ -1,0 +1,1019 @@
+type,key,value
+setting,play_on_startup,1
+setting,audio_card,auto
+setting,audio_file,Forest & Athan Omar Hisham Al Arabi.mp3
+setting,play_on_page_load,0
+setting,sync_fajr_volume,1
+setting,fajr_volume,2
+setting,volume,20
+setting,friday_quran_time,08:20
+setting,friday_quran_file,Sourat Al Kahf (Be Heaven) - Omar Hisham Al Arabi.mp3
+setting,audio_output,server
+setting,friday_quran_enabled,1
+setting,ics_url,https://prayerwebcal.dsultan.com/ics/Unknown/cq=0:csr=0:ct=0:ee=0:qs=0:srs=0:ss=0:sus=0:ts=0:tz=Europe%2FParis:x=48.881:y=2.419
+setting,dark_mode,0
+weekday_mute,0,0
+weekday_mute,1,0
+weekday_mute,2,0
+weekday_mute,3,0
+weekday_mute,4,0
+weekday_mute,5,0
+weekday_mute,6,0
+prayer_schedule,Fajr-0,1
+prayer_schedule,Dhuhr-0,1
+prayer_schedule,Asr-0,1
+prayer_schedule,Maghrib-0,1
+prayer_schedule,Isha-0,0
+prayer_schedule,Fajr-1,1
+prayer_schedule,Dhuhr-1,1
+prayer_schedule,Asr-1,1
+prayer_schedule,Maghrib-1,1
+prayer_schedule,Isha-1,0
+prayer_schedule,Fajr-2,1
+prayer_schedule,Dhuhr-2,1
+prayer_schedule,Asr-2,1
+prayer_schedule,Maghrib-2,1
+prayer_schedule,Isha-2,0
+prayer_schedule,Fajr-3,1
+prayer_schedule,Dhuhr-3,1
+prayer_schedule,Asr-3,1
+prayer_schedule,Maghrib-3,1
+prayer_schedule,Isha-3,0
+prayer_schedule,Fajr-4,1
+prayer_schedule,Dhuhr-4,1
+prayer_schedule,Asr-4,1
+prayer_schedule,Maghrib-4,1
+prayer_schedule,Isha-4,0
+prayer_schedule,Fajr-5,1
+prayer_schedule,Dhuhr-5,1
+prayer_schedule,Asr-5,1
+prayer_schedule,Maghrib-5,1
+prayer_schedule,Isha-5,0
+prayer_schedule,Fajr-6,1
+prayer_schedule,Dhuhr-6,1
+prayer_schedule,Asr-6,1
+prayer_schedule,Maghrib-6,1
+prayer_schedule,Isha-6,0
+prayer_schedule,Fajr | Sobh-0,0
+prayer_schedule,Dohr-0,1
+prayer_schedule,Fajr | Sobh-1,0
+prayer_schedule,Dohr-1,1
+prayer_schedule,Fajr | Sobh-2,0
+prayer_schedule,Dohr-2,1
+prayer_schedule,Fajr | Sobh-3,0
+prayer_schedule,Dohr-3,1
+prayer_schedule,Fajr | Sobh-4,0
+prayer_schedule,Dohr-4,1
+prayer_schedule,Fajr | Sobh-5,0
+prayer_schedule,Dohr-5,1
+prayer_schedule,Fajr | Sobh-6,0
+prayer_schedule,Dohr-6,1
+skip_next,skip,0
+prayer_check,2025-12-08-Fajr,1|2025-12-08T20:15:25.323Z
+prayer_check,2025-12-09-Maghrib,1|2025-12-09T22:00:00.618Z
+prayer_check,2025-12-09-Dhuhr,1|2025-12-09T22:00:01.767Z
+prayer_check,2025-12-09-Fajr,1|2025-12-09T22:00:02.384Z
+prayer_check,2025-12-09-Asr,1|2025-12-09T22:00:03.220Z
+prayer_check,2025-12-08-Isha,1|2025-12-09T22:00:07.561Z
+prayer_check,2025-12-08-Maghrib,1|2025-12-09T22:00:09.834Z
+prayer_check,2025-12-08-Asr,1|2025-12-09T22:00:10.213Z
+prayer_check,2025-12-08-Dhuhr,1|2025-12-09T22:00:10.610Z
+prayer_check,2025-12-09-Isha,1|2025-12-10T17:47:59.329Z
+prayer_check,2025-12-10-Dhuhr,1|2025-12-10T17:52:14.520Z
+prayer_check,2025-12-10-Fajr,1|2025-12-10T17:52:15.019Z
+prayer_check,2025-12-10-Maghrib,1|2025-12-10T17:57:40.241Z
+prayer_check,2025-12-10-Asr,1|2025-12-10T17:57:40.538Z
+prayer_check,2025-12-10-Isha,1|2025-12-10T18:11:10.091Z
+prayer_check,2025-12-11-Fajr,1|2025-12-11T16:08:45.050Z
+prayer_check,2025-12-11-Dhuhr,1|2025-12-11T16:08:45.388Z
+prayer_check,2025-12-11-Asr,1|2025-12-11T16:08:45.902Z
+prayer_check,2025-12-11-Maghrib,1|2025-12-11T16:08:46.590Z
+prayer_check,2025-12-12-Fajr,1|2025-12-12T06:27:33.249Z
+prayer_check,2025-12-11-Isha,1|2025-12-12T06:27:36.178Z
+prayer_check,2025-12-12-Dhuhr,1|2025-12-12T14:53:11.343Z
+prayer_check,2025-12-12-Asr,1|2025-12-12T14:53:11.909Z
+prayer_check,2025-12-12-Isha,1|2025-12-15T07:10:20.810Z
+prayer_check,2025-12-12-Maghrib,1|2025-12-15T07:10:22.157Z
+prayer_check,2025-12-13-Fajr,1|2025-12-15T07:10:26.926Z
+prayer_check,2025-12-13-Dhuhr,1|2025-12-15T07:14:08.529Z
+prayer_check,2025-12-13-Maghrib,1|2025-12-15T09:32:23.422Z
+prayer_check,2025-12-13-Asr,1|2025-12-15T09:32:23.802Z
+prayer_check,2025-12-13-Isha,1|2025-12-15T09:32:24.502Z
+prayer_check,2025-12-14-Dhuhr,1|2025-12-15T09:36:47.216Z
+prayer_check,2025-12-14-Fajr,1|2025-12-15T09:36:47.918Z
+prayer_check,2025-12-14-Asr,1|2025-12-15T09:41:02.222Z
+prayer_check,2025-12-14-Maghrib,1|2025-12-15T09:42:39.050Z
+prayer_check,2025-12-14-Isha,1|2025-12-15T09:42:39.560Z
+prayer_check,2025-12-15-Fajr,1|2025-12-15T09:46:53.645Z
+prayer_check,2025-12-15-Asr,1|2025-12-15T22:20:13.535Z
+prayer_check,2025-12-15-Dhuhr,1|2025-12-15T22:20:13.831Z
+prayer_check,2025-12-16-Isha,1|2025-12-17T05:52:55.906Z
+prayer_check,2025-12-16-Maghrib,1|2025-12-17T05:52:56.682Z
+prayer_check,2025-12-16-Asr,1|2025-12-17T05:53:00.597Z
+prayer_check,2025-12-16-Dhuhr,1|2025-12-17T05:53:01.165Z
+prayer_check,2025-12-16-Fajr,1|2025-12-17T05:53:01.733Z
+prayer_check,2025-12-15-Isha,1|2025-12-17T05:53:05.382Z
+prayer_check,2025-12-15-Maghrib,1|2025-12-17T05:53:06.021Z
+prayer_check,2025-12-17-Fajr,1|2025-12-17T06:45:23.639Z
+prayer_check,2025-12-17-Asr,1|2025-12-17T18:10:01.562Z
+prayer_check,2025-12-17-Dhuhr,1|2025-12-17T18:10:02.170Z
+prayer_check,2025-12-18-Fajr,1|2025-12-18T11:29:40.955Z
+prayer_check,2025-12-17-Isha,1|2025-12-18T11:29:43.850Z
+prayer_check,2025-12-17-Maghrib,1|2025-12-18T11:29:44.317Z
+prayer_check,2025-12-18-Dhuhr,1|2025-12-20T06:43:52.596Z
+prayer_check,2025-12-18-Asr,1|2025-12-20T06:48:35.865Z
+prayer_check,2025-12-18-Maghrib,1|2025-12-20T06:57:06.951Z
+prayer_check,2025-12-18-Isha,1|2025-12-20T06:57:07.258Z
+prayer_check,2025-12-19-Asr,1|2025-12-20T06:57:12.754Z
+prayer_check,2025-12-19-Dhuhr,1|2025-12-20T06:57:13.305Z
+prayer_check,2025-12-19-Fajr,1|2025-12-20T06:57:13.721Z
+prayer_check,2025-12-19-Maghrib,1|2025-12-20T07:02:40.768Z
+prayer_check,2025-12-19-Isha,1|2025-12-20T07:02:41.279Z
+prayer_check,2025-12-20-Fajr,1|2025-12-20T07:08:58.509Z
+prayer_check,2025-12-20-Dhuhr,1|2025-12-20T18:17:03.306Z
+prayer_check,2025-12-20-Asr,1|2025-12-20T18:17:03.638Z
+prayer_check,2025-12-20-Isha,1|2025-12-20T18:17:04.659Z
+prayer_check,2025-12-20-Maghrib,1|2025-12-20T18:17:05.056Z
+prayer_check,2025-12-21-Isha,1|2025-12-22T06:02:55.299Z
+prayer_check,2025-12-21-Maghrib,1|2025-12-22T06:02:55.559Z
+prayer_check,2025-12-21-Asr,1|2025-12-22T06:02:55.938Z
+prayer_check,2025-12-21-Dhuhr,1|2025-12-22T06:02:56.303Z
+prayer_check,2025-12-21-Fajr,1|2025-12-22T06:02:57.589Z
+prayer_check,2025-12-22-Fajr,1|2025-12-22T06:18:01.268Z
+prayer_check,2025-12-22-Asr,1|2025-12-22T14:10:27.078Z
+prayer_check,2025-12-22-Dhuhr,1|2025-12-22T14:10:27.289Z
+prayer_check,2025-12-23-Fajr,1|2025-12-23T06:55:39.954Z
+prayer_check,2025-12-22-Isha,1|2025-12-23T06:55:42.740Z
+prayer_check,2025-12-22-Maghrib,1|2025-12-23T06:55:43.313Z
+prayer_check,2025-12-23-Isha,1|2025-12-24T07:46:27.094Z
+prayer_check,2025-12-23-Maghrib,1|2025-12-24T07:46:27.430Z
+prayer_check,2025-12-23-Asr,1|2025-12-24T07:46:27.804Z
+prayer_check,2025-12-23-Dhuhr,1|2025-12-24T07:46:28.091Z
+prayer_check,2025-12-24-Fajr,1|2025-12-24T07:46:30.957Z
+prayer_check,2025-12-24-Maghrib,1|2025-12-25T06:46:06.768Z
+prayer_check,2025-12-24-Asr,1|2025-12-25T06:46:07.120Z
+prayer_check,2025-12-24-Dhuhr,1|2025-12-25T06:46:07.527Z
+prayer_check,2025-12-25-Fajr,2|2025-12-26T23:58:29.658Z
+prayer_check,2025-12-24-Isha,1|2025-12-25T17:41:04.493Z
+prayer_check,2025-12-26-Fajr | Sobh,2|2025-12-26T22:30:30.311Z
+prayer_check,2025-12-25-Isha,2|2025-12-26T22:30:19.403Z
+prayer_check,2025-12-25-Maghrib,2|2025-12-26T22:30:19.639Z
+prayer_check,2025-12-25-Asr,2|2025-12-26T22:30:19.990Z
+prayer_check,2025-12-25-Dhuhr,2|2025-12-26T22:30:20.294Z
+prayer_check,2025-12-26-Maghrib,2|2025-12-26T22:35:41.076Z
+prayer_check,2025-12-26-Dohr,2|2025-12-26T22:32:40.193Z
+prayer_check,2025-12-26-Asr,2|2025-12-26T22:32:40.587Z
+prayer_check,2025-12-26-Isha,1|2025-12-26T22:35:38.358Z
+prayer_check,2025-12-28-Fajr | Sobh,1|2025-12-28T06:22:04.853Z
+prayer_check,2025-12-27-Isha,2|2025-12-28T06:21:57.079Z
+prayer_check,2025-12-27-Maghrib,2|2025-12-28T06:21:57.388Z
+prayer_check,2025-12-27-Asr,2|2025-12-28T06:21:58.764Z
+prayer_check,2025-12-27-Dohr,2|2025-12-28T06:21:59.267Z
+prayer_check,2025-12-28-Dohr,2|2025-12-30T05:56:28.875Z
+prayer_check,2025-12-28-Asr,2|2025-12-30T05:56:29.392Z
+prayer_check,2025-12-28-Maghrib,2|2025-12-30T05:56:30.107Z
+prayer_check,2025-12-28-Isha,2|2025-12-30T05:56:30.522Z
+prayer_check,2025-12-29-Fajr | Sobh,1|2025-12-30T05:56:37.452Z
+prayer_check,2025-12-29-Dohr,1|2025-12-30T05:56:51.931Z
+prayer_check,2025-12-29-Asr,1|2025-12-30T05:56:53.096Z
+prayer_check,2025-12-29-Maghrib,1|2025-12-30T05:56:55.693Z
+prayer_check,2025-12-29-Isha,1|2025-12-30T05:56:56.705Z
+prayer_check,2025-12-30-Dohr,2|2026-01-04T08:51:11.372Z
+prayer_check,2025-12-30-Fajr | Sobh,2|2026-01-04T08:51:11.712Z
+prayer_check,2025-12-30-Isha,2|2026-01-04T08:58:13.138Z
+prayer_check,2025-12-30-Maghrib,2|2026-01-04T08:58:13.324Z
+prayer_check,2025-12-30-Asr,2|2026-01-04T08:58:13.792Z
+prayer_check,2025-12-31-Dohr,2|2026-01-04T09:01:20.193Z
+prayer_check,2025-12-31-Fajr | Sobh,2|2026-01-04T09:01:20.593Z
+prayer_check,2025-12-31-Maghrib,2|2026-01-04T09:37:09.049Z
+prayer_check,2025-12-31-Asr,2|2026-01-04T09:37:09.335Z
+prayer_check,2025-12-31-Isha,2|2026-01-04T09:41:42.451Z
+prayer_check,2026-01-01-Dohr,2|2026-01-04T09:41:48.723Z
+prayer_check,2026-01-01-Fajr | Sobh,2|2026-01-04T09:41:49.273Z
+prayer_check,2026-01-01-Asr,2|2026-01-04T09:43:59.978Z
+prayer_check,2026-01-01-Maghrib,2|2026-01-04T09:44:00.580Z
+prayer_check,2026-01-01-Isha,2|2026-01-04T09:47:29.172Z
+prayer_check,2026-01-02-Fajr | Sobh,2|2026-01-04T09:47:33.747Z
+prayer_check,2026-01-02-Dohr,2|2026-01-04T09:50:25.973Z
+prayer_check,2026-01-02-Isha,2|2026-01-04T10:15:07.651Z
+prayer_check,2026-01-02-Maghrib,2|2026-01-04T10:15:08.032Z
+prayer_check,2026-01-02-Asr,2|2026-01-04T10:15:08.359Z
+prayer_check,2026-01-03-Dohr,2|2026-01-04T10:20:01.800Z
+prayer_check,2026-01-03-Fajr | Sobh,2|2026-01-04T10:20:02.077Z
+prayer_check,2026-01-03-Asr,2|2026-01-04T10:20:02.621Z
+prayer_check,2026-01-03-Maghrib,2|2026-01-04T10:23:56.474Z
+prayer_check,2026-01-03-Isha,2|2026-01-04T10:23:56.752Z
+prayer_check,2026-01-04-Fajr | Sobh,2|2026-01-04T10:25:56.787Z
+prayer_check,2026-01-04-Maghrib,2|2026-01-05T06:14:49.471Z
+prayer_check,2026-01-04-Asr,2|2026-01-05T06:14:49.780Z
+prayer_check,2026-01-04-Dohr,2|2026-01-05T06:14:50.079Z
+prayer_check,2026-01-05-Fajr | Sobh,1|2026-01-05T15:21:38.325Z
+prayer_check,2026-01-05-Dohr,1|2026-01-05T15:21:41.049Z
+prayer_check,2026-01-05-Asr,1|2026-01-05T15:21:41.739Z
+prayer_check,2026-01-04-Isha,2|2026-01-05T15:21:46.089Z
+prayer_check,2026-01-06-Fajr | Sobh,2|2026-01-07T07:10:42.968Z
+prayer_check,2026-01-05-Isha,2|2026-01-07T07:10:45.362Z
+prayer_check,2026-01-05-Maghrib,2|2026-01-07T07:10:47.549Z
+prayer_check,2026-01-06-Dohr,2|2026-01-07T20:37:21.348Z
+prayer_check,2026-01-06-Isha,2|2026-01-07T20:41:22.383Z
+prayer_check,2026-01-06-Maghrib,2|2026-01-07T20:41:22.661Z
+prayer_check,2026-01-06-Asr,2|2026-01-07T20:41:23.035Z
+prayer_check,2026-01-07-Fajr | Sobh,2|2026-01-07T20:43:33.858Z
+prayer_check,2026-01-07-Asr,2|2026-01-07T20:46:56.309Z
+prayer_check,2026-01-07-Dohr,2|2026-01-07T20:46:56.648Z
+prayer_check,2026-01-07-Isha,1|2026-01-08T05:41:10.513Z
+prayer_check,2026-01-07-Maghrib,2|2026-01-08T05:41:08.150Z
+prayer_check,2026-01-08-Fajr | Sobh,2|2026-01-08T21:20:28.248Z
+prayer_check,2026-01-08-Dohr,2|2026-01-08T21:20:28.879Z
+prayer_check,2026-01-08-Asr,2|2026-01-08T21:20:31.124Z
+prayer_check,2026-01-08-Maghrib,2|2026-01-09T06:16:07.840Z
+prayer_check,2026-01-08-Isha,2|2026-01-09T06:16:08.771Z
+prayer_check,2026-01-09-Fajr | Sobh,1|2026-01-09T06:22:34.599Z
+prayer_check,2026-01-12-Fajr | Sobh,2|2026-01-13T06:42:11.264Z
+prayer_check,2026-01-11-Isha,2|2026-01-13T06:42:18.304Z
+prayer_check,2026-01-10-Isha,2|2026-01-13T06:42:22.194Z
+prayer_check,2026-01-09-Isha,2|2026-01-13T06:42:24.436Z
+prayer_check,2026-01-09-Dohr,2|2026-01-13T06:42:27.555Z
+prayer_check,2026-01-09-Asr,2|2026-01-13T06:42:27.875Z
+prayer_check,2026-01-09-Maghrib,2|2026-01-13T06:42:28.202Z
+prayer_check,2026-01-10-Maghrib,2|2026-01-13T06:42:30.451Z
+prayer_check,2026-01-10-Dohr,2|2026-01-13T06:42:31.435Z
+prayer_check,2026-01-10-Fajr | Sobh,2|2026-01-13T06:42:32.591Z
+prayer_check,2026-01-10-Asr,2|2026-01-13T06:42:34.295Z
+prayer_check,2026-01-11-Fajr | Sobh,2|2026-01-13T06:42:37.399Z
+prayer_check,2026-01-11-Dohr,2|2026-01-13T06:42:37.736Z
+prayer_check,2026-01-11-Asr,2|2026-01-13T06:42:38.085Z
+prayer_check,2026-01-11-Maghrib,2|2026-01-13T06:42:38.546Z
+prayer_check,2026-01-13-Asr,1|2026-01-13T22:56:03.992Z
+prayer_check,2026-01-13-Dohr,2|2026-01-13T22:56:02.190Z
+prayer_check,2026-01-13-Fajr | Sobh,2|2026-01-13T22:56:03.134Z
+prayer_check,2026-01-12-Isha,2|2026-01-13T22:56:08.861Z
+prayer_check,2026-01-12-Maghrib,2|2026-01-13T22:56:09.342Z
+prayer_check,2026-01-12-Asr,2|2026-01-13T22:56:09.811Z
+prayer_check,2026-01-12-Dohr,2|2026-01-13T22:56:10.312Z
+prayer_check,2026-01-15-Asr,1|2026-01-15T14:11:01.467Z
+prayer_check,2026-01-15-Dohr,2|2026-01-15T14:11:02.447Z
+prayer_check,2026-01-15-Fajr | Sobh,2|2026-01-15T14:11:06.607Z
+prayer_check,2026-01-14-Isha,2|2026-01-15T14:11:12.507Z
+prayer_check,2026-01-14-Maghrib,2|2026-01-15T14:11:12.677Z
+prayer_check,2026-01-14-Fajr | Sobh,2|2026-01-15T14:11:13.817Z
+prayer_check,2026-01-14-Dohr,2|2026-01-15T14:11:14.397Z
+prayer_check,2026-01-13-Isha,2|2026-01-15T14:11:19.727Z
+prayer_check,2026-01-13-Maghrib,2|2026-01-15T14:11:20.187Z
+prayer_check,2026-01-14-Asr,2|2026-01-15T14:11:23.616Z
+prayer_check,2026-01-16-Maghrib,2|2026-01-18T22:03:00.056Z
+prayer_check,2026-01-15-Isha,2|2026-01-18T21:53:33.589Z
+prayer_check,2026-01-15-Maghrib,2|2026-01-18T21:53:34.090Z
+prayer_check,2026-01-16-Fajr | Sobh,2|2026-01-18T21:53:37.544Z
+prayer_check,2026-01-16-Dohr,2|2026-01-18T21:54:42.532Z
+prayer_check,2026-01-16-Asr,2|2026-01-18T21:56:39.334Z
+prayer_check,2026-01-16-Isha,2|2026-01-18T22:02:59.519Z
+prayer_check,2026-01-17-Asr,1|2026-01-18T22:08:35.012Z
+prayer_check,2026-01-17-Dohr,2|2026-01-18T22:08:25.543Z
+prayer_check,2026-01-17-Fajr | Sobh,2|2026-01-18T22:08:25.997Z
+prayer_check,2026-01-17-Maghrib,2|2026-01-18T22:12:32.295Z
+prayer_check,2026-01-17-Isha,2|2026-01-18T22:12:32.800Z
+prayer_check,2026-01-18-Dohr,2|2026-01-18T22:17:52.119Z
+prayer_check,2026-01-18-Fajr | Sobh,2|2026-01-18T22:17:52.356Z
+prayer_check,2026-01-18-Asr,2|2026-01-18T22:17:53.098Z
+prayer_check,2026-01-18-Maghrib,2|2026-01-18T22:22:22.257Z
+prayer_check,2026-01-18-Isha,1|2026-01-18T22:29:06.334Z
+prayer_check,2026-01-19-Dohr,2|2026-01-19T16:15:27.362Z
+prayer_check,2026-01-19-Asr,1|2026-01-19T16:15:30.683Z
+prayer_check,2026-01-19-Fajr | Sobh,1|2026-01-19T16:15:33.281Z
+prayer_check,2026-01-20-Fajr | Sobh,1|2026-01-20T13:37:18.060Z
+prayer_check,2026-01-20-Dohr,2|2026-01-21T16:34:56.208Z
+prayer_check,2026-01-19-Isha,2|2026-01-20T13:37:24.442Z
+prayer_check,2026-01-19-Maghrib,2|2026-01-20T13:37:25.142Z
+prayer_check,2026-01-21-Asr,1|2026-01-21T16:34:38.944Z
+prayer_check,2026-01-21-Dohr,1|2026-01-21T16:34:39.768Z
+prayer_check,2026-01-21-Fajr | Sobh,1|2026-01-21T16:34:40.580Z
+prayer_check,2026-01-20-Isha,2|2026-01-21T16:34:58.128Z
+prayer_check,2026-01-20-Maghrib,2|2026-01-21T16:34:54.308Z
+prayer_check,2026-01-20-Asr,2|2026-01-21T16:34:54.777Z
+prayer_check,2026-01-22-Fajr | Sobh,2|2026-01-23T09:14:26.780Z
+prayer_check,2026-01-22-Isha,2|2026-01-23T10:13:46.202Z
+prayer_check,2026-01-21-Isha,2|2026-01-23T09:14:34.465Z
+prayer_check,2026-01-21-Maghrib,2|2026-01-23T09:14:34.973Z
+prayer_check,2026-01-22-Maghrib,2|2026-01-23T09:44:48.077Z
+prayer_check,2026-01-22-Asr,2|2026-01-23T09:44:48.515Z
+prayer_check,2026-01-22-Dohr,2|2026-01-23T09:44:48.967Z
+prayer_check,2026-01-23-Fajr | Sobh,2|2026-01-23T19:05:58.008Z
+prayer_check,2026-01-23-Asr,1|2026-01-24T05:44:44.560Z
+prayer_check,2026-01-23-Dohr,2|2026-01-24T05:44:45.408Z
+prayer_check,2026-01-24-Maghrib,1|2026-01-24T18:25:14.406Z
+prayer_check,2026-01-24-Asr,2|2026-01-24T18:25:14.872Z
+prayer_check,2026-01-24-Dohr,2|2026-01-24T18:25:15.338Z
+prayer_check,2026-01-24-Fajr | Sobh,2|2026-01-24T18:25:15.770Z
+prayer_check,2026-01-23-Isha,2|2026-01-24T18:29:45.283Z
+prayer_check,2026-01-23-Maghrib,2|2026-01-24T18:29:46.199Z
+prayer_check,2026-01-24-Isha,1|2026-01-24T18:41:22.023Z
+prayer_check,2026-01-25-Fajr | Sobh,1|2026-01-25T06:41:03.184Z
+prayer_check,2026-01-25-Dohr,2|2026-01-25T16:18:52.918Z
+prayer_check,2026-01-25-Asr,1|2026-01-25T16:18:53.961Z
+prayer_check,2026-01-25-Maghrib,2|2026-01-26T06:53:38.308Z
+prayer_check,2026-01-25-Isha,2|2026-01-26T06:53:38.629Z
+prayer_check,2026-01-26-Fajr | Sobh,1|2026-01-26T06:53:49.132Z
+prayer_check,2026-01-26-Dohr,2|2026-01-26T14:42:04.832Z
+prayer_check,2026-01-26-Asr,1|2026-01-26T16:42:10.173Z
+prayer_check,2026-01-26-Maghrib,1|2026-01-26T18:39:07.605Z
+prayer_check,2026-01-26-Isha,2|2026-01-27T21:52:39.106Z
+prayer_check,2026-01-27-Fajr | Sobh,1|2026-01-27T21:52:42.916Z
+prayer_check,2026-01-27-Dohr,2|2026-01-27T21:52:43.870Z
+prayer_check,2026-01-27-Asr,1|2026-01-27T21:52:45.420Z
+prayer_check,2026-01-28-Fajr | Sobh,2|2026-01-28T08:38:05.383Z
+prayer_check,2026-01-27-Isha,2|2026-01-28T08:38:14.287Z
+prayer_check,2026-01-27-Maghrib,2|2026-01-28T08:38:14.719Z
+prayer_check,2026-01-29-Fajr | Sobh,1|2026-01-29T06:38:54.971Z
+prayer_check,2026-01-28-Isha,2|2026-01-29T06:38:57.640Z
+prayer_check,2026-01-28-Maghrib,2|2026-01-29T06:38:58.474Z
+prayer_check,2026-01-28-Asr,1|2026-01-29T06:39:01.531Z
+prayer_check,2026-01-28-Dohr,2|2026-01-29T06:39:02.093Z
+prayer_check,2026-01-29-Dohr,2|2026-01-29T21:02:03.094Z
+prayer_check,2026-01-29-Maghrib,2|2026-01-29T21:02:04.345Z
+prayer_check,2026-01-29-Asr,2|2026-01-29T21:02:04.758Z
+prayer_check,2026-01-29-Isha,1|2026-01-29T21:02:05.499Z
+prayer_check,2026-01-30-Dohr,1|2026-01-30T13:34:57.578Z
+prayer_check,2026-01-30-Fajr | Sobh,1|2026-01-30T13:34:45.186Z
+prayer_check,2026-01-30-Asr,2|2026-01-31T12:28:44.744Z
+prayer_check,2026-01-30-Maghrib,2|2026-01-31T12:28:45.255Z
+prayer_check,2026-01-30-Isha,2|2026-01-31T12:31:34.959Z
+prayer_check,2026-01-31-Dohr,1|2026-01-31T12:38:38.588Z
+prayer_check,2026-01-31-Fajr | Sobh,2|2026-01-31T12:38:39.183Z
+prayer_check,2026-01-31-Asr,2|2026-02-01T05:48:18.340Z
+prayer_check,2026-02-01-Fajr | Sobh,1|2026-02-01T06:25:30.468Z
+prayer_check,2026-01-31-Isha,2|2026-02-01T06:25:34.553Z
+prayer_check,2026-01-31-Maghrib,2|2026-02-01T06:25:35.049Z
+prayer_check,2026-02-01-Dohr,1|2026-02-01T19:45:27.799Z
+prayer_check,2026-02-01-Asr,2|2026-02-01T19:45:29.859Z
+prayer_check,2026-02-01-Maghrib,2|2026-02-01T19:45:30.367Z
+prayer_check,2026-02-01-Isha,1|2026-02-01T19:45:31.587Z
+prayer_check,2026-02-02-Fajr | Sobh,1|2026-02-02T07:31:26.141Z
+prayer_check,2026-02-02-Dohr,2|2026-02-02T20:09:09.196Z
+prayer_check,2026-02-02-Asr,2|2026-02-02T20:09:09.833Z
+prayer_check,2026-02-02-Maghrib,1|2026-02-02T20:09:11.396Z
+prayer_check,2026-02-03-Fajr | Sobh,1|2026-02-03T06:18:36.215Z
+prayer_check,2026-02-02-Isha,2|2026-02-03T06:18:42.122Z
+prayer_check,2026-02-03-Dohr,2|2026-02-03T15:48:56.267Z
+prayer_check,2026-02-03-Asr,1|2026-02-03T15:48:57.298Z
+prayer_check,2026-02-04-Fajr | Sobh,2|2026-02-04T11:59:38.803Z
+prayer_check,2026-02-03-Isha,2|2026-02-04T11:59:48.696Z
+prayer_check,2026-02-03-Maghrib,2|2026-02-04T11:59:49.179Z
+prayer_check,2026-02-04-Dohr,1|2026-02-04T12:40:44.833Z
+prayer_check,2026-02-05-Asr,1|2026-02-05T14:59:57.011Z
+prayer_check,2026-02-05-Dohr,2|2026-02-05T14:59:52.834Z
+prayer_check,2026-02-05-Fajr | Sobh,2|2026-02-05T15:55:18.899Z
+prayer_check,2026-02-04-Isha,2|2026-02-05T15:55:24.445Z
+prayer_check,2026-02-04-Asr,2|2026-02-05T15:55:25.148Z
+prayer_check,2026-02-04-Maghrib,2|2026-02-05T15:55:26.587Z
+prayer_check,2026-02-06-Fajr | Sobh,2|2026-02-06T23:45:27.473Z
+prayer_check,2026-02-05-Isha,2|2026-02-06T23:45:32.615Z
+prayer_check,2026-02-05-Maghrib,2|2026-02-06T23:45:33.016Z
+prayer_check,2026-02-06-Asr,2|2026-02-08T07:12:11.030Z
+prayer_check,2026-02-06-Dohr,2|2026-02-08T07:12:11.737Z
+prayer_check,2026-02-06-Isha,2|2026-02-08T07:15:59.593Z
+prayer_check,2026-02-06-Maghrib,2|2026-02-08T07:16:00.128Z
+prayer_check,2026-02-07-Maghrib,2|2026-02-08T07:23:22.229Z
+prayer_check,2026-02-07-Asr,2|2026-02-08T07:23:22.577Z
+prayer_check,2026-02-07-Dohr,2|2026-02-08T07:23:22.978Z
+prayer_check,2026-02-07-Fajr | Sobh,2|2026-02-08T07:23:24.764Z
+prayer_check,2026-02-07-Isha,2|2026-02-08T07:32:51.336Z
+prayer_check,2026-02-08-Fajr | Sobh,2|2026-02-08T12:31:01.848Z
+prayer_check,2026-02-08-Dohr,1|2026-02-08T12:31:00.353Z
+prayer_check,2026-02-09-Fajr | Sobh,1|2026-02-09T07:26:08.365Z
+prayer_check,2026-02-08-Isha,2|2026-02-09T07:26:14.428Z
+prayer_check,2026-02-08-Maghrib,2|2026-02-09T07:26:14.712Z
+prayer_check,2026-02-08-Asr,2|2026-02-09T07:26:15.045Z
+prayer_check,2026-02-09-Dohr,2|2026-02-09T18:30:57.239Z
+prayer_check,2026-02-09-Asr,2|2026-02-09T18:30:57.709Z
+prayer_check,2026-02-09-Maghrib,1|2026-02-09T18:30:58.404Z
+prayer_check,2026-02-10-Fajr | Sobh,1|2026-02-10T06:34:16.377Z
+prayer_check,2026-02-09-Isha,2|2026-02-10T06:34:22.570Z
+prayer_check,2026-02-10-Asr,1|2026-02-10T14:56:12.447Z
+prayer_check,2026-02-10-Dohr,2|2026-02-10T14:56:12.954Z
+prayer_check,2026-02-11-Fajr | Sobh,1|2026-02-11T14:49:08.156Z
+prayer_check,2026-02-11-Dohr,2|2026-02-11T14:49:10.748Z
+prayer_check,2026-02-11-Asr,1|2026-02-11T14:49:11.545Z
+prayer_check,2026-02-10-Isha,1|2026-02-11T14:49:15.111Z
+prayer_check,2026-02-10-Maghrib,2|2026-02-11T14:49:15.745Z
+prayer_check,2026-02-11-Maghrib,2|2026-02-12T04:09:12.818Z
+prayer_check,2026-02-11-Isha,1|2026-02-12T04:09:14.047Z
+prayer_check,2026-02-12-Fajr | Sobh,1|2026-02-12T08:23:16.339Z
+prayer_check,2026-02-12-Dohr,1|2026-02-12T16:37:46.743Z
+prayer_check,2026-02-12-Asr,1|2026-02-12T18:36:38.863Z
+prayer_check,2026-02-13-Fajr | Sobh,2|2026-02-13T16:32:33.750Z
+prayer_check,2026-02-13-Dohr,2|2026-02-13T16:32:34.670Z
+prayer_check,2026-02-13-Asr,1|2026-02-13T16:32:35.805Z
+prayer_check,2026-02-12-Isha,2|2026-02-13T16:32:46.222Z
+prayer_check,2026-02-12-Maghrib,2|2026-02-13T16:32:46.824Z
+prayer_check,2026-02-15-Fajr | Sobh,2|2026-02-15T19:32:41.030Z
+prayer_check,2026-02-15-Dohr,2|2026-02-15T19:32:41.526Z
+prayer_check,2026-02-15-Asr,2|2026-02-15T19:32:42.082Z
+prayer_check,2026-02-15-Maghrib,1|2026-02-15T19:32:43.781Z
+prayer_check,2026-02-14-Isha,2|2026-02-15T19:32:49.140Z
+prayer_check,2026-02-14-Maghrib,2|2026-02-15T19:32:50.290Z
+prayer_check,2026-02-14-Asr,2|2026-02-15T19:32:50.880Z
+prayer_check,2026-02-14-Dohr,2|2026-02-15T19:32:51.494Z
+prayer_check,2026-02-14-Fajr | Sobh,2|2026-02-15T19:32:59.393Z
+prayer_check,2026-02-13-Maghrib,2|2026-02-15T19:33:02.811Z
+prayer_check,2026-02-13-Isha,2|2026-02-15T19:33:03.412Z
+prayer_check,2026-02-16-Fajr | Sobh,1|2026-02-16T06:17:28.142Z
+prayer_check,2026-02-15-Isha,2|2026-02-16T06:17:32.354Z
+prayer_check,2026-02-16-Isha,1|2026-02-17T05:25:57.583Z
+prayer_check,2026-02-16-Dohr,2|2026-02-17T05:25:58.870Z
+prayer_check,2026-02-16-Asr,2|2026-02-17T05:25:59.271Z
+prayer_check,2026-02-16-Maghrib,2|2026-02-17T05:25:59.635Z
+prayer_check,2026-02-17-Fajr | Sobh,1|2026-02-17T10:54:57.897Z
+prayer_check,2026-02-17-Isha,1|2026-02-18T05:39:38.978Z
+prayer_check,2026-02-17-Maghrib,2|2026-02-18T05:39:37.908Z
+prayer_check,2026-02-17-Asr,2|2026-02-18T05:39:38.199Z
+prayer_check,2026-02-17-Dohr,2|2026-02-18T05:39:38.519Z
+prayer_check,2026-02-19-Fajr | Sobh,1|2026-02-19T07:33:42.794Z
+prayer_check,2026-02-18-Isha,1|2026-02-19T07:36:23.582Z
+prayer_check,2026-02-18-Maghrib,1|2026-02-19T07:36:28.628Z
+prayer_check,2026-02-18-Asr,1|2026-02-19T07:36:29.206Z
+prayer_check,2026-02-18-Dohr,1|2026-02-19T07:36:29.739Z
+prayer_check,2026-02-18-Fajr | Sobh,1|2026-02-19T07:36:30.391Z
+prayer_check,2026-02-19-Dohr,2|2026-02-22T19:22:12.568Z
+prayer_check,2026-02-21-Fajr | Sobh,2|2026-02-22T19:33:18.345Z
+prayer_check,2026-02-19-Asr,2|2026-02-22T19:22:13.019Z
+prayer_check,2026-02-19-Maghrib,2|2026-02-22T19:22:13.497Z
+prayer_check,2026-02-19-Isha,2|2026-02-22T19:22:13.813Z
+prayer_check,2026-02-20-Dohr,2|2026-02-22T19:22:18.819Z
+prayer_check,2026-02-20-Fajr | Sobh,2|2026-02-22T19:22:19.268Z
+prayer_check,2026-02-20-Asr,2|2026-02-22T19:33:10.635Z
+prayer_check,2026-02-20-Maghrib,2|2026-02-22T19:33:10.903Z
+prayer_check,2026-02-20-Isha,2|2026-02-22T19:33:11.326Z
+prayer_check,2026-02-21-Dohr,2|2026-02-22T19:53:00.261Z
+prayer_check,2026-02-21-Isha,2|2026-02-22T20:01:38.790Z
+prayer_check,2026-02-21-Asr,2|2026-02-22T20:01:39.582Z
+prayer_check,2026-02-21-Maghrib,2|2026-02-22T20:01:40.798Z
+prayer_check,2026-02-22-Fajr | Sobh,2|2026-02-22T20:01:51.119Z
+prayer_check,2026-02-22-Dohr,2|2026-02-22T20:03:05.254Z
+prayer_check,2026-02-22-Asr,2|2026-02-22T20:07:01.825Z
+prayer_check,2026-02-22-Isha,1|2026-02-22T20:58:48.368Z
+prayer_check,2026-02-22-Maghrib,2|2026-02-22T20:58:49.073Z
+prayer_check,2026-02-23-Fajr | Sobh,1|2026-02-23T07:47:28.807Z
+prayer_check,2026-02-23-Dohr,2|2026-02-23T17:10:38.447Z
+prayer_check,2026-02-23-Asr,1|2026-02-23T17:10:39.610Z
+prayer_check,2026-02-23-Maghrib,2|2026-02-25T18:42:49.661Z
+prayer_check,2026-02-23-Isha,2|2026-02-25T18:44:10.067Z
+prayer_check,2026-02-24-Isha,2|2026-02-26T18:20:15.986Z
+prayer_check,2026-02-24-Maghrib,2|2026-02-26T18:20:16.447Z
+prayer_check,2026-02-24-Asr,1|2026-02-25T18:42:59.930Z
+prayer_check,2026-02-24-Dohr,1|2026-02-25T18:43:59.119Z
+prayer_check,2026-02-24-Fajr | Sobh,1|2026-02-25T18:43:02.417Z
+prayer_check,2026-02-26-Fajr | Sobh,2|2026-02-26T18:19:56.780Z
+prayer_check,2026-02-26-Dohr,2|2026-02-26T18:19:59.942Z
+prayer_check,2026-02-26-Asr,1|2026-02-26T18:20:01.864Z
+prayer_check,2026-02-25-Isha,2|2026-02-26T18:20:09.774Z
+prayer_check,2026-02-25-Maghrib,2|2026-02-26T18:20:10.243Z
+prayer_check,2026-02-25-Asr,2|2026-02-26T18:20:11.729Z
+prayer_check,2026-02-25-Dohr,2|2026-02-26T18:20:12.016Z
+prayer_check,2026-02-25-Fajr | Sobh,2|2026-02-26T18:20:12.333Z
+prayer_check,2026-02-27-Fajr | Sobh,1|2026-02-27T06:34:49.889Z
+prayer_check,2026-02-26-Maghrib,2|2026-02-27T06:34:57.757Z
+prayer_check,2026-02-26-Isha,2|2026-02-27T06:34:58.351Z
+prayer_check,2026-03-01-Fajr | Sobh,2|2026-03-01T16:38:19.446Z
+prayer_check,2026-03-01-Dohr,2|2026-03-01T16:38:21.376Z
+prayer_check,2026-03-01-Asr,1|2026-03-01T16:38:22.341Z
+prayer_check,2026-02-28-Isha,2|2026-03-01T17:07:34.249Z
+prayer_check,2026-02-28-Maghrib,2|2026-03-01T17:07:34.713Z
+prayer_check,2026-02-28-Asr,2|2026-03-01T17:07:35.321Z
+prayer_check,2026-02-28-Dohr,2|2026-03-01T17:07:35.848Z
+prayer_check,2026-02-28-Fajr | Sobh,1|2026-03-01T17:07:37.913Z
+prayer_check,2026-02-27-Isha,1|2026-03-01T17:08:03.634Z
+prayer_check,2026-02-27-Maghrib,2|2026-03-01T17:07:46.115Z
+prayer_check,2026-02-27-Asr,2|2026-03-01T17:07:46.486Z
+prayer_check,2026-02-27-Dohr,2|2026-03-01T17:07:47.070Z
+prayer_check,2026-03-02-Fajr | Sobh,1|2026-03-02T10:50:14.418Z
+prayer_check,2026-03-01-Isha,2|2026-03-02T10:50:26.287Z
+prayer_check,2026-03-01-Maghrib,2|2026-03-02T10:50:27.100Z
+prayer_check,2026-03-02-Dohr,2|2026-03-02T18:11:05.962Z
+prayer_check,2026-03-02-Asr,2|2026-03-02T18:11:06.617Z
+prayer_check,2026-03-03-Asr,2|2026-03-04T06:56:09.881Z
+prayer_check,2026-03-03-Dohr,2|2026-03-04T06:56:10.438Z
+prayer_check,2026-03-03-Fajr | Sobh,1|2026-03-04T06:56:13.691Z
+prayer_check,2026-03-02-Maghrib,2|2026-03-04T06:56:29.395Z
+prayer_check,2026-03-02-Isha,2|2026-03-04T06:56:29.996Z
+prayer_check,2026-03-04-Dohr,2|2026-03-05T05:07:54.495Z
+prayer_check,2026-03-04-Fajr | Sobh,2|2026-03-05T05:07:55.189Z
+prayer_check,2026-03-03-Isha,2|2026-03-05T05:07:58.176Z
+prayer_check,2026-03-03-Maghrib,2|2026-03-05T05:07:58.779Z
+prayer_check,2026-03-05-Maghrib,2|2026-03-06T08:27:30.696Z
+prayer_check,2026-03-05-Asr,2|2026-03-06T08:27:31.328Z
+prayer_check,2026-03-05-Dohr,2|2026-03-06T08:27:31.906Z
+prayer_check,2026-03-04-Isha,2|2026-03-05T05:13:32.269Z
+prayer_check,2026-03-04-Maghrib,2|2026-03-05T05:13:32.668Z
+prayer_check,2026-03-04-Asr,2|2026-03-05T05:13:33.105Z
+prayer_check,2026-03-05-Fajr | Sobh,1|2026-03-05T05:15:59.862Z
+prayer_check,2026-03-06-Fajr | Sobh,2|2026-03-06T08:27:20.556Z
+prayer_check,2026-03-05-Isha,2|2026-03-06T08:27:29.912Z
+prayer_check,2026-03-06-Dohr,2|2026-03-06T21:33:02.604Z
+prayer_check,2026-03-06-Asr,2|2026-03-06T21:33:03.437Z
+prayer_check,2026-03-06-Maghrib,2|2026-03-06T21:33:04.059Z
+prayer_check,2026-03-06-Isha,1|2026-03-07T11:53:15.347Z
+prayer_check,2026-03-07-Fajr | Sobh,1|2026-03-07T11:52:06.142Z
+prayer_check,2026-03-07-Asr,1|2026-03-07T16:40:01.647Z
+prayer_check,2026-03-07-Dohr,2|2026-03-07T16:40:00.656Z
+prayer_check,2026-03-07-Isha,1|2026-03-08T01:16:09.197Z
+prayer_check,2026-03-07-Maghrib,2|2026-03-08T01:16:09.862Z
+prayer_check,2026-03-08-Fajr | Sobh,2|2026-03-08T13:14:48.506Z
+prayer_check,2026-03-08-Dohr,1|2026-03-08T13:14:50.348Z
+prayer_check,2026-03-09-Fajr | Sobh,2|2026-03-09T07:34:23.778Z
+prayer_check,2026-03-08-Maghrib,2|2026-03-09T07:34:39.740Z
+prayer_check,2026-03-08-Isha,2|2026-03-09T07:34:40.719Z
+prayer_check,2026-03-09-Asr,1|2026-03-09T17:35:17.875Z
+prayer_check,2026-03-09-Dohr,2|2026-03-09T17:35:18.612Z
+prayer_check,2026-03-08-Asr,2|2026-03-09T17:35:23.985Z
+prayer_check,2026-03-10-Fajr | Sobh,2|2026-03-10T08:42:51.616Z
+prayer_check,2026-03-09-Isha,2|2026-03-10T08:43:00.395Z
+prayer_check,2026-03-09-Maghrib,2|2026-03-10T08:43:01.238Z
+prayer_check,2026-03-12-Fajr | Sobh,2|2026-03-12T08:31:36.388Z
+prayer_check,2026-03-11-Isha,2|2026-03-12T08:31:46.368Z
+prayer_check,2026-03-11-Maghrib,2|2026-03-12T08:31:46.860Z
+prayer_check,2026-03-11-Asr,2|2026-03-12T08:31:47.229Z
+prayer_check,2026-03-11-Dohr,2|2026-03-12T08:31:47.668Z
+prayer_check,2026-03-11-Fajr | Sobh,2|2026-03-12T08:31:48.059Z
+prayer_check,2026-03-10-Isha,2|2026-03-12T08:31:54.828Z
+prayer_check,2026-03-10-Dohr,2|2026-03-12T08:31:55.207Z
+prayer_check,2026-03-10-Maghrib,2|2026-03-12T08:31:55.678Z
+prayer_check,2026-03-10-Asr,2|2026-03-12T08:32:07.828Z
+prayer_check,2026-03-13-Maghrib,1|2026-03-14T01:54:32.539Z
+prayer_check,2026-03-13-Asr,2|2026-03-14T01:54:54.880Z
+prayer_check,2026-03-13-Dohr,2|2026-03-14T01:54:45.300Z
+prayer_check,2026-03-13-Fajr | Sobh,2|2026-03-14T01:54:48.285Z
+prayer_check,2026-03-12-Isha,2|2026-03-14T01:54:59.562Z
+prayer_check,2026-03-12-Maghrib,2|2026-03-14T01:54:59.906Z
+prayer_check,2026-03-12-Asr,2|2026-03-14T01:55:00.278Z
+prayer_check,2026-03-12-Dohr,2|2026-03-14T01:55:00.560Z
+prayer_check,2026-03-15-Fajr | Sobh,2|2026-03-15T08:07:55.484Z
+prayer_check,2026-03-14-Isha,2|2026-03-15T08:08:01.836Z
+prayer_check,2026-03-14-Maghrib,2|2026-03-15T08:08:02.286Z
+prayer_check,2026-03-14-Fajr | Sobh,2|2026-03-15T08:08:03.704Z
+prayer_check,2026-03-14-Dohr,2|2026-03-15T08:08:04.137Z
+prayer_check,2026-03-13-Isha,2|2026-03-15T08:08:07.888Z
+prayer_check,2026-03-14-Asr,2|2026-03-15T08:08:12.409Z
+prayer_check,2026-03-15-Dohr,2|2026-03-15T22:05:27.063Z
+prayer_check,2026-03-15-Maghrib,2|2026-03-15T22:05:28.411Z
+prayer_check,2026-03-15-Asr,2|2026-03-15T22:05:28.892Z
+prayer_check,2026-03-15-Isha,1|2026-03-15T22:05:29.930Z
+prayer_check,2026-03-16-Fajr | Sobh,1|2026-03-16T05:50:13.202Z
+prayer_check,2026-03-16-Dohr,2|2026-03-16T19:17:25.691Z
+prayer_check,2026-03-16-Asr,2|2026-03-16T19:17:26.198Z
+prayer_check,2026-03-16-Maghrib,1|2026-03-16T19:17:29.747Z
+prayer_check,2026-03-17-Fajr | Sobh,2|2026-03-17T07:38:30.048Z
+prayer_check,2026-03-16-Isha,1|2026-03-17T07:38:47.654Z
+prayer_check,2026-03-17-Dohr,2|2026-03-17T16:45:10.962Z
+prayer_check,2026-03-17-Asr,1|2026-03-17T16:45:21.593Z
+prayer_check,2026-03-18-Dohr,2|2026-03-18T16:11:04.861Z
+prayer_check,2026-03-18-Asr,1|2026-03-18T16:11:07.040Z
+prayer_check,2026-03-18-Fajr | Sobh,2|2026-03-18T16:11:07.806Z
+prayer_check,2026-03-17-Isha,2|2026-03-18T16:11:17.070Z
+prayer_check,2026-03-17-Maghrib,2|2026-03-18T16:11:20.700Z
+prayer_check,2026-03-19-Fajr | Sobh,2|2026-03-19T08:17:52.531Z
+prayer_check,2026-03-18-Maghrib,2|2026-03-19T08:18:14.873Z
+prayer_check,2026-03-18-Isha,1|2026-03-19T08:18:16.213Z
+prayer_check,2026-03-19-Dohr,1|2026-03-19T15:24:11.421Z
+prayer_check,2026-03-19-Asr,2|2026-03-19T15:24:13.961Z
+prayer_check,2026-03-20-Fajr | Sobh,2|2026-03-20T10:12:27.235Z
+prayer_check,2026-03-19-Isha,2|2026-03-20T10:12:34.936Z
+prayer_check,2026-03-19-Maghrib,2|2026-03-20T10:12:35.403Z
+prayer_check,2026-03-21-Dohr,1|2026-03-21T14:43:31.320Z
+prayer_check,2026-03-21-Asr,2|2026-03-21T14:43:39.303Z
+prayer_check,2026-03-21-Fajr | Sobh,2|2026-03-21T14:43:37.578Z
+prayer_check,2026-03-20-Isha,2|2026-03-21T14:43:45.407Z
+prayer_check,2026-03-20-Maghrib,2|2026-03-21T14:43:46.038Z
+prayer_check,2026-03-20-Asr,2|2026-03-21T14:43:46.557Z
+prayer_check,2026-03-20-Dohr,2|2026-03-21T14:43:46.949Z
+prayer_check,2026-03-21-Isha,2|2026-03-23T06:34:43.606Z
+prayer_check,2026-03-21-Maghrib,2|2026-03-23T06:34:44.137Z
+prayer_check,2026-03-23-Dohr,2|2026-03-23T15:36:00.175Z
+prayer_check,2026-03-23-Fajr | Sobh,2|2026-03-23T15:08:48.457Z
+prayer_check,2026-03-22-Isha,2|2026-03-23T15:08:58.531Z
+prayer_check,2026-03-22-Maghrib,2|2026-03-23T15:08:58.874Z
+prayer_check,2026-03-22-Fajr | Sobh,2|2026-03-23T15:09:00.298Z
+prayer_check,2026-03-22-Asr,2|2026-03-23T15:09:01.135Z
+prayer_check,2026-03-22-Dohr,2|2026-03-23T15:09:02.147Z
+prayer_check,2026-03-23-Asr,1|2026-03-23T15:35:59.545Z
+prayer_check,2026-03-24-Fajr | Sobh,1|2026-03-24T05:08:11.832Z
+prayer_check,2026-03-23-Isha,2|2026-03-24T05:08:27.472Z
+prayer_check,2026-03-23-Maghrib,2|2026-03-24T05:08:29.158Z
+prayer_check,2026-03-24-Dohr,2|2026-03-24T18:28:51.324Z
+prayer_check,2026-03-24-Asr,1|2026-03-24T18:29:02.175Z
+prayer_check,2026-03-25-Fajr | Sobh,2|2026-03-25T18:43:51.989Z
+prayer_check,2026-03-25-Dohr,2|2026-03-25T18:43:52.869Z
+prayer_check,2026-03-25-Asr,1|2026-03-25T18:43:56.378Z
+prayer_check,2026-03-25-Maghrib,1|2026-03-25T18:43:55.764Z
+prayer_check,2026-03-24-Isha,2|2026-03-25T18:44:04.638Z
+prayer_check,2026-03-24-Maghrib,2|2026-03-25T18:44:05.262Z
+prayer_check,2026-03-26-Fajr | Sobh,1|2026-03-26T07:51:36.190Z
+prayer_check,2026-03-25-Isha,2|2026-03-26T07:51:40.290Z
+prayer_check,2026-03-26-Dohr,2|2026-03-26T18:12:55.834Z
+prayer_check,2026-03-26-Asr,1|2026-03-26T18:12:57.623Z
+prayer_check,2026-03-27-Fajr | Sobh,2|2026-03-27T09:29:31.565Z
+prayer_check,2026-03-26-Isha,2|2026-03-27T09:29:39.231Z
+prayer_check,2026-03-26-Maghrib,2|2026-03-27T09:29:40.032Z
+prayer_check,2026-03-27-Asr,1|2026-03-27T23:12:12.350Z
+prayer_check,2026-03-27-Dohr,2|2026-03-27T23:12:13.133Z
+prayer_check,2026-03-28-Fajr | Sobh,2|2026-03-28T08:32:40.229Z
+prayer_check,2026-03-27-Maghrib,2|2026-03-28T08:32:49.040Z
+prayer_check,2026-03-27-Isha,2|2026-03-28T08:32:49.500Z
+prayer_check,2026-03-28-Maghrib,1|2026-03-29T05:25:44.703Z
+prayer_check,2026-03-28-Asr,2|2026-03-29T05:25:45.413Z
+prayer_check,2026-03-28-Dohr,2|2026-03-29T05:25:45.914Z
+prayer_check,2026-03-29-Fajr | Sobh,2|2026-03-29T06:38:02.408Z
+prayer_check,2026-03-28-Isha,2|2026-03-29T06:38:06.838Z
+prayer_check,2026-03-29-Dohr,2|2026-03-29T16:59:10.437Z
+prayer_check,2026-03-29-Asr,1|2026-03-29T16:59:11.807Z
+prayer_check,2026-03-29-Maghrib,1|2026-03-29T19:13:28.566Z
+prayer_check,2026-03-30-Fajr | Sobh,2|2026-03-30T08:23:38.019Z
+prayer_check,2026-03-29-Isha,2|2026-03-30T08:23:47.266Z
+prayer_check,2026-03-30-Asr,1|2026-03-30T15:44:14.120Z
+prayer_check,2026-03-30-Dohr,2|2026-03-30T15:44:14.695Z
+prayer_check,2026-03-30-Maghrib,2|2026-03-30T23:57:10.135Z
+prayer_check,2026-03-30-Isha,1|2026-03-30T23:57:11.211Z
+prayer_check,2026-03-31-Dohr,1|2026-03-31T14:18:37.943Z
+prayer_check,2026-03-31-Fajr | Sobh,2|2026-03-31T14:18:38.713Z
+prayer_check,2026-04-01-Fajr | Sobh,2|2026-04-01T08:46:26.722Z
+prayer_check,2026-04-01-Dohr,2|2026-04-01T08:46:37.327Z
+prayer_check,2026-03-31-Isha,2|2026-04-01T08:46:49.307Z
+prayer_check,2026-03-31-Maghrib,2|2026-04-01T08:46:49.849Z
+prayer_check,2026-03-31-Asr,2|2026-04-01T08:46:50.319Z
+prayer_check,2026-04-01-Asr,2|2026-04-03T06:42:56.932Z
+prayer_check,2026-04-01-Maghrib,2|2026-04-03T06:42:58.246Z
+prayer_check,2026-04-01-Isha,2|2026-04-03T06:42:59.107Z
+prayer_check,2026-04-02-Fajr | Sobh,2|2026-04-03T06:43:05.162Z
+prayer_check,2026-04-02-Dohr,2|2026-04-03T06:43:06.760Z
+prayer_check,2026-04-02-Maghrib,2|2026-04-03T06:53:26.421Z
+prayer_check,2026-04-02-Asr,2|2026-04-03T06:53:26.642Z
+prayer_check,2026-04-02-Isha,2|2026-04-03T06:53:27.251Z
+prayer_check,2026-04-03-Fajr | Sobh,2|2026-04-03T06:53:32.511Z
+prayer_check,2026-04-03-Dohr,1|2026-04-03T18:37:29.631Z
+prayer_check,2026-04-03-Isha,2|2026-04-07T19:36:33.924Z
+prayer_check,2026-04-03-Maghrib,2|2026-04-07T19:36:34.241Z
+prayer_check,2026-04-03-Asr,2|2026-04-07T19:36:34.753Z
+prayer_check,2026-04-04-Fajr | Sobh,2|2026-04-07T19:38:55.596Z
+prayer_check,2026-04-04-Dohr,2|2026-04-07T19:38:56.299Z
+prayer_check,2026-04-04-Asr,2|2026-04-07T19:41:11.754Z
+prayer_check,2026-04-04-Isha,2|2026-04-07T19:43:37.329Z
+prayer_check,2026-04-04-Maghrib,2|2026-04-07T19:43:42.715Z
+prayer_check,2026-04-05-Dohr,2|2026-04-07T19:46:03.818Z
+prayer_check,2026-04-05-Fajr | Sobh,2|2026-04-07T19:46:04.819Z
+prayer_check,2026-04-05-Asr,2|2026-04-07T19:52:26.489Z
+prayer_check,2026-04-05-Isha,2|2026-04-07T19:52:27.121Z
+prayer_check,2026-04-05-Maghrib,2|2026-04-07T19:52:28.283Z
+prayer_check,2026-04-06-Dohr,2|2026-04-07T19:52:32.739Z
+prayer_check,2026-04-06-Fajr | Sobh,2|2026-04-07T19:52:33.357Z
+prayer_check,2026-04-06-Maghrib,2|2026-04-07T19:54:51.643Z
+prayer_check,2026-04-06-Asr,2|2026-04-07T19:54:55.753Z
+prayer_check,2026-04-06-Isha,2|2026-04-07T19:56:39.707Z
+prayer_check,2026-04-07-Fajr | Sobh,2|2026-04-07T20:00:00.633Z
+prayer_check,2026-04-07-Dohr,2|2026-04-08T06:31:27.932Z
+prayer_check,2026-04-07-Isha,2|2026-04-08T06:31:16.911Z
+prayer_check,2026-04-07-Maghrib,2|2026-04-08T06:31:17.497Z
+prayer_check,2026-04-07-Asr,2|2026-04-08T06:31:18.042Z
+prayer_check,2026-04-08-Fajr | Sobh,2|2026-04-08T06:31:23.660Z
+prayer_check,2026-04-09-Dohr,1|2026-04-09T16:18:18.447Z
+prayer_check,2026-04-09-Fajr | Sobh,2|2026-04-09T16:17:24.854Z
+prayer_check,2026-04-08-Isha,2|2026-04-09T16:17:51.374Z
+prayer_check,2026-04-08-Maghrib,2|2026-04-09T16:17:51.994Z
+prayer_check,2026-04-08-Asr,2|2026-04-09T16:17:53.192Z
+prayer_check,2026-04-08-Dohr,2|2026-04-09T16:17:53.664Z
+prayer_check,2026-04-10-Dohr,1|2026-04-10T14:45:49.322Z
+prayer_check,2026-04-10-Fajr | Sobh,2|2026-04-10T14:45:49.978Z
+prayer_check,2026-04-09-Isha,2|2026-04-10T14:45:53.761Z
+prayer_check,2026-04-09-Maghrib,2|2026-04-10T14:45:54.222Z
+prayer_check,2026-04-09-Asr,2|2026-04-10T14:45:54.611Z
+prayer_check,2026-04-13-Fajr | Sobh,2|2026-04-13T08:45:16.931Z
+prayer_check,2026-04-12-Isha,2|2026-04-13T08:45:26.529Z
+prayer_check,2026-04-12-Fajr | Sobh,2|2026-04-13T08:45:27.201Z
+prayer_check,2026-04-12-Dohr,2|2026-04-13T08:45:27.571Z
+prayer_check,2026-04-12-Asr,2|2026-04-13T08:45:27.977Z
+prayer_check,2026-04-12-Maghrib,2|2026-04-13T08:45:28.839Z
+prayer_check,2026-04-11-Isha,2|2026-04-13T08:45:34.389Z
+prayer_check,2026-04-11-Maghrib,2|2026-04-13T08:45:34.819Z
+prayer_check,2026-04-11-Asr,2|2026-04-13T08:45:36.319Z
+prayer_check,2026-04-11-Fajr | Sobh,2|2026-04-13T08:45:36.735Z
+prayer_check,2026-04-10-Asr,2|2026-04-13T08:45:41.377Z
+prayer_check,2026-04-10-Maghrib,2|2026-04-13T08:45:41.924Z
+prayer_check,2026-04-10-Isha,2|2026-04-13T08:45:42.481Z
+prayer_check,2026-04-11-Dohr,2|2026-04-13T08:45:48.539Z
+prayer_check,2026-04-13-Dohr,2|2026-04-13T15:52:41.186Z
+prayer_check,2026-04-13-Asr,1|2026-04-13T15:52:42.485Z
+prayer_check,2026-04-16-Asr,1|2026-04-17T16:44:54.614Z
+prayer_check,2026-04-16-Dohr,1|2026-04-17T16:44:55.766Z
+prayer_check,2026-04-16-Fajr | Sobh,1|2026-04-17T16:44:57.164Z
+prayer_check,2026-04-15-Isha,2|2026-04-17T16:45:04.734Z
+prayer_check,2026-04-15-Maghrib,2|2026-04-17T16:45:05.179Z
+prayer_check,2026-04-15-Asr,2|2026-04-17T16:45:05.686Z
+prayer_check,2026-04-15-Fajr | Sobh,2|2026-04-17T16:45:07.390Z
+prayer_check,2026-04-15-Dohr,1|2026-04-17T16:45:12.076Z
+prayer_check,2026-04-14-Isha,2|2026-04-17T16:45:19.686Z
+prayer_check,2026-04-14-Maghrib,2|2026-04-17T16:45:20.169Z
+prayer_check,2026-04-14-Asr,1|2026-04-17T16:45:23.896Z
+prayer_check,2026-04-14-Dohr,1|2026-04-17T16:45:25.200Z
+prayer_check,2026-04-14-Fajr | Sobh,2|2026-04-17T16:45:23.513Z
+prayer_check,2026-04-13-Isha,2|2026-04-17T16:45:36.469Z
+prayer_check,2026-04-13-Maghrib,2|2026-04-17T16:45:36.974Z
+prayer_check,2026-04-16-Maghrib,2|2026-04-21T13:21:06.932Z
+prayer_check,2026-04-16-Isha,2|2026-04-21T13:21:07.512Z
+prayer_check,2026-04-17-Dohr,2|2026-04-21T13:24:47.130Z
+prayer_check,2026-04-17-Fajr | Sobh,2|2026-04-21T13:24:47.540Z
+prayer_check,2026-04-17-Maghrib,2|2026-04-21T13:30:44.675Z
+prayer_check,2026-04-17-Asr,2|2026-04-21T13:30:45.505Z
+prayer_check,2026-04-27-Dohr,1|2026-04-27T15:08:43.211Z
+prayer_check,2026-04-27-Fajr | Sobh,2|2026-04-27T15:08:43.838Z
+prayer_check,2026-04-26-Isha,2|2026-04-27T15:08:48.416Z
+prayer_check,2026-04-26-Maghrib,2|2026-04-27T15:08:48.785Z
+prayer_check,2026-04-26-Asr,2|2026-04-27T15:08:49.235Z
+prayer_check,2026-04-26-Dohr,2|2026-04-27T15:08:49.621Z
+prayer_check,2026-04-26-Fajr | Sobh,2|2026-04-27T15:08:51.229Z
+prayer_check,2026-04-25-Isha,2|2026-04-27T15:09:07.814Z
+prayer_check,2026-04-25-Maghrib,2|2026-04-27T15:09:08.100Z
+prayer_check,2026-04-25-Asr,2|2026-04-27T15:09:08.460Z
+prayer_check,2026-04-25-Dohr,2|2026-04-27T15:09:08.819Z
+prayer_check,2026-04-25-Fajr | Sobh,2|2026-04-27T15:09:09.165Z
+prayer_check,2026-04-24-Isha,2|2026-04-27T15:09:12.969Z
+prayer_check,2026-04-24-Maghrib,2|2026-04-27T15:09:13.262Z
+prayer_check,2026-04-24-Asr,2|2026-04-27T15:09:13.597Z
+prayer_check,2026-04-24-Dohr,2|2026-04-27T15:09:14.016Z
+prayer_check,2026-04-24-Fajr | Sobh,2|2026-04-27T15:09:14.297Z
+prayer_check,2026-04-23-Isha,2|2026-04-27T15:09:17.634Z
+prayer_check,2026-04-23-Maghrib,2|2026-04-27T15:09:18.226Z
+prayer_check,2026-04-23-Asr,2|2026-04-27T15:09:18.604Z
+prayer_check,2026-04-23-Dohr,2|2026-04-27T15:09:19.019Z
+prayer_check,2026-04-23-Fajr | Sobh,2|2026-04-27T15:09:19.315Z
+prayer_check,2026-04-22-Isha,2|2026-04-27T15:09:25.045Z
+prayer_check,2026-04-22-Maghrib,2|2026-04-27T15:09:25.835Z
+prayer_check,2026-04-22-Asr,2|2026-04-27T15:09:26.245Z
+prayer_check,2026-04-22-Dohr,2|2026-04-27T15:09:26.584Z
+prayer_check,2026-04-22-Fajr | Sobh,2|2026-04-27T15:09:26.943Z
+prayer_check,2026-04-21-Isha,2|2026-04-27T15:09:32.460Z
+prayer_check,2026-04-21-Maghrib,2|2026-04-27T15:09:32.735Z
+prayer_check,2026-04-21-Asr,2|2026-04-27T15:09:33.020Z
+prayer_check,2026-04-21-Dohr,2|2026-04-27T15:09:33.361Z
+prayer_check,2026-04-21-Fajr | Sobh,2|2026-04-27T15:09:33.640Z
+prayer_check,2026-04-20-Isha,2|2026-04-27T15:09:38.446Z
+prayer_check,2026-04-20-Maghrib,2|2026-04-27T15:09:39.606Z
+prayer_check,2026-04-20-Asr,2|2026-04-27T15:09:39.895Z
+prayer_check,2026-04-20-Dohr,2|2026-04-27T15:09:40.194Z
+prayer_check,2026-04-20-Fajr | Sobh,2|2026-04-27T15:09:41.615Z
+prayer_check,2026-04-19-Isha,2|2026-04-27T15:09:47.642Z
+prayer_check,2026-04-19-Maghrib,2|2026-04-27T15:09:47.979Z
+prayer_check,2026-04-19-Asr,2|2026-04-27T15:09:48.343Z
+prayer_check,2026-04-19-Dohr,2|2026-04-27T15:09:48.712Z
+prayer_check,2026-04-19-Fajr | Sobh,2|2026-04-27T15:09:48.977Z
+prayer_check,2026-04-18-Isha,2|2026-04-27T15:09:55.796Z
+prayer_check,2026-04-18-Maghrib,2|2026-04-27T15:09:56.134Z
+prayer_check,2026-04-18-Asr,2|2026-04-27T15:09:56.415Z
+prayer_check,2026-04-18-Dohr,2|2026-04-27T15:09:56.685Z
+prayer_check,2026-04-18-Fajr | Sobh,2|2026-04-27T15:09:56.947Z
+prayer_check,2026-04-17-Isha,2|2026-04-27T15:10:00.169Z
+prayer_check,2026-04-27-Asr,2|2026-04-28T18:48:34.595Z
+prayer_check,2026-04-27-Maghrib,2|2026-04-28T18:48:35.095Z
+prayer_check,2026-04-27-Isha,2|2026-04-28T18:48:35.681Z
+prayer_check,2026-04-28-Dohr,1|2026-04-28T18:48:46.457Z
+prayer_check,2026-04-28-Fajr | Sobh,2|2026-04-28T18:48:41.564Z
+prayer_check,2026-04-28-Maghrib,2|2026-04-29T09:38:41.813Z
+prayer_check,2026-04-28-Asr,2|2026-04-29T09:38:42.228Z
+prayer_check,2026-04-28-Isha,2|2026-04-29T09:38:42.663Z
+prayer_check,2026-04-29-Fajr | Sobh,2|2026-04-29T09:38:47.520Z
+prayer_check,2026-04-30-Fajr | Sobh,2|2026-04-30T06:14:27.466Z
+prayer_check,2026-04-29-Isha,2|2026-04-30T06:14:31.619Z
+prayer_check,2026-04-29-Maghrib,2|2026-04-30T06:14:31.915Z
+prayer_check,2026-04-29-Asr,2|2026-04-30T06:14:32.268Z
+prayer_check,2026-04-29-Dohr,2|2026-04-30T06:14:32.580Z
+prayer_check,2026-05-01-Fajr | Sobh,2|2026-05-01T06:09:21.016Z
+prayer_check,2026-04-30-Dohr,2|2026-05-01T06:09:32.060Z
+prayer_check,2026-04-30-Asr,2|2026-05-01T06:09:32.773Z
+prayer_check,2026-04-30-Maghrib,2|2026-05-01T06:09:33.327Z
+prayer_check,2026-04-30-Isha,2|2026-05-01T06:09:33.670Z
+prayer_check,2026-05-02-Fajr | Sobh,2|2026-05-02T07:41:36.762Z
+prayer_check,2026-05-01-Isha,2|2026-05-02T07:41:45.051Z
+prayer_check,2026-05-01-Dohr,1|2026-05-02T07:41:46.198Z
+prayer_check,2026-05-01-Asr,2|2026-05-02T07:41:46.786Z
+prayer_check,2026-05-01-Maghrib,2|2026-05-02T07:41:47.320Z
+prayer_check,2026-05-02-Asr,2|2026-05-07T05:18:18.082Z
+prayer_check,2026-05-02-Dohr,2|2026-05-07T05:18:18.403Z
+prayer_check,2026-05-02-Maghrib,2|2026-05-07T05:18:19.203Z
+prayer_check,2026-05-02-Isha,2|2026-05-07T05:41:17.143Z
+prayer_check,2026-05-03-Asr,2|2026-05-07T05:41:20.925Z
+prayer_check,2026-05-03-Dohr,2|2026-05-07T05:41:21.271Z
+prayer_check,2026-05-03-Fajr | Sobh,2|2026-05-07T05:41:21.775Z
+prayer_check,2026-05-03-Isha,2|2026-05-07T05:48:28.727Z
+prayer_check,2026-05-03-Maghrib,2|2026-05-07T05:48:29.178Z
+prayer_check,2026-05-04-Fajr | Sobh,2|2026-05-07T05:48:32.434Z
+prayer_check,2026-05-04-Dohr,2|2026-05-07T05:50:00.718Z
+prayer_check,2026-05-04-Asr,2|2026-05-07T05:52:05.504Z
+prayer_check,2026-05-04-Isha,2|2026-05-11T14:24:57.117Z
+prayer_check,2026-05-04-Maghrib,2|2026-05-11T14:24:57.523Z
+prayer_check,2026-05-05-Asr,2|2026-05-11T14:25:01.155Z
+prayer_check,2026-05-05-Dohr,2|2026-05-11T14:25:01.511Z
+prayer_check,2026-05-05-Fajr | Sobh,2|2026-05-11T14:25:01.993Z
+prayer_check,2026-05-05-Isha,2|2026-05-11T14:28:34.392Z
+prayer_check,2026-05-05-Maghrib,2|2026-05-11T14:28:34.856Z
+prayer_check,2026-05-06-Dohr,2|2026-05-11T14:32:12.571Z
+prayer_check,2026-05-06-Fajr | Sobh,2|2026-05-11T14:32:12.871Z
+prayer_check,2026-05-06-Maghrib,2|2026-05-11T14:37:18.134Z
+prayer_check,2026-05-06-Asr,2|2026-05-11T14:37:18.385Z
+prayer_check,2026-05-06-Isha,2|2026-05-11T14:38:52.543Z
+prayer_check,2026-05-07-Isha,2|2026-05-11T14:43:07.089Z
+prayer_check,2026-05-07-Fajr | Sobh,2|2026-05-11T14:43:08.286Z
+prayer_check,2026-05-07-Asr,2|2026-05-11T14:48:57.068Z
+prayer_check,2026-05-07-Dohr,2|2026-05-11T14:48:57.598Z
+prayer_check,2026-05-12-Fajr | Sobh,2|2026-05-13T13:28:13.121Z
+prayer_check,2026-05-07-Maghrib,2|2026-05-13T12:14:26.408Z
+prayer_check,2026-05-08-Maghrib,2|2026-05-13T12:23:52.130Z
+prayer_check,2026-05-08-Dohr,2|2026-05-13T12:23:52.858Z
+prayer_check,2026-05-08-Fajr | Sobh,2|2026-05-13T12:23:53.258Z
+prayer_check,2026-05-08-Asr,2|2026-05-13T12:23:54.310Z
+prayer_check,2026-05-08-Isha,2|2026-05-13T12:23:55.042Z
+prayer_check,2026-05-09-Isha,2|2026-05-13T12:29:29.622Z
+prayer_check,2026-05-09-Fajr | Sobh,2|2026-05-13T12:29:27.192Z
+prayer_check,2026-05-09-Dohr,2|2026-05-13T12:29:28.363Z
+prayer_check,2026-05-13-Dohr,2|2026-05-13T13:42:27.587Z
+prayer_check,2026-05-09-Asr,2|2026-05-13T13:06:21.544Z
+prayer_check,2026-05-09-Maghrib,2|2026-05-13T13:06:21.946Z
+prayer_check,2026-05-10-Isha,2|2026-05-13T13:06:25.256Z
+prayer_check,2026-05-10-Fajr | Sobh,2|2026-05-13T13:06:25.694Z
+prayer_check,2026-05-11-Isha,2|2026-05-13T13:15:23.967Z
+prayer_check,2026-05-11-Fajr | Sobh,2|2026-05-13T13:15:25.265Z
+prayer_check,2026-05-10-Dohr,2|2026-05-13T13:15:54.636Z
+prayer_check,2026-05-10-Asr,2|2026-05-13T13:15:55.166Z
+prayer_check,2026-05-10-Maghrib,2|2026-05-13T13:15:55.696Z
+prayer_check,2026-05-11-Maghrib,2|2026-05-13T13:20:51.073Z
+prayer_check,2026-05-11-Asr,2|2026-05-13T13:20:51.456Z
+prayer_check,2026-05-11-Dohr,2|2026-05-13T13:20:51.757Z
+prayer_check,2026-05-12-Dohr,2|2026-05-13T13:28:12.616Z
+prayer_check,2026-05-12-Isha,2|2026-05-13T13:28:13.465Z
+prayer_check,2026-05-12-Asr,2|2026-05-13T13:28:13.986Z
+prayer_check,2026-05-12-Maghrib,2|2026-05-13T13:30:17.066Z
+prayer_check,2026-05-13-Fajr | Sobh,2|2026-05-13T13:42:28.264Z
+daily_activity,2026-01-08-Read Coran,1|2026-01-08T06:20:00.178Z
+daily_activity,2026-01-07-Read Coran,2|2026-01-08T07:12:26.156Z
+daily_activity,2026-01-08-Tasbih & Dikr,1|2026-01-08T10:50:35.183Z
+daily_activity,2026-01-13-Read Coran,1|2026-01-13T22:55:59.300Z
+daily_activity,2026-01-12-Read Coran,2|2026-01-13T22:56:14.877Z
+daily_activity,2026-01-14-Tasbih & Dikr,1|2026-01-14T08:55:58.566Z
+daily_activity,2026-01-15-Tasbih & Dikr,1|2026-01-15T14:11:43.816Z
+daily_activity,2026-01-18-Read Coran,1|2026-01-18T22:23:06.586Z
+daily_activity,2026-01-18-Tasbih & Dikr,1|2026-01-18T22:23:04.267Z
+daily_activity,2026-01-17-Tasbih & Dikr,1|2026-01-18T22:36:39.815Z
+daily_activity,2026-01-19-Tasbih & Dikr,1|2026-01-19T16:15:41.451Z
+daily_activity,2026-01-20-Tasbih & Dikr,1|2026-01-20T13:37:45.462Z
+daily_activity,2026-01-23-Tasbih & Dikr,1|2026-01-23T10:13:52.484Z
+daily_activity,2026-01-24-Read Coran,1|2026-01-24T18:25:19.480Z
+daily_activity,2026-01-24-Tasbih & Dikr,1|2026-01-24T18:25:19.046Z
+daily_activity,2026-01-25-Read Coran,1|2026-01-25T08:05:54.836Z
+daily_activity,2026-01-26-Read Coran,1|2026-01-26T06:53:46.480Z
+daily_activity,2026-01-26-Tasbih & Dikr,1|2026-01-26T06:53:47.197Z
+daily_activity,2026-01-27-Read Coran,1|2026-01-27T21:52:50.466Z
+daily_activity,2026-01-27-Tasbih & Dikr,1|2026-01-27T21:52:53.752Z
+daily_activity,2026-01-28-Read Coran,1|2026-01-28T08:38:09.590Z
+daily_activity,2026-01-28-Tasbih & Dikr,1|2026-01-28T08:38:10.326Z
+daily_activity,2026-01-29-Read Coran,1|2026-01-29T06:39:08.470Z
+daily_activity,2026-01-29-Tasbih & Dikr,1|2026-01-29T06:39:09.987Z
+daily_activity,2026-01-30-Read Coran,1|2026-01-30T13:34:48.071Z
+daily_activity,2026-01-30-Tasbih & Dikr,1|2026-01-30T13:34:48.637Z
+daily_activity,2026-01-31-Tasbih & Dikr,1|2026-01-31T12:31:43.395Z
+daily_activity,2026-01-31-Read Coran,1|2026-01-31T12:42:33.632Z
+daily_activity,2026-02-01-Tasbih & Dikr,1|2026-02-01T06:35:27.602Z
+daily_activity,2026-02-01-Read Coran,1|2026-02-01T06:35:29.936Z
+daily_activity,2026-02-02-Read Coran,1|2026-02-02T07:31:30.111Z
+daily_activity,2026-02-02-Tasbih & Dikr,1|2026-02-02T07:31:31.993Z
+daily_activity,2026-02-03-Read Coran,1|2026-02-03T06:18:39.126Z
+daily_activity,2026-02-03-Tasbih & Dikr,1|2026-02-03T06:18:39.886Z
+daily_activity,2026-02-04-Tasbih & Dikr,1|2026-02-04T11:59:44.702Z
+daily_activity,2026-02-04-Read Coran,1|2026-02-04T11:59:45.466Z
+daily_activity,2026-02-05-Read Coran,1|2026-02-05T14:59:59.891Z
+daily_activity,2026-02-05-Tasbih & Dikr,1|2026-02-05T15:00:00.872Z
+daily_activity,2026-02-06-Read Coran,1|2026-02-06T23:45:29.638Z
+daily_activity,2026-02-06-Tasbih & Dikr,1|2026-02-06T23:45:30.288Z
+daily_activity,2026-02-07-Read Coran,1|2026-02-08T07:10:01.298Z
+daily_activity,2026-02-07-Tasbih & Dikr,1|2026-02-08T07:10:01.975Z
+daily_activity,2026-02-08-Read Coran,1|2026-02-08T07:40:56.495Z
+daily_activity,2026-02-08-Tasbih & Dikr,1|2026-02-08T07:33:06.365Z
+daily_activity,2026-02-09-Read Coran,1|2026-02-09T07:26:10.979Z
+daily_activity,2026-02-09-Tasbih & Dikr,1|2026-02-09T07:26:11.779Z
+daily_activity,2026-02-10-Read Coran,1|2026-02-10T06:34:20.107Z
+daily_activity,2026-02-10-Tasbih & Dikr,1|2026-02-10T06:34:20.809Z
+daily_activity,2026-02-11-Tasbih & Dikr,1|2026-02-11T14:49:20.368Z
+daily_activity,2026-02-11-Read Coran,1|2026-02-11T14:49:20.847Z
+daily_activity,2026-02-12-Read Coran,1|2026-02-12T04:09:34.168Z
+daily_activity,2026-02-12-Tasbih & Dikr,1|2026-02-12T04:09:35.170Z
+daily_activity,2026-02-13-Read Coran,1|2026-02-13T16:32:42.173Z
+daily_activity,2026-02-13-Tasbih & Dikr,1|2026-02-13T16:32:40.781Z
+daily_activity,2026-02-15-Read Coran,1|2026-02-15T19:32:47.006Z
+daily_activity,2026-02-16-Read Coran,1|2026-02-16T06:17:26.353Z
+daily_activity,2026-02-16-Tasbih & Dikr,1|2026-02-16T06:17:25.601Z
+daily_activity,2026-02-17-Tasbih & Dikr,1|2026-02-17T03:57:34.400Z
+daily_activity,2026-02-17-Read Coran,1|2026-02-17T05:25:54.755Z
+daily_activity,2026-02-19-Read Coran,1|2026-02-19T07:33:38.655Z
+daily_activity,2026-02-19-Tasbih & Dikr,1|2026-02-19T07:33:39.215Z
+daily_activity,2026-02-18-Read Coran,1|2026-02-19T07:36:24.857Z
+daily_activity,2026-02-18-Tasbih & Dikr,1|2026-02-19T07:36:25.429Z
+daily_activity,2026-02-20-Read Coran,1|2026-02-20T07:35:01.760Z
+daily_activity,2026-02-20-Tasbih & Dikr,1|2026-02-20T07:35:02.555Z
+daily_activity,2026-02-22-Read Coran,1|2026-02-22T19:33:26.194Z
+daily_activity,2026-02-22-Tasbih & Dikr,1|2026-02-22T19:33:27.698Z
+daily_activity,2026-02-23-Read Coran,1|2026-02-23T07:47:32.268Z
+daily_activity,2026-02-23-Tasbih & Dikr,1|2026-02-23T07:47:33.108Z
+daily_activity,2026-02-24-Read Coran,1|2026-02-25T18:43:05.907Z
+daily_activity,2026-02-24-Tasbih & Dikr,1|2026-02-25T18:43:05.049Z
+daily_activity,2026-02-26-Read Coran,1|2026-02-26T18:20:04.815Z
+daily_activity,2026-02-26-Tasbih & Dikr,1|2026-02-26T18:20:05.599Z
+daily_activity,2026-02-27-Read Coran,1|2026-02-27T06:34:52.647Z
+daily_activity,2026-02-27-Tasbih & Dikr,1|2026-02-27T06:34:54.149Z
+daily_activity,2026-03-01-Tasbih & Dikr,1|2026-03-01T17:07:26.406Z
+daily_activity,2026-03-01-Read Coran,1|2026-03-01T17:07:27.647Z
+daily_activity,2026-02-27-Pray Nawafil,1|2026-03-01T17:08:01.441Z
+daily_activity,2026-03-02-Tasbih & Dikr,1|2026-03-02T10:50:22.685Z
+daily_activity,2026-03-02-Read Coran,1|2026-03-02T18:11:26.219Z
+daily_activity,2026-03-03-Read Coran,1|2026-03-04T06:56:19.489Z
+daily_activity,2026-03-03-Tasbih & Dikr,1|2026-03-04T06:56:20.337Z
+daily_activity,2026-03-05-Tasbih & Dikr,1|2026-03-05T05:08:11.798Z
+daily_activity,2026-03-05-Read Coran,1|2026-03-05T05:28:12.275Z
+daily_activity,2026-03-06-Read Coran,1|2026-03-06T08:27:24.475Z
+daily_activity,2026-03-06-Tasbih & Dikr,1|2026-03-06T08:27:27.195Z
+daily_activity,2026-03-06-Pray Nawafil,1|2026-03-06T21:33:08.993Z
+daily_activity,2026-03-07-Read Coran,1|2026-03-07T11:52:12.154Z
+daily_activity,2026-03-07-Tasbih & Dikr,1|2026-03-07T11:52:13.519Z
+daily_activity,2026-03-08-Read Coran,1|2026-03-08T13:14:53.660Z
+daily_activity,2026-03-08-Tasbih & Dikr,1|2026-03-08T13:14:54.784Z
+daily_activity,2026-03-09-Read Coran,1|2026-03-09T07:34:30.024Z
+daily_activity,2026-03-09-Tasbih & Dikr,1|2026-03-09T07:34:28.945Z
+daily_activity,2026-03-10-Read Coran,1|2026-03-10T08:42:55.258Z
+daily_activity,2026-03-10-Tasbih & Dikr,1|2026-03-10T08:42:56.805Z
+daily_activity,2026-03-12-Read Coran,1|2026-03-12T08:31:40.474Z
+daily_activity,2026-03-12-Tasbih & Dikr,1|2026-03-12T08:31:41.678Z
+daily_activity,2026-03-15-Tasbih & Dikr,1|2026-03-15T06:49:49.859Z
+daily_activity,2026-03-15-Read Coran,1|2026-03-15T08:07:58.620Z
+daily_activity,2026-03-15-Pray Nawafil,1|2026-03-15T22:05:32.542Z
+daily_activity,2026-03-16-Tasbih & Dikr,1|2026-03-16T05:50:17.730Z
+daily_activity,2026-03-16-Read Coran,1|2026-03-16T19:17:40.851Z
+daily_activity,2026-03-17-Read Coran,1|2026-03-17T07:38:33.724Z
+daily_activity,2026-03-17-Tasbih & Dikr,1|2026-03-17T07:38:34.823Z
+daily_activity,2026-03-18-Read Coran,1|2026-03-18T16:11:10.559Z
+daily_activity,2026-03-18-Tasbih & Dikr,1|2026-03-18T16:11:11.390Z
+daily_activity,2026-03-19-Read Coran,1|2026-03-19T08:17:57.007Z
+daily_activity,2026-03-19-Tasbih & Dikr,1|2026-03-19T08:17:59.063Z
+daily_activity,2026-03-18-Pray Nawafil,1|2026-03-19T08:18:18.713Z
+daily_activity,2026-03-21-Read Coran,1|2026-03-21T14:44:13.652Z
+daily_activity,2026-03-21-Tasbih & Dikr,1|2026-03-21T14:44:14.949Z
+daily_activity,2026-03-23-Tasbih & Dikr,1|2026-03-23T15:08:52.925Z
+daily_activity,2026-03-23-Read Coran,1|2026-03-23T15:08:53.937Z
+daily_activity,2026-03-24-Tasbih & Dikr,1|2026-03-24T05:08:14.766Z
+daily_activity,2026-03-24-Read Coran,1|2026-03-24T05:08:15.966Z
+daily_activity,2026-03-25-Read Coran,1|2026-03-25T18:43:59.038Z
+daily_activity,2026-03-25-Tasbih & Dikr,1|2026-03-25T18:44:00.189Z
+daily_activity,2026-03-26-Read Coran,1|2026-03-26T07:51:30.635Z
+daily_activity,2026-03-26-Tasbih & Dikr,1|2026-03-26T07:51:31.778Z
+daily_activity,2026-03-27-Tasbih & Dikr,1|2026-03-27T09:29:34.748Z
+daily_activity,2026-03-27-Read Coran,1|2026-03-27T09:29:35.904Z
+daily_activity,2026-03-28-Read Coran,1|2026-03-28T08:32:45.395Z
+daily_activity,2026-03-28-Tasbih & Dikr,1|2026-03-28T08:32:44.715Z
+daily_activity,2026-03-29-Read Coran,1|2026-03-29T06:38:12.408Z
+daily_activity,2026-03-29-Tasbih & Dikr,1|2026-03-29T06:38:12.045Z
+daily_activity,2026-03-30-Read Coran,1|2026-03-30T08:23:41.394Z
+daily_activity,2026-03-30-Tasbih & Dikr,1|2026-03-30T08:23:43.466Z
+daily_activity,2026-03-31-Read Coran,1|2026-03-31T14:18:42.859Z
+daily_activity,2026-03-31-Tasbih & Dikr,1|2026-03-31T14:18:45.295Z
+daily_activity,2026-04-01-Tasbih & Dikr,1|2026-04-01T08:46:44.139Z
+daily_activity,2026-04-01-Read Coran,1|2026-04-01T08:46:45.419Z
+daily_activity,2026-04-03-Tasbih & Dikr,1|2026-04-03T06:53:35.597Z
+daily_activity,2026-04-08-Read Coran,1|2026-04-09T05:35:09.768Z
+daily_activity,2026-04-08-Tasbih & Dikr,1|2026-04-09T05:35:11.267Z
+daily_activity,2026-04-09-Read Coran,1|2026-04-09T16:17:29.085Z
+daily_activity,2026-04-09-Tasbih & Dikr,1|2026-04-09T16:17:29.912Z
+daily_activity,2026-04-10-Tasbih & Dikr,1|2026-04-10T14:46:08.051Z
+daily_activity,2026-04-13-Read Coran,1|2026-04-13T08:45:21.886Z
+daily_activity,2026-04-13-Tasbih & Dikr,1|2026-04-13T08:45:22.213Z
+daily_activity,2026-04-16-Tasbih & Dikr,1|2026-04-17T16:44:59.596Z
+daily_activity,2026-04-16-Read Coran,1|2026-04-17T16:45:00.686Z
+daily_activity,2026-04-15-Read Coran,1|2026-04-17T16:45:14.633Z
+daily_activity,2026-04-15-Tasbih & Dikr,1|2026-04-17T16:45:16.222Z
+daily_activity,2026-04-20-Read Coran,1|2026-04-20T20:42:56.666Z
+daily_activity,2026-04-20-Tasbih & Dikr,1|2026-04-20T20:42:57.982Z
+daily_activity,2026-04-21-Tasbih & Dikr,1|2026-04-21T06:44:16.106Z
+daily_activity,2026-04-21-Read Coran,1|2026-04-21T06:44:17.393Z
+daily_activity,2026-04-26-Tasbih & Dikr,1|2026-04-26T05:49:01.146Z
+daily_activity,2026-04-27-Tasbih & Dikr,1|2026-04-27T15:08:59.116Z
+daily_activity,2026-04-27-Read Coran,1|2026-04-27T15:08:59.694Z
+daily_activity,2026-04-28-Tasbih & Dikr,1|2026-04-28T06:34:30.143Z
+daily_activity,2026-04-28-Read Coran,1|2026-04-28T06:34:33.963Z
+daily_activity,2026-04-29-Read Coran,1|2026-04-29T09:38:51.059Z
+daily_activity,2026-04-29-Tasbih & Dikr,1|2026-04-29T09:38:51.842Z
+daily_activity,2026-05-01-Tasbih & Dikr,1|2026-05-01T06:09:24.150Z
+daily_activity,2026-04-30-Read Coran,1|2026-05-01T06:09:29.749Z
+daily_activity,2026-04-30-Tasbih & Dikr,1|2026-05-01T06:09:30.621Z
+daily_activity,2026-05-02-Tasbih & Dikr,1|2026-05-02T07:41:52.360Z
+daily_activity,2026-05-07-Read Coran,1|2026-05-07T06:47:54.833Z
+daily_activity,2026-05-07-Tasbih & Dikr,1|2026-05-07T06:47:55.247Z
+daily_activity,2026-05-11-Read Coran,1|2026-05-11T14:28:43.202Z
+daily_activity,2026-05-11-Tasbih & Dikr,1|2026-05-11T14:28:42.792Z
+daily_activity,2026-05-12-Read Coran,1|2026-05-12T07:15:15.107Z
+daily_activity,2026-05-12-Tasbih & Dikr,1|2026-05-12T07:15:15.668Z
+daily_activity,2026-05-13-Tasbih,1|2026-05-13T08:46:37.975Z
+daily_activity,2026-05-12-Tasbih,1|2026-05-13T13:42:32.577Z
+daily_activity,2026-05-12-Coran,1|2026-05-13T13:42:34.016Z
