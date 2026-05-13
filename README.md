@@ -104,8 +104,8 @@ Use the **automatic deployment script** that works on all platforms:
 mkdir athan-center && cd athan-center
 
 # Download deployment files
-wget https://raw.githubusercontent.com/simoroco/athan-center/main/prod_deploy/docker-compose.yml
-wget https://raw.githubusercontent.com/simoroco/athan-center/main/prod_deploy/start.sh
+wget https://raw.githubusercontent.com/simoroco/athan-center/main/deploy_prod/docker-compose.yml
+wget https://raw.githubusercontent.com/simoroco/athan-center/main/deploy_prod/start.sh
 chmod +x start.sh
 
 # Start (auto-detects OS and configures accordingly)
