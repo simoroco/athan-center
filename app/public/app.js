@@ -1991,6 +1991,26 @@ function isSameWeek(date1, date2) {
     return week1Start === week2Start;
 }
 
+// Return a natural relative day label for a date compared to today
+// e.g. Today, Yesterday, Tomorrow, This Monday, Last Monday, Next Friday
+function getRelativeDayLabel(date) {
+    const today = getServerSyncedDate();
+    const dayDiff = getDayDifference(today, date);
+    const weekdayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const currentWeekday = weekdayNames[date.getDay()];
+
+    if (dayDiff === 0) return 'Today';
+    if (dayDiff === 1) return 'Tomorrow';
+    if (dayDiff === -1) return 'Yesterday';
+
+    const weekDiff = getDayDifference(getWeekStart(today), getWeekStart(date));
+    if (weekDiff === 0) return `This ${currentWeekday}`;
+    if (weekDiff === -7) return `Last ${currentWeekday}`;
+    if (weekDiff === 7) return `Next ${currentWeekday}`;
+
+    return currentWeekday;
+}
+
 // Update date displays in navigation buttons
 function updateDateButtons() {
     const today = getServerSyncedDate();
@@ -2056,21 +2076,7 @@ function updateDateButtons() {
 
     // Update calendar button with natural labels
     if (calendarBtn) {
-        const todayFormatted = formatDateLocal(today);
-        const currentFormatted = formatDateLocal(currentDate);
-
-        let calendarLabel;
-        if (dayDiff === 0) {
-            calendarLabel = 'Today';
-        } else if (dayDiff === 1) {
-            calendarLabel = 'Tomorrow';
-        } else if (dayDiff === -1) {
-            calendarLabel = 'Yesterday';
-        } else if (isSameWeek(today, currentDate) && dayDiff !== 0) {
-            calendarLabel = `This ${currentWeekday}`;
-        } else {
-            calendarLabel = currentWeekday;
-        }
+        const calendarLabel = getRelativeDayLabel(currentDate);
         calendarBtn.innerHTML = `<span class="nav-btn-icon"><svg class="icon"><use href="#i-calendar"/></svg></span><span class="nav-btn-text"><span class="nav-btn-label">${calendarLabel} (</span><span class="btn-date">${currentDateStr}</span><span class="nav-btn-label">)</span></span>`;
     }
 
@@ -2168,8 +2174,8 @@ async function loadPrayers() {
                 hideNextPrayerCard();
             }
         } else {
-            // All other cases - hide card
-            hideNextPrayerCard();
+            // All other cases - show date placeholder in nextPrayerCard
+            displayDateOnlyCard(currentDate);
         }
     } catch (error) {
         console.error('Error loading prayers:', error);
@@ -2410,6 +2416,8 @@ function displayNextPrayer(prayer) {
     const card = document.getElementById('nextPrayerCard');
 
     // Update content BEFORE showing the card to avoid flashing empty data
+    const labelDiv = document.querySelector('.next-prayer-label');
+    if (labelDiv) labelDiv.textContent = 'Next Prayer';
     updatePrayerName(prayer.prayer_name);
 
     document.querySelector('.next-prayer-time').textContent = prayer.prayer_time;
@@ -2499,6 +2507,44 @@ function hideNextPrayerCard() {
     const muteAlert = document.getElementById('muteAlertBanner');
     if (skipBtn) skipBtn.style.display = 'none';
     if (muteAlert) muteAlert.style.display = 'none';
+}
+
+// Display the next prayer card with only the relative day and date
+// (used when there is no upcoming prayer to show for the selected day)
+function displayDateOnlyCard(date) {
+    const card = document.getElementById('nextPrayerCard');
+    if (!card) return;
+
+    const labelDiv = document.querySelector('.next-prayer-label');
+    const nameDiv = document.querySelector('.next-prayer-name');
+    const timeDiv = document.querySelector('.next-prayer-time');
+    const countdownDiv = document.querySelector('.next-prayer-countdown');
+
+    if (labelDiv) labelDiv.textContent = '';
+
+    if (nameDiv) {
+        // Remove all text nodes, keeping elements (like ramadanMoonCard)
+        nameDiv.childNodes.forEach(node => {
+            if (node.nodeType === Node.TEXT_NODE) {
+                node.remove();
+            }
+        });
+        const ramadanSpan = nameDiv.querySelector('#ramadanMoonCard');
+        nameDiv.insertBefore(document.createTextNode(getRelativeDayLabel(date)), ramadanSpan);
+    }
+
+    if (timeDiv) {
+        timeDiv.textContent = date.toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: '2-digit'
+        });
+    }
+
+    if (countdownDiv) countdownDiv.textContent = '';
+
+    card.style.display = 'block';
+    card.style.visibility = 'visible';
+    card.classList.remove('banner-up');
 }
 
 // Start the countdown timer
