@@ -2422,6 +2422,8 @@ function displayNextPrayer(prayer) {
 
     document.querySelector('.next-prayer-time').textContent = prayer.prayer_time;
 
+    card.classList.remove('date-only');
+
     // Only show the card after content is updated
     card.style.display = 'block';
     card.style.visibility = 'visible';
@@ -2501,6 +2503,7 @@ function hideNextPrayerCard() {
     card.style.visibility = 'hidden';
     card.style.display = '';
     card.classList.remove('banner-up');
+    card.classList.remove('date-only');
 
     // Also hide mute button and banner when card is hidden
     const skipBtn = document.getElementById('skipNextBtn');
@@ -2529,6 +2532,7 @@ function displayDateOnlyCard(date) {
                 node.remove();
             }
         });
+        nameDiv.style.fontSize = ''; // clear any inline shrink from fitPrayerNameOnOneLine
         const ramadanSpan = nameDiv.querySelector('#ramadanMoonCard');
         nameDiv.insertBefore(document.createTextNode(getRelativeDayLabel(date)), ramadanSpan);
     }
@@ -2542,6 +2546,7 @@ function displayDateOnlyCard(date) {
 
     if (countdownDiv) countdownDiv.textContent = '';
 
+    card.classList.add('date-only');
     card.style.display = 'block';
     card.style.visibility = 'visible';
     card.classList.remove('banner-up');

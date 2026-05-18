@@ -319,6 +319,49 @@ header h1 {
     opacity: 0.95;
 }
 
+/* Date-only mode: shown when no upcoming prayer exists for the selected day */
+.next-prayer-card.date-only {
+    row-gap: calc(var(--door-width) * 0.015);
+}
+
+.next-prayer-card.date-only .next-prayer-label,
+.next-prayer-card.date-only .next-prayer-countdown {
+    display: none;
+}
+
+.next-prayer-card.date-only .next-prayer-name {
+    font-size: calc(var(--door-width) * 0.09);
+    font-weight: 700;
+    margin-bottom: calc(var(--door-width) * 0.025);
+    line-height: 1.2;
+    white-space: normal;
+    text-align: center;
+}
+
+.next-prayer-card.date-only .next-prayer-time {
+    font-size: calc(var(--door-width) * 0.07);
+    font-weight: 600;
+    margin-bottom: 0;
+    line-height: 1.2;
+    text-align: center;
+}
+
+body:not(.dark-mode) .next-prayer-card.date-only {
+    color: #000;
+    text-shadow:
+        0 0 3px rgba(255, 255, 255, 1),
+        0 0 7px rgba(255, 255, 255, 0.95);
+    -webkit-text-stroke: none;
+}
+
+body.dark-mode .next-prayer-card.date-only {
+    color: #fff;
+    text-shadow:
+        0 0 3px rgba(0, 0, 0, 1),
+        0 0 7px rgba(0, 0, 0, 0.95);
+    -webkit-text-stroke: none;
+}
+
 .dua-card {
     background: linear-gradient(135deg, #2a6dd1 0%, #114bb2 100%);
     color: white;
