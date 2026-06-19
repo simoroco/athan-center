@@ -448,8 +448,8 @@ async function checkSkipNextStatus() {
                 return;
             }
         } else {
-            // Mobile: toggle — only one at a time
-            if (!shouldShow) {
+            // Mobile: toggle — only one at a time; never show quickFillBtn for today
+            if (!shouldShow && currentDateStr !== todayStr) {
                 muteAlert.style.display = 'none';
                 skipBtn.style.display = 'none';
                 if (quickFillBtn) quickFillBtn.style.display = '';
@@ -4406,11 +4406,11 @@ document.addEventListener('keydown', (event) => {
 
 // ===== QUICK FILL MODAL =====
 const QUICK_FILL_PRAYERS = [
-    { name: 'Fajr | Sobh', letter: 'F' },
-    { name: 'Dohr',        letter: 'D' },
-    { name: 'Asr',         letter: 'A' },
-    { name: 'Maghrib',     letter: 'M' },
-    { name: 'Isha',        letter: 'I' },
+    { name: 'Fajr | Sobh', letter: 'Faj' },
+    { name: 'Dohr',        letter: 'Doh' },
+    { name: 'Asr',         letter: 'Asr' },
+    { name: 'Maghrib',     letter: 'Mag' },
+    { name: 'Isha',        letter: 'Ish' },
 ];
 
 async function openQuickFillModal() {
@@ -4431,9 +4431,11 @@ async function loadQuickFillData() {
         const year = today.getFullYear();
         const prevYear = year - 1;
 
-        // Build list of the last 30 days (yesterday back)
+        const todayStr = formatDateLocal(today);
+
+        // Build list: today (i=0) + last 13 days = 14 days total
         const days = [];
-        for (let i = 1; i <= 30; i++) {
+        for (let i = 0; i <= 13; i++) {
             const d = getServerSyncedDate();
             d.setDate(d.getDate() - i);
             days.push(formatDateLocal(d));
@@ -4455,29 +4457,50 @@ async function loadQuickFillData() {
             await fetchChecksForYear(prevYear);
         }
 
-        // Keep only days with at least one unchecked prayer
-        const incompleteDays = days.filter(dateStr => {
-            const dayChecks = checksMap[dateStr] || {};
-            return QUICK_FILL_PRAYERS.some(p => !dayChecks[p.name] || dayChecks[p.name] === 0);
-        });
-
-        if (incompleteDays.length === 0) {
-            body.innerHTML = '<p style="text-align:center;padding:20px;color:var(--text-secondary)">All prayers checked ✓</p>';
-            return;
+        // Find the oldest (furthest back) day in the window that has an incomplete prayer
+        let oldestIncompleteIndex = -1;
+        for (let i = days.length - 1; i >= 1; i--) { // skip today (index 0)
+            const dayChecks = checksMap[days[i]] || {};
+            if (QUICK_FILL_PRAYERS.some(p => !dayChecks[p.name] || dayChecks[p.name] === 0)) {
+                oldestIncompleteIndex = i;
+                break;
+            }
         }
+
+        // Always show today; also show all days from today back to the oldest incomplete day
+        const daysToShow = oldestIncompleteIndex >= 0
+            ? days.slice(0, oldestIncompleteIndex + 1)
+            : [todayStr];
+
+        // ISO week number helper
+        const getISOWeek = (dateStr) => {
+            const d = new Date(dateStr + 'T00:00:00');
+            const day = d.getDay() || 7; // 1=Mon…7=Sun
+            d.setDate(d.getDate() + 4 - day); // shift to Thursday of this week
+            const yearStart = new Date(d.getFullYear(), 0, 1);
+            return Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
+        };
 
         // Build table
         let html = '<table class="qf-table"><thead><tr><th class="qf-day-col"></th>';
         QUICK_FILL_PRAYERS.forEach(p => { html += `<th>${p.letter}</th>`; });
         html += '</tr></thead><tbody>';
 
-        incompleteDays.forEach(dateStr => {
+        let lastWeek = null;
+        daysToShow.forEach(dateStr => {
             const parts = dateStr.split('-');
-            const dayNum = parseInt(parts[2], 10);
-            const monthNum = parseInt(parts[1], 10);
+            const dayDisplay = `${parts[2]}/${parts[1]}`; // zero-padded: 09/06
+            const isToday = dateStr === todayStr;
             const dayChecks = checksMap[dateStr] || {};
+            const weekNum = getISOWeek(dateStr);
 
-            html += `<tr data-date="${dateStr}"><td class="qf-day-label">${dayNum}/${monthNum}</td>`;
+            if (weekNum !== lastWeek) {
+                html += `<tr class="qf-week-sep"><td colspan="6">W${weekNum}</td></tr>`;
+                lastWeek = weekNum;
+            }
+
+            html += `<tr data-date="${dateStr}"${isToday ? ' class="qf-row-today"' : ''}>`;
+            html += `<td class="qf-day-label">${isToday ? 'Today' : dayDisplay}</td>`;
             QUICK_FILL_PRAYERS.forEach(p => {
                 const state = dayChecks[p.name] || 0;
                 const inner = state === 2 ? '●' : state === 1 ? '✓' : '';
@@ -4511,9 +4534,9 @@ async function loadQuickFillData() {
                         loadPrayers();
                     }
 
-                    // If the row is now complete, fade it out
+                    // If a past day's row is now complete, fade it out
                     const row = btn.closest('tr');
-                    if (row) {
+                    if (row && !row.classList.contains('qf-row-today')) {
                         const allDone = Array.from(row.querySelectorAll('.qf-prayer-btn'))
                             .every(b => parseInt(b.dataset.state, 10) >= 1);
                         if (allDone) {

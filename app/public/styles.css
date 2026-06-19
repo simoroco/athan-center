@@ -2244,3 +2244,37 @@ body.dark-mode .audio-notification-content {
     border-color: #f59e0b;
     color: #f59e0b;
 }
+
+/* Week separator row */
+.qf-week-sep td {
+    padding: 8px 6px 2px;
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    opacity: 0.55;
+    border-bottom: none;
+}
+
+.qf-week-sep:first-child td {
+    padding-top: 4px;
+}
+
+/* Today row highlight */
+.qf-row-today {
+    background: rgba(59, 130, 246, 0.06);
+}
+
+.qf-row-today .qf-day-label {
+    color: #3b82f6;
+    font-weight: 700;
+}
+
+.dark-mode .qf-row-today {
+    background: rgba(96, 165, 250, 0.1);
+}
+
+.dark-mode .qf-row-today .qf-day-label {
+    color: #60a5fa;
+}
