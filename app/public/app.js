@@ -124,6 +124,8 @@ function hideAudioNotification() {
 document.addEventListener('DOMContentLoaded', async () => {
     // FIRST: Synchronize time with server before doing anything else
     await syncTimeWithServer();
+    // Reset currentDate to today using the now-synced server time
+    currentDate = getServerSyncedDate();
 
     // Initialize lastPlayedPrayer to prevent playing audio for prayers that already passed
     // when the page is loaded after their time
@@ -223,6 +225,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     setInterval(() => {
         checkSkipNextStatus();
     }, 60000);
+
+    // Reset to today when the page becomes visible again (e.g. device wake, tab refocus)
+    document.addEventListener('visibilitychange', async () => {
+        if (document.visibilityState === 'visible') {
+            await syncTimeWithServer();
+            currentDate = getServerSyncedDate();
+            loadPrayers();
+        }
+    });
 });
 
 // Initialize lastPlayedPrayer to mark all past prayers as already played
@@ -402,30 +413,28 @@ async function checkSkipNextStatus() {
             }
         }
 
-        // Determine if we should show banners and enable button based on date
-        const isViewingToday = currentDateStr === todayStr;
-        const isViewingTomorrow = currentDateStr === tomorrowStr;
-        const currentTime = today.toTimeString().split(' ')[0].substring(0, 5);
-
-        // Check if Isha prayer has passed today
-        let ishaHasPassed = false;
-        try {
-            const todayPrayersResponse = await fetch(`${API_BASE}/api/prayers/${todayStr}`);
-            const todayPrayers = await todayPrayersResponse.json();
-            const ishaPrayer = todayPrayers.find(p => p.prayer_name === 'Isha');
-            if (ishaPrayer && currentTime > ishaPrayer.prayer_time) {
-                ishaHasPassed = true;
+        // Button is always visible EXCEPT for past days where not all 5 prayers are checked (at least orange = state >= 1)
+        const isPastDay = currentDateStr < todayStr;
+        let shouldShow = true;
+        if (isPastDay) {
+            try {
+                const [checksResp, dayPrayersResp] = await Promise.all([
+                    fetch(`${API_BASE}/api/prayer-checks/${currentDateStr}`),
+                    fetch(`${API_BASE}/api/prayers/${currentDateStr}`)
+                ]);
+                const checks = await checksResp.json();
+                const dayPrayers = await dayPrayersResp.json();
+                const allChecked = dayPrayers.length > 0 && dayPrayers.every(p => {
+                    const check = checks.find(c => c.prayer_name === p.prayer_name);
+                    return check && check.checked >= 1;
+                });
+                if (!allChecked) shouldShow = false;
+            } catch (e) {
+                shouldShow = false;
             }
-        } catch (error) {
-            console.error('Error checking Isha time:', error);
         }
 
-        // Button and banner should ONLY be visible when nextPrayerCard is shown
-        // Same logic as nextPrayerCard: today OR (tomorrow if Isha has passed)
-        const shouldShow = isViewingToday || (isViewingTomorrow && ishaHasPassed);
-
         if (!shouldShow) {
-            // Not the right date - hide both button AND banner completely
             muteAlert.style.display = 'none';
             skipBtn.style.display = 'none';
             const cardEl = document.getElementById('nextPrayerCard');
@@ -433,17 +442,34 @@ async function checkSkipNextStatus() {
             return;
         }
 
-        // Show the button (nextPrayerCard is visible)
+        // Show the button
         skipBtn.style.display = 'block';
         skipBtn.classList.remove('disabled');
         skipBtn.style.pointerEvents = 'auto';
         skipBtn.title = '';
 
-        // Show banner if prayer is muted
-        const shouldShowBanner = isMuted;
+        // Show mute banner only when viewing today or tomorrow-after-isha
+        const isViewingToday = currentDateStr === todayStr;
+        const isViewingTomorrow = currentDateStr === tomorrowStr;
+        const currentTime = today.toTimeString().split(' ')[0].substring(0, 5);
+
+        let ishaHasPassed = false;
+        if (isViewingTomorrow) {
+            try {
+                const todayPrayersResponse = await fetch(`${API_BASE}/api/prayers/${todayStr}`);
+                const todayPrayers = await todayPrayersResponse.json();
+                const ishaPrayer = todayPrayers.find(p => p.prayer_name === 'Isha');
+                if (ishaPrayer && currentTime > ishaPrayer.prayer_time) {
+                    ishaHasPassed = true;
+                }
+            } catch (error) {
+                console.error('Error checking Isha time:', error);
+            }
+        }
+
+        const shouldShowBanner = isMuted && (isViewingToday || (isViewingTomorrow && ishaHasPassed));
 
         if (!shouldShowBanner) {
-            // Hide banner but keep button enabled
             muteAlert.style.display = 'none';
             const cardEl = document.getElementById('nextPrayerCard');
             if (cardEl) cardEl.classList.remove('banner-up');
