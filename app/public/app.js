@@ -435,19 +435,31 @@ async function checkSkipNextStatus() {
         }
 
         const quickFillBtn = document.getElementById('quickFillBtn');
+        const isDesktop = window.innerWidth >= 769;
 
-        if (!shouldShow) {
-            muteAlert.style.display = 'none';
-            skipBtn.style.display = 'none';
-            if (quickFillBtn) quickFillBtn.style.display = 'block';
-            const cardEl = document.getElementById('nextPrayerCard');
-            if (cardEl) cardEl.classList.remove('banner-up');
-            return;
+        if (isDesktop) {
+            // Desktop: always show both buttons regardless of date
+            skipBtn.style.display = '';
+            if (quickFillBtn) quickFillBtn.style.display = '';
+            if (!shouldShow) {
+                muteAlert.style.display = 'none';
+                const cardEl = document.getElementById('nextPrayerCard');
+                if (cardEl) cardEl.classList.remove('banner-up');
+                return;
+            }
+        } else {
+            // Mobile: toggle — only one at a time
+            if (!shouldShow) {
+                muteAlert.style.display = 'none';
+                skipBtn.style.display = 'none';
+                if (quickFillBtn) quickFillBtn.style.display = '';
+                const cardEl = document.getElementById('nextPrayerCard');
+                if (cardEl) cardEl.classList.remove('banner-up');
+                return;
+            }
+            skipBtn.style.display = '';
+            if (quickFillBtn) quickFillBtn.style.display = 'none';
         }
-
-        // Show the button, hide quick fill
-        skipBtn.style.display = 'block';
-        if (quickFillBtn) quickFillBtn.style.display = 'none';
         skipBtn.classList.remove('disabled');
         skipBtn.style.pointerEvents = 'auto';
         skipBtn.title = '';
@@ -2210,6 +2222,7 @@ async function loadPrayers() {
         } else {
             // All other cases - show date placeholder in nextPrayerCard
             displayDateOnlyCard(currentDate);
+            checkSkipNextStatus();
         }
     } catch (error) {
         console.error('Error loading prayers:', error);
@@ -4431,7 +4444,8 @@ async function loadQuickFillData() {
         const fetchChecksForYear = async (yr) => {
             const resp = await fetch(`${API_BASE}/api/prayer-checks-range?year=${yr}`);
             const data = await resp.json();
-            data.forEach(c => {
+            const items = Array.isArray(data) ? data : (data.checks || []);
+            items.forEach(c => {
                 if (!checksMap[c.date]) checksMap[c.date] = {};
                 checksMap[c.date][c.prayer_name] = c.checked;
             });
