@@ -2141,6 +2141,7 @@ body.dark-mode .audio-notification-content {
     -webkit-overflow-scrolling: touch;
     flex: 1;
     padding: 0 8px 8px;
+    container-type: inline-size;
 }
 
 /* Table wrapper makes it fill width */
@@ -2186,6 +2187,15 @@ body.dark-mode .audio-notification-content {
     color: var(--text-secondary);
     vertical-align: middle;
     white-space: nowrap;
+    overflow: hidden;
+}
+
+.qf-lbl-short { display: none; }
+.qf-lbl-full  { display: inline; }
+
+@container (max-width: 310px) {
+    .qf-lbl-full  { display: none; }
+    .qf-lbl-short { display: inline; }
 }
 
 /* Prayer toggle cell */

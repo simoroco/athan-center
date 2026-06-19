@@ -4499,8 +4499,9 @@ async function loadQuickFillData() {
                 lastWeek = weekNum;
             }
 
+            const shortLabel = isToday ? 'T.' : parts[2]; // just day number
             html += `<tr data-date="${dateStr}"${isToday ? ' class="qf-row-today"' : ''}>`;
-            html += `<td class="qf-day-label">${isToday ? 'Today' : dayDisplay}</td>`;
+            html += `<td class="qf-day-label"><span class="qf-lbl-full">${isToday ? 'Today' : dayDisplay}</span><span class="qf-lbl-short">${shortLabel}</span></td>`;
             QUICK_FILL_PRAYERS.forEach(p => {
                 const state = dayChecks[p.name] || 0;
                 const inner = state === 2 ? '●' : state === 1 ? '✓' : '';
@@ -4534,15 +4535,25 @@ async function loadQuickFillData() {
                         loadPrayers();
                     }
 
-                    // If a past day's row is now complete, fade it out
+                    // If a past day's row is now complete, fade it out only if
+                    // there are no older (lower in table) incomplete rows remaining
                     const row = btn.closest('tr');
                     if (row && !row.classList.contains('qf-row-today')) {
                         const allDone = Array.from(row.querySelectorAll('.qf-prayer-btn'))
                             .every(b => parseInt(b.dataset.state, 10) >= 1);
                         if (allDone) {
-                            row.style.transition = 'opacity 0.3s';
-                            row.style.opacity = '0';
-                            setTimeout(() => row.remove(), 300);
+                            const tbody = row.closest('tbody');
+                            const allDataRows = Array.from(tbody.querySelectorAll('tr[data-date]'));
+                            const rowIndex = allDataRows.indexOf(row);
+                            const hasOlderIncomplete = allDataRows.slice(rowIndex + 1).some(r =>
+                                Array.from(r.querySelectorAll('.qf-prayer-btn'))
+                                    .some(b => parseInt(b.dataset.state, 10) === 0)
+                            );
+                            if (!hasOlderIncomplete) {
+                                row.style.transition = 'opacity 0.3s';
+                                row.style.opacity = '0';
+                                setTimeout(() => row.remove(), 300);
+                            }
                         }
                     }
 
