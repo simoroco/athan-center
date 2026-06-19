@@ -2097,3 +2097,150 @@ body.dark-mode .audio-notification-content {
     /* Mute alert banner: grid-placement handles positioning,
        so no specific desktop override needed. */
 }
+
+/* ===== QUICK FILL MODAL ===== */
+.qf-modal-content {
+    padding: 0;
+    max-width: 520px;
+    margin: 12px auto;
+    border-radius: 14px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100dvh - 24px);
+}
+
+.qf-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--component-border);
+    flex-shrink: 0;
+}
+
+.qf-modal-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.qf-modal-content .close {
+    position: static;
+    font-size: 1.6rem;
+    line-height: 1;
+    cursor: pointer;
+    color: var(--text-secondary);
+    background: none;
+    border: none;
+    padding: 0 4px;
+}
+
+.qf-body {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    flex: 1;
+    padding: 0 8px 8px;
+}
+
+/* Table wrapper makes it fill width */
+.qf-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+/* Header row: prayer initials */
+.qf-table thead th {
+    padding: 6px 2px 4px;
+    text-align: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    width: 18%;
+}
+
+.qf-table thead th.qf-day-col {
+    width: 10%;
+    text-align: left;
+    padding-left: 4px;
+}
+
+/* Body rows */
+.qf-table tbody tr {
+    border-bottom: 1px solid var(--component-border);
+}
+
+.qf-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+/* Day label cell */
+.qf-day-label {
+    text-align: left;
+    padding: 4px 4px 4px 6px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+/* Prayer toggle cell */
+.qf-table tbody td.qf-prayer-cell {
+    padding: 3px 2px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* The toggle button itself */
+.qf-prayer-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    max-width: 52px;
+    border-radius: 8px;
+    border: 2px solid var(--component-border);
+    background: var(--component-bg);
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.qf-prayer-btn:active {
+    transform: scale(0.92);
+}
+
+/* State: orange (state 2) */
+.qf-prayer-btn[data-state="2"] {
+    background: var(--color-warning-bg, #fff3cd);
+    border-color: var(--color-warning, #f59e0b);
+    color: var(--color-warning, #f59e0b);
+}
+
+/* State: blue (state 1) */
+.qf-prayer-btn[data-state="1"] {
+    background: #dbeafe;
+    border-color: #3b82f6;
+    color: #3b82f6;
+}
+
+/* Dark mode overrides */
+.dark-mode .qf-prayer-btn[data-state="1"] {
+    background: #1e3a5f;
+    border-color: #60a5fa;
+    color: #60a5fa;
+}
+
+.dark-mode .qf-prayer-btn[data-state="2"] {
+    background: #3d2e00;
+    border-color: #f59e0b;
+    color: #f59e0b;
+}

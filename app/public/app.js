@@ -434,16 +434,20 @@ async function checkSkipNextStatus() {
             }
         }
 
+        const quickFillBtn = document.getElementById('quickFillBtn');
+
         if (!shouldShow) {
             muteAlert.style.display = 'none';
             skipBtn.style.display = 'none';
+            if (quickFillBtn) quickFillBtn.style.display = 'block';
             const cardEl = document.getElementById('nextPrayerCard');
             if (cardEl) cardEl.classList.remove('banner-up');
             return;
         }
 
-        // Show the button
+        // Show the button, hide quick fill
         skipBtn.style.display = 'block';
+        if (quickFillBtn) quickFillBtn.style.display = 'none';
         skipBtn.classList.remove('disabled');
         skipBtn.style.pointerEvents = 'auto';
         skipBtn.title = '';
@@ -1239,6 +1243,10 @@ function setupEventListeners() {
             const statsModal = document.getElementById('statisticsModal');
             if (statsModal && statsModal.style.display === 'block') {
                 statsModal.style.display = 'none';
+            }
+            const qfModal = document.getElementById('quickFillModal');
+            if (qfModal && qfModal.style.display === 'block') {
+                qfModal.style.display = 'none';
             }
         }
     });
@@ -4381,6 +4389,147 @@ document.addEventListener('keydown', (event) => {
     if ((event.key === 'Escape' || event.key === 'Esc') && modal.style.display === 'block') {
         closeFullscreenChartModal();
     }
+});
+
+// ===== QUICK FILL MODAL =====
+const QUICK_FILL_PRAYERS = [
+    { name: 'Fajr | Sobh', letter: 'F' },
+    { name: 'Dohr',        letter: 'D' },
+    { name: 'Asr',         letter: 'A' },
+    { name: 'Maghrib',     letter: 'M' },
+    { name: 'Isha',        letter: 'I' },
+];
+
+async function openQuickFillModal() {
+    const modal = document.getElementById('quickFillModal');
+    modal.style.display = 'block';
+    await loadQuickFillData();
+}
+
+function closeQuickFillModal() {
+    document.getElementById('quickFillModal').style.display = 'none';
+}
+
+async function loadQuickFillData() {
+    const body = document.getElementById('quickFillBody');
+    body.innerHTML = '<p style="text-align:center;padding:20px;color:var(--text-secondary)">Loading…</p>';
+    try {
+        const today = getServerSyncedDate();
+        const year = today.getFullYear();
+        const prevYear = year - 1;
+
+        // Build list of the last 30 days (yesterday back)
+        const days = [];
+        for (let i = 1; i <= 30; i++) {
+            const d = getServerSyncedDate();
+            d.setDate(d.getDate() - i);
+            days.push(formatDateLocal(d));
+        }
+
+        // Fetch prayer checks for the relevant year(s)
+        const checksMap = {}; // { 'YYYY-MM-DD': { prayerName: checkedState } }
+        const fetchChecksForYear = async (yr) => {
+            const resp = await fetch(`${API_BASE}/api/prayer-checks-range?year=${yr}`);
+            const data = await resp.json();
+            data.forEach(c => {
+                if (!checksMap[c.date]) checksMap[c.date] = {};
+                checksMap[c.date][c.prayer_name] = c.checked;
+            });
+        };
+        await fetchChecksForYear(year);
+        if (days[days.length - 1].startsWith(String(prevYear))) {
+            await fetchChecksForYear(prevYear);
+        }
+
+        // Keep only days with at least one unchecked prayer
+        const incompleteDays = days.filter(dateStr => {
+            const dayChecks = checksMap[dateStr] || {};
+            return QUICK_FILL_PRAYERS.some(p => !dayChecks[p.name] || dayChecks[p.name] === 0);
+        });
+
+        if (incompleteDays.length === 0) {
+            body.innerHTML = '<p style="text-align:center;padding:20px;color:var(--text-secondary)">All prayers checked ✓</p>';
+            return;
+        }
+
+        // Build table
+        let html = '<table class="qf-table"><thead><tr><th class="qf-day-col"></th>';
+        QUICK_FILL_PRAYERS.forEach(p => { html += `<th>${p.letter}</th>`; });
+        html += '</tr></thead><tbody>';
+
+        incompleteDays.forEach(dateStr => {
+            const parts = dateStr.split('-');
+            const dayNum = parseInt(parts[2], 10);
+            const monthNum = parseInt(parts[1], 10);
+            const dayChecks = checksMap[dateStr] || {};
+
+            html += `<tr data-date="${dateStr}"><td class="qf-day-label">${dayNum}/${monthNum}</td>`;
+            QUICK_FILL_PRAYERS.forEach(p => {
+                const state = dayChecks[p.name] || 0;
+                const inner = state === 2 ? '●' : state === 1 ? '✓' : '';
+                html += `<td class="qf-prayer-cell"><button class="qf-prayer-btn" data-date="${dateStr}" data-prayer="${p.name}" data-state="${state}">${inner}</button></td>`;
+            });
+            html += '</tr>';
+        });
+        html += '</tbody></table>';
+        body.innerHTML = html;
+
+        // Attach toggle handlers
+        body.querySelectorAll('.qf-prayer-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const date = btn.dataset.date;
+                const prayer = btn.dataset.prayer;
+                const prevState = parseInt(btn.dataset.state, 10);
+                // Optimistic update: 0 → 2 → 1 → 0
+                const newState = prevState === 0 ? 2 : prevState === 2 ? 1 : 0;
+                btn.dataset.state = newState;
+                btn.textContent = newState === 2 ? '●' : newState === 1 ? '✓' : '';
+
+                try {
+                    await fetch(`${API_BASE}/api/prayer-checks/toggle`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ date, prayer_name: prayer })
+                    });
+
+                    // Refresh main prayer list if it's showing the same date
+                    if (formatDateLocal(currentDate) === date) {
+                        loadPrayers();
+                    }
+
+                    // If the row is now complete, fade it out
+                    const row = btn.closest('tr');
+                    if (row) {
+                        const allDone = Array.from(row.querySelectorAll('.qf-prayer-btn'))
+                            .every(b => parseInt(b.dataset.state, 10) >= 1);
+                        if (allDone) {
+                            row.style.transition = 'opacity 0.3s';
+                            row.style.opacity = '0';
+                            setTimeout(() => row.remove(), 300);
+                        }
+                    }
+
+                    // Refresh skip/quick-fill button visibility
+                    checkSkipNextStatus();
+                } catch (error) {
+                    // Revert optimistic update on error
+                    btn.dataset.state = prevState;
+                    btn.textContent = prevState === 2 ? '●' : prevState === 1 ? '✓' : '';
+                    console.error('Error toggling prayer check:', error);
+                }
+            });
+        });
+
+    } catch (error) {
+        body.innerHTML = '<p style="text-align:center;padding:20px;color:var(--color-danger)">Error loading data</p>';
+        console.error('Error loading quick fill data:', error);
+    }
+}
+
+document.getElementById('quickFillBtn').addEventListener('click', openQuickFillModal);
+document.getElementById('closeQuickFill').addEventListener('click', closeQuickFillModal);
+document.getElementById('quickFillModal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('quickFillModal')) closeQuickFillModal();
 });
 
 // Export to Excel
