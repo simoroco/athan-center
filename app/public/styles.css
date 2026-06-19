@@ -2193,6 +2193,13 @@ body.dark-mode .audio-notification-content {
 .qf-lbl-short { display: none; }
 .qf-lbl-full  { display: inline; }
 
+/* Mobile: always show compact labels */
+@media (max-width: 768px) {
+    .qf-lbl-full  { display: none; }
+    .qf-lbl-short { display: inline; }
+}
+
+/* Desktop but very narrow container fallback */
 @container (max-width: 310px) {
     .qf-lbl-full  { display: none; }
     .qf-lbl-short { display: inline; }
