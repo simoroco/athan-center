@@ -4504,7 +4504,7 @@ async function loadQuickFillData() {
             html += `<td class="qf-day-label"><span class="qf-lbl-full">${isToday ? 'Today' : dayDisplay}</span><span class="qf-lbl-short">${shortLabel}</span></td>`;
             QUICK_FILL_PRAYERS.forEach(p => {
                 const state = dayChecks[p.name] || 0;
-                const inner = state === 2 ? '●' : state === 1 ? '✓' : '';
+                const inner = state >= 1 ? '✓' : '';
                 html += `<td class="qf-prayer-cell"><button class="qf-prayer-btn" data-date="${dateStr}" data-prayer="${p.name}" data-state="${state}">${inner}</button></td>`;
             });
             html += '</tr>';
@@ -4521,7 +4521,7 @@ async function loadQuickFillData() {
                 // Optimistic update: 0 → 2 → 1 → 0
                 const newState = prevState === 0 ? 2 : prevState === 2 ? 1 : 0;
                 btn.dataset.state = newState;
-                btn.textContent = newState === 2 ? '●' : newState === 1 ? '✓' : '';
+                btn.textContent = newState >= 1 ? '✓' : '';
 
                 try {
                     await fetch(`${API_BASE}/api/prayer-checks/toggle`, {
@@ -4562,7 +4562,7 @@ async function loadQuickFillData() {
                 } catch (error) {
                     // Revert optimistic update on error
                     btn.dataset.state = prevState;
-                    btn.textContent = prevState === 2 ? '●' : prevState === 1 ? '✓' : '';
+                    btn.textContent = prevState >= 1 ? '✓' : '';
                     console.error('Error toggling prayer check:', error);
                 }
             });
