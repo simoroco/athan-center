@@ -4552,7 +4552,7 @@ async function loadQuickFillData() {
                             if (!hasOlderIncomplete) {
                                 row.style.transition = 'opacity 0.3s';
                                 row.style.opacity = '0';
-                                setTimeout(() => row.remove(), 300);
+                                setTimeout(() => row.remove(), 20000);
                             }
                         }
                     }
