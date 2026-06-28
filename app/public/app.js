@@ -4550,9 +4550,12 @@ async function loadQuickFillData() {
                                     .some(b => parseInt(b.dataset.state, 10) === 0)
                             );
                             if (!hasOlderIncomplete) {
-                                row.style.transition = 'opacity 0.3s';
-                                row.style.opacity = '0';
-                                setTimeout(() => row.remove(), 20000);
+                                // Keep row visible for 20s, then fade out and remove
+                                setTimeout(() => {
+                                    row.style.transition = 'opacity 0.3s';
+                                    row.style.opacity = '0';
+                                    setTimeout(() => row.remove(), 300);
+                                }, 20000);
                             }
                         }
                     }
