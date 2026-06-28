@@ -2227,6 +2227,8 @@ body.dark-mode .audio-notification-content {
     transition: background 0.15s, border-color 0.15s, transform 0.1s;
     font-size: 1.5rem;
     font-weight: 700;
+    line-height: 1;
+    font-family: 'Apple Braille', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: var(--text-secondary);
     -webkit-tap-highlight-color: transparent;
 }
