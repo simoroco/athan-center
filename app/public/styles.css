@@ -4,6 +4,37 @@
     box-sizing: border-box;
 }
 
+/* Non-selectable interactive elements */
+button,
+.next-prayer-card,
+.next-prayer-label,
+.next-prayer-name,
+.next-prayer-time,
+#weekdayMuteBanner,
+.weekday-mute-banner,
+.mute-alert-banner,
+.prayer-name,
+.prayer-time,
+.prayer-item,
+.activity-item,
+.daily-activities-section,
+.date-navigation,
+.nav-btn-icon,
+.settings-section-header,
+.section-toggle,
+.schedule-prayer-row,
+.schedule-prayer-name,
+#scheduleMatrix,
+.calendar-day,
+.close,
+.close-btn,
+.slider,
+.toggle-switch {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
 html {
     touch-action: pan-x pan-y;
     -ms-content-zooming: none;
