@@ -2107,10 +2107,10 @@ app.get('/api/stop-audio', (req, res) => {
     }
 });
 
-// GET - Test Athan playback on server (30 seconds)
+// GET - Test Athan playback on server (full audio)
 app.get('/api/test-athan-server', (req, res) => {
     try {
-        log('[test-athan-server] Test Athan requested (30s preview on server)');
+        log('[test-athan-server] Playing Athan requested');
 
         const audioFileRow = db.prepare('SELECT value FROM settings WHERE key = ?').get('audio_file');
         const audioFile = audioFileRow ? audioFileRow.value : 'Masjid Al-Haram.mp3';
@@ -2125,7 +2125,7 @@ app.get('/api/test-athan-server', (req, res) => {
             return res.status(404).json({ error: 'Athan file not found', file: audioFile });
         }
 
-        log(`[test-athan-server] 🔊 BACKEND ATHAN TEST PLAYING (30s): ${audioPath} at UI volume ${volumePercent}% (server: ${volumeLevel}x)`);
+        log(`[test-athan-server] 🔊 BACKEND ATHAN TEST PLAYING (full): ${audioPath} at UI volume ${volumePercent}% (server: ${volumeLevel}x)`);
 
         // Stop any currently playing audio
         if (currentAudioPlayer) {
@@ -2133,8 +2133,8 @@ app.get('/api/test-athan-server', (req, res) => {
             currentAudioPlayer = null;
         }
 
-        // Play only the first 30 seconds using sox trim with selected audio card
-        const { args, env } = buildSoxArgs(volumeLevel, audioPath, ['trim', '0', '30']);
+        // Play the full audio file with selected audio card
+        const { args, env } = buildSoxArgs(volumeLevel, audioPath);
         currentAudioPlayer = spawn('play', args, { env });
 
         currentAudioPlayer.on('error', (err) => {
@@ -2146,14 +2146,14 @@ app.get('/api/test-athan-server', (req, res) => {
             if (code !== 0) {
                 logError(`Athan test process exited with code ${code}`);
             } else {
-                log('Athan test (30s) finished');
+                log('Athan test (full) finished');
             }
             currentAudioPlayer = null;
         });
 
         res.json({
             success: true,
-            message: 'Playing Athan test on server (30 seconds)...',
+            message: 'Playing Athan test on server (full audio)...',
             file: audioFile,
             volume: volumePercent
         });

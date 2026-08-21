@@ -1555,15 +1555,6 @@ function setupEventListeners() {
             // Play ONLY in the browser (not on server)
             playAthanInBrowser(audioFile, 'Test');
 
-            // Stop browser test playback after 30 seconds
-            setTimeout(() => {
-                if (audioElement && !audioElement.paused) {
-                    audioElement.pause();
-                    audioElement.currentTime = 0;
-                    hideAudioNotification();
-                }
-            }, 30000);
-
         } catch (error) {
             alert('Error during test: ' + error.message);
         }
@@ -1647,7 +1638,7 @@ function setupEventListeners() {
         await playFullQuran();
     });
 
-    // Test Athan playback on server only (30 seconds)
+    // Test Athan playback on server only
     document.getElementById('testAthanServerBtn').addEventListener('click', async () => {
         try {
             const audioFile = document.getElementById('audioFile').value;
@@ -1662,15 +1653,10 @@ function setupEventListeners() {
 
             if (data.success) {
                 // Show notification banner for server test
-                showAudioNotification('Test Athan server playing (30s preview)');
+                showAudioNotification('Athan playing (on the server)...');
                 // Animate the next prayer card during the server-side test
                 const card = document.getElementById('nextPrayerCard');
                 if (card) card.classList.add('playing-athan');
-                // Hide notification + stop animation after 30 seconds
-                setTimeout(() => {
-                    hideAudioNotification();
-                    if (card) card.classList.remove('playing-athan');
-                }, 30000);
             } else {
                 alert('Error: ' + (data.error || 'Unknown error'));
             }
