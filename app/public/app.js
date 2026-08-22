@@ -708,7 +708,7 @@ function playAthanInBrowser(audioFile, prayerName) {
 
         // Show floating notification banner for non-prayer audio (Test)
         if (prayerName === 'Test') {
-            showAudioNotification('Test Athan web playing (30s preview)');
+            showAudioNotification('Athan calling (web)...');
         }
 
         // Load and play audio
@@ -760,7 +760,7 @@ function playQuranInBrowser(quranFile, isTest = false) {
 
         // Show floating notification banner for Quran recitation
         const message = isTest
-            ? 'Test web Quran recitation playing (30s preview)'
+            ? 'Quran reciting (30s web preview)...'
             : 'Al Kahf Sourat recitation playing';
         showAudioNotification(message);
 
@@ -1653,7 +1653,7 @@ function setupEventListeners() {
 
             if (data.success) {
                 // Show notification banner for server test
-                showAudioNotification('Athan playing (on the server)...');
+                showAudioNotification('Athan calling (server)...');
                 // Animate the next prayer card during the server-side test
                 const card = document.getElementById('nextPrayerCard');
                 if (card) card.classList.add('playing-athan');
@@ -1680,7 +1680,7 @@ function setupEventListeners() {
 
             if (data.success) {
                 // Show notification banner for server test
-                showAudioNotification('Test Quran recitation server playing (30s preview)');
+                showAudioNotification('Quran reciting (30s server preview)...');
                 // Hide notification after 30 seconds
                 setTimeout(() => {
                     hideAudioNotification();
