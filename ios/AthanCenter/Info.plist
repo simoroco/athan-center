@@ -27,8 +27,8 @@
 	</dict>
 	<key>UILaunchScreen</key>
 	<dict>
-		<key>UIColorName</key>
-		<string></string>
+		<key>UILaunchScreen_Generation</key>
+		<true/>
 	</dict>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>

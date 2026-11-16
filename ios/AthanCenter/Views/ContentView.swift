@@ -11,9 +11,10 @@ struct ContentView: View {
 
     var body: some View {
         let theme = store.theme
-        GeometryReader { geo in
-            let metrics = DoorMetrics(screenWidth: geo.size.width)
-            ZStack(alignment: .bottom) {
+        NavigationStack {
+            GeometryReader { geo in
+                let metrics = DoorMetrics(screenWidth: geo.size.width)
+                ZStack(alignment: .bottom) {
                 // --- Background: photo + fixed dim overlay (body CSS) ---
                 theme.bgBase.ignoresSafeArea()
                 Image("background")
@@ -42,15 +43,6 @@ struct ContentView: View {
                             PrayerListView(theme: theme)
 
                             DailyActivitiesView(theme: theme)
-
-                            DateNavView(theme: theme, showCalendar: $showCalendar)
-
-                            ActionsRow(
-                                theme: theme,
-                                showQuickPray: $showQuickPray,
-                                showStats: $showStats,
-                                showSettings: $showSettings
-                            )
                         }
                         .frame(width: metrics.doorWidth)
                         .frame(maxWidth: .infinity)
@@ -83,6 +75,66 @@ struct ContentView: View {
                         .transition(.opacity)
                 }
             }
+            .ignoresSafeArea(.container, edges: .top)
+            .toolbar {
+                // Top-left: mute next Athan (or Quick Pray on incomplete past days).
+                ToolbarItem(placement: .topBarLeading) {
+                    if store.pastDayIncomplete {
+                        Button { showQuickPray = true } label: {
+                            Image("emoji-zap").resizable().frame(width: 22, height: 22)
+                        }
+                        .accessibilityIdentifier("quickPrayBtn")
+                    } else {
+                        Button { Task { await store.muteNext() } } label: {
+                            Image(systemName: "speaker.slash")
+                                .font(.system(size: 17, weight: .semibold))
+                                .foregroundStyle(theme.danger)
+                        }
+                        .disabled(store.skipNext || !store.cardVisible)
+                        .opacity(store.skipNext || !store.cardVisible ? 0.55 : 1)
+                        .accessibilityIdentifier("muteNextBtn")
+                    }
+                }
+                // Top-right: statistics + settings.
+                ToolbarItemGroup(placement: .topBarTrailing) {
+                    Button { showStats = true } label: {
+                        Image(systemName: "chart.bar")
+                            .font(.system(size: 17, weight: .semibold))
+                    }
+                    .accessibilityIdentifier("historyBtn")
+                    Button { showSettings = true } label: {
+                        Image(systemName: "gearshape")
+                            .font(.system(size: 17, weight: .semibold))
+                    }
+                    .accessibilityIdentifier("settingsBtn")
+                }
+                // Native bottom bar: date navigation.
+                ToolbarItemGroup(placement: .bottomBar) {
+                    Button { store.goPrevDay() } label: {
+                        Image(systemName: "chevron.left").font(.system(size: 17, weight: .semibold))
+                    }
+                    .accessibilityIdentifier("prevDay")
+                    Spacer()
+                    Button { store.goToday() } label: {
+                        Image(systemName: "house").font(.system(size: 17, weight: .semibold))
+                    }
+                    .disabled(store.isViewingToday)
+                    .opacity(store.isViewingToday ? 0.4 : 1)
+                    .accessibilityIdentifier("todayBtn")
+                    Spacer()
+                    Button { showCalendar = true } label: {
+                        Image(systemName: "calendar").font(.system(size: 17, weight: .semibold))
+                    }
+                    .accessibilityIdentifier("calendarBtn")
+                    Spacer()
+                    Button { store.goNextDay() } label: {
+                        Image(systemName: "chevron.right").font(.system(size: 17, weight: .semibold))
+                    }
+                    .accessibilityIdentifier("nextDay")
+                }
+            }
+            .toolbarBackground(.hidden, for: .navigationBar)
+            .tint(theme.textPrimary)
         }
         .animation(.spring(response: 0.3), value: store.audio.bannerText)
         .animation(.easeOut, value: store.toast)
@@ -93,6 +145,7 @@ struct ContentView: View {
         .sheet(isPresented: $showQuickPray) { QuickPraySheet().environmentObject(store) }
         .sheet(isPresented: $showStats) { StatisticsSheet().environmentObject(store) }
         .sheet(isPresented: $showSettings) { SettingsSheet().environmentObject(store) }
+        }
     }
 
     /// Every second: when next-prayer window has expired, reload next prayer.

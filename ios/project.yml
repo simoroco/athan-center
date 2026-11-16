@@ -7,7 +7,7 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.0"
-    MARKETING_VERSION: "5.0.0"
+    MARKETING_VERSION: "5.1.0"
     CURRENT_PROJECT_VERSION: "1"
     TARGETED_DEVICE_FAMILY: "1"
 targets:
@@ -22,7 +22,7 @@ targets:
       properties:
         CFBundleDisplayName: Athan Center
         UILaunchScreen:
-          UIColorName: ""
+          UILaunchScreen_Generation: true
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
         NSAppTransportSecurity:

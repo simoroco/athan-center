@@ -12,7 +12,7 @@ enum AC {
     ]
     static let weekdayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] // prayer_schedule: 0=Mon
     static let weekdayNamesSun = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"] // JS getDay(): 0=Sun
-    static let appVersion = "© 2026 Athan Center | v5.0.0"
+    static let appVersion = "© 2026 Athan Center | v5.1.0"
     static let defaultServer = "http://192.168.1.50:7777"
 
     /// getPrayerName() from app.js — normalizes ICS event names for display.

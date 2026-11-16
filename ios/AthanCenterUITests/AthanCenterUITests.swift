@@ -69,22 +69,24 @@ final class AthanCenterUITests: XCTestCase {
         XCTAssertTrue(row.exists)
     }
 
-    // MARK: 3 — Date navigation changes the calendar button label
+    // MARK: 3 — Date navigation toggles the "today" button state
 
     func testDateNavigation() throws {
         let app = launch()
-        XCTAssertTrue(waitFor(app.buttons["calendarBtn"], 20))
+        XCTAssertTrue(waitFor(app.buttons["nextDay"], 20))
 
-        let before = app.buttons["calendarBtn"].label
+        // Viewing today: the "go to today" button is disabled.
+        XCTAssertFalse(app.buttons["todayBtn"].isEnabled)
         app.buttons["nextDay"].tap()
         sleep(2)
-        let after = app.buttons["calendarBtn"].label
-        XCTAssertNotEqual(before, after)
+        // On a future date it becomes enabled.
+        XCTAssertTrue(app.buttons["todayBtn"].isEnabled)
 
-        // Today button re-enabled and returns us.
+        // Today button returns us to today and disables again.
         app.buttons["todayBtn"].tap()
         sleep(2)
-        XCTAssertTrue(app.buttons["nextDay"].exists)
+        XCTAssertFalse(app.buttons["todayBtn"].isEnabled)
+        XCTAssertTrue(app.buttons["calendarBtn"].exists)
     }
 
     // MARK: 4 — Settings sheet opens with all sections
