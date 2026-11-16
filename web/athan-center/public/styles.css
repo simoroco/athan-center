@@ -1,0 +1,2330 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Non-selectable interactive elements */
+button,
+.next-prayer-card,
+.next-prayer-label,
+.next-prayer-name,
+.next-prayer-time,
+#weekdayMuteBanner,
+.weekday-mute-banner,
+.mute-alert-banner,
+.prayer-name,
+.prayer-time,
+.prayer-item,
+.activity-item,
+.daily-activities-section,
+.date-navigation,
+.nav-btn-icon,
+.settings-section-header,
+.section-toggle,
+.schedule-prayer-row,
+.schedule-prayer-name,
+#scheduleMatrix,
+.calendar-day,
+.close,
+.close-btn,
+.slider,
+.toggle-switch {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+html {
+    touch-action: pan-x pan-y;
+    -ms-content-zooming: none;
+    -ms-touch-action: pan-x pan-y;
+    background: var(--bg-base);
+    min-height: 100%;
+}
+
+:root {
+    /* ====== LAYOUT (same in light + dark mode) ====== */
+    /* Cap door-width at the mobile size so the desktop reproduces the
+       mobile design pixel-for-pixel (container + components stay the same). */
+    --door-width: min(calc(100vw - 16px), 374px);
+    --bg-image-width: calc(max(calc(var(--door-width) * 2.63), 100vw) * 1.05);
+    --bg-image-height: calc(var(--bg-image-width) * 1.5);
+    --bg-y-offset: calc(10px - var(--bg-image-height) * 0.44 - 10px);
+    --arch-height: calc(var(--bg-image-height) * 0.15);
+
+    /* ====== COLOR TOKENS — DEFAULT = LIGHT/NORMAL MODE ======
+       Layout is identical between modes; only these vars change.
+       Toggling .dark-mode on <body> swaps the color set. */
+    --bg-base: #F0F4FF;
+    --bg-overlay: rgba(0, 0, 0, 0.45);
+    --component-bg: rgba(255, 255, 255, 0.2);
+    --component-bg-hover: rgba(255, 255, 255, 0.4);
+    --component-border: rgba(255, 255, 255, 0.4);
+    --component-border-hover: rgba(255, 255, 255, 0.55);
+    --text-primary: #1a1a1a;
+    --text-secondary: #1a1a1a;
+    --text-accent: #2a6dd1;
+    --text-card: #114bb2;
+    --text-shadow-color: rgba(255, 255, 255, 0.7);
+    --text-shadow-strong: rgba(255, 255, 255, 0.95);
+    --card-glow: rgba(212, 175, 55, 0.7);
+    --card-glow-soft: rgba(212, 175, 55, 0.45);
+    --color-danger: #b91c1c;
+    --color-danger-bg: rgba(254, 226, 226, 0.2);
+    --color-danger-border: rgba(254, 202, 202, 0.5);
+    --color-danger-hover-bg: rgba(254, 202, 202, 0.4);
+    --color-danger-past: #ef4444;
+    --color-checkmark-orange: #ff8c00;
+}
+
+body.dark-mode {
+    --bg-base: #0d1733;
+    --bg-overlay: rgba(0, 0, 0, 0.82);
+    --component-bg: rgba(30, 30, 40, 0.2);
+    --component-bg-hover: rgba(255, 255, 255, 0.12);
+    --component-border: rgba(255, 255, 255, 0.15);
+    --component-border-hover: rgba(255, 255, 255, 0.3);
+    --text-primary: #ffffff;
+    --text-secondary: #f0f0f0;
+    --text-accent: #60A5FA;
+    --text-card: #60A5FA;
+    --text-shadow-color: rgba(0, 0, 0, 0.6);
+    --text-shadow-strong: rgba(0, 0, 0, 0.95);
+    --card-glow: rgba(212, 175, 55, 0.75);
+    --card-glow-soft: rgba(212, 175, 55, 0.5);
+    --color-danger: #ef4444;
+    --color-danger-bg: rgba(74, 28, 28, 0.2);
+    --color-danger-border: rgba(239, 68, 68, 0.25);
+    --color-danger-hover-bg: rgba(94, 36, 36, 0.35);
+}
+
+body {
+    font-family: 'Apple Braille', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-base);
+    background-image:
+        linear-gradient(var(--bg-overlay), var(--bg-overlay)),
+        url('background.png');
+    background-repeat: no-repeat, no-repeat;
+    background-size: cover, var(--bg-image-width) auto;
+    background-position: center, center var(--bg-y-offset);
+    background-attachment: fixed, scroll;
+    min-height: 100vh;
+    padding: 10px;
+    color: var(--text-secondary);
+    overflow-x: hidden;
+    touch-action: pan-x pan-y;
+    -webkit-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
+.container {
+    max-width: var(--door-width);
+    margin: 0 auto;
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
+    overflow: visible;
+    display: flow-root; /* prevent margin-collapse with .next-prayer-card */
+}
+
+header {
+    background: linear-gradient(135deg, #2a6dd1 0%, #114bb2 100%);
+    color: white;
+    padding: 30px;
+    text-align: center;
+}
+
+.app-logo {
+    width: 90px;
+    height: auto;
+    display: block;
+    margin: 0 auto 10px auto;
+}
+
+header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+.date-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 3px 0;
+    gap: 5px;
+    margin-bottom: 10px;
+}
+
+.nav-btn {
+    padding: 8px 6px;
+    background: var(--component-bg);
+    color: var(--text-secondary);
+    text-shadow:
+        0 0 2px var(--text-shadow-strong),
+        0 0 5px var(--text-shadow-color),
+        0 1px 2px var(--text-shadow-color);
+    border: 1px solid var(--component-border);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.7rem;
+    font-weight: 600;
+    transition: all 0.3s;
+    flex: 1;
+    min-width: 0;
+    min-height: 59px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-align: center;
+    white-space: nowrap;
+    line-height: 1.5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.nav-btn:hover {
+    background: var(--component-bg-hover);
+    border-color: var(--component-border-hover);
+    transform: translateY(-1px);
+}
+
+.nav-btn .nav-btn-icon {
+    display: inline-flex;
+    align-items: center;
+}
+
+.nav-arrow,
+.icon {
+    width: 1.1em;
+    height: 1.1em;
+    vertical-align: -0.15em;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.icon-lg {
+    width: 1.4em;
+    height: 1.4em;
+}
+
+.btn-date {
+    font-size: 1rem;
+    font-weight: 600;
+    opacity: 0.9;
+    display: inline;
+}
+
+.date-input {
+    padding: 10px;
+    border: 2px solid #2a6dd1;
+    border-radius: 8px;
+    font-size: 1rem;
+    flex: 2;
+    text-align: center;
+}
+
+.next-prayer-card {
+    background: transparent;
+    color: var(--text-card);
+    padding: calc(var(--door-width) * 0.015) calc(var(--door-width) * 0.025);
+    text-align: center;
+    margin: calc(var(--bg-image-height) * 0.01 + 15px) auto calc(var(--bg-image-height) * 0.02 - 23px);
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    transition: all 0.3s ease;
+    position: relative;
+    width: 100%;
+    max-width: var(--door-width);
+    min-height: var(--arch-height);
+    aspect-ratio: auto;
+    display: grid;
+    grid-template-rows: auto auto auto auto;
+    grid-template-areas:
+        "label"
+        "name"
+        "time"
+        "countdown";
+    justify-items: center;
+    align-content: center;
+    align-items: center;
+    row-gap: 0;
+    text-shadow:
+        0 0 2px var(--card-glow),
+        0 0 5px var(--card-glow-soft),
+        0 1px 2px var(--text-shadow-color);
+    -webkit-text-stroke: 0.4px var(--card-glow-soft);
+    paint-order: stroke fill;
+    font-weight: 700;
+}
+
+.next-prayer-label    { grid-area: label; }
+.next-prayer-name     { grid-area: name; }
+.next-prayer-time     { grid-area: time; }
+.next-prayer-countdown,
+.mute-alert-banner    { grid-area: countdown; }
+
+.next-prayer-card.playing-athan {
+    animation: pulsate-glow 1.4s ease-in-out infinite;
+    cursor: pointer;
+}
+
+@keyframes pulsate-glow {
+
+    0%,
+    100% {
+        transform: scale(1);
+        filter:
+            drop-shadow(0 0 18px rgba(212, 175, 55, 0.9))
+            drop-shadow(0 0 36px rgba(212, 175, 55, 0.75))
+            drop-shadow(0 0 60px rgba(212, 175, 55, 0.45));
+    }
+
+    50% {
+        transform: scale(1.06);
+        filter:
+            drop-shadow(0 0 30px rgba(212, 175, 55, 1))
+            drop-shadow(0 0 60px rgba(212, 175, 55, 0.95))
+            drop-shadow(0 0 100px rgba(212, 175, 55, 0.7));
+    }
+}
+
+.next-prayer-card.playing-athan .next-prayer-name,
+.next-prayer-card.playing-athan .next-prayer-time {
+    animation: text-glow 1.4s ease-in-out infinite;
+}
+
+@keyframes text-glow {
+
+    0%,
+    100% {
+        text-shadow:
+            0 0 4px rgba(212, 175, 55, 0.9),
+            0 0 12px rgba(212, 175, 55, 0.7),
+            0 0 24px rgba(212, 175, 55, 0.45);
+    }
+
+    50% {
+        text-shadow:
+            0 0 10px rgba(212, 175, 55, 1),
+            0 0 22px rgba(212, 175, 55, 0.95),
+            0 0 44px rgba(212, 175, 55, 0.7);
+    }
+}
+
+.next-prayer-label {
+    font-size: calc(var(--door-width) * 0.053);
+    font-weight: 700;
+    opacity: 0.95;
+    margin-bottom: calc(var(--door-width) * 0.025);
+}
+
+.next-prayer-name {
+    font-size: calc(var(--door-width) * 0.177);
+    font-weight: 800;
+    margin-bottom: calc(var(--door-width) * 0.03 - 7px);
+    font-family: 'Consolas', 'Courier New', monospace;
+    line-height: 1.05;
+    white-space: nowrap;
+    max-width: 100%;
+}
+
+.next-prayer-time {
+    font-size: calc(var(--door-width) * 0.143);
+    font-weight: 700;
+    margin-bottom: calc(var(--door-width) * 0.025);
+    line-height: 1.05;
+}
+
+.next-prayer-countdown {
+    font-size: calc(var(--door-width) * 0.053);
+    font-weight: 700;
+    opacity: 0.95;
+}
+
+/* Date-only mode: shown when no upcoming prayer exists for the selected day */
+.next-prayer-card.date-only {
+    row-gap: calc(var(--door-width) * 0.015);
+}
+
+.next-prayer-card.date-only .next-prayer-label,
+.next-prayer-card.date-only .next-prayer-countdown {
+    display: none;
+}
+
+.next-prayer-card.date-only .next-prayer-name {
+    font-size: calc(var(--door-width) * 0.09);
+    font-weight: 700;
+    margin-bottom: calc(var(--door-width) * 0.025);
+    line-height: 1.2;
+    white-space: normal;
+    text-align: center;
+}
+
+.next-prayer-card.date-only .next-prayer-time {
+    font-size: calc(var(--door-width) * 0.07);
+    font-weight: 600;
+    margin-bottom: 0;
+    line-height: 1.2;
+    text-align: center;
+}
+
+body:not(.dark-mode) .next-prayer-card.date-only {
+    color: #000;
+    text-shadow:
+        0 0 3px rgba(255, 255, 255, 1),
+        0 0 7px rgba(255, 255, 255, 0.95);
+    -webkit-text-stroke: none;
+}
+
+body.dark-mode .next-prayer-card.date-only {
+    color: #fff;
+    text-shadow:
+        0 0 3px rgba(0, 0, 0, 1),
+        0 0 7px rgba(0, 0, 0, 0.95);
+    -webkit-text-stroke: none;
+}
+
+.dua-card {
+    background: linear-gradient(135deg, #2a6dd1 0%, #114bb2 100%);
+    color: white;
+    padding: 25px;
+    margin: 25px 20px 10px 20px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(42, 109, 209, 0.25);
+    text-align: center;
+}
+
+.dua-text {
+    margin: 6px 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.dua-text.arabic {
+    font-size: 1.3rem;
+}
+
+.prayers-list {
+    padding: 4px 0;
+    background: transparent;
+    width: 85%;
+    margin: 0 auto 21px;
+}
+
+.prayer-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    margin: 0 auto 2px;
+    width: 98%;
+    min-height: 59px;
+    background: var(--component-bg);
+    border: 1px solid var(--component-border);
+    border-radius: 8px;
+    color: var(--text-secondary);
+    transition: all 0.3s;
+}
+
+.prayer-item:hover {
+    background: var(--component-bg-hover);
+    border-color: var(--component-border-hover);
+    transform: translateX(3px);
+}
+
+.prayer-name {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    font-family: 'Consolas', 'Courier New', monospace;
+    text-shadow:
+        0 0 2px var(--text-shadow-strong),
+        0 0 6px var(--text-shadow-color),
+        0 0 12px var(--text-shadow-color),
+        0 1px 2px var(--text-shadow-color);
+    -webkit-text-stroke: 0.4px var(--text-shadow-color);
+    paint-order: stroke fill;
+    white-space: nowrap;
+}
+
+.prayer-check-mark,
+.prayer-redcheck-mark {
+    font-weight: bold;
+    font-size: 1.5rem;
+    line-height: 1;
+    margin-left: 8px;
+    font-family: 'Apple Braille', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    text-shadow:
+        0 0 2px var(--text-shadow-strong),
+        0 0 6px var(--text-shadow-color),
+        0 0 12px var(--text-shadow-color),
+        0 1px 2px var(--text-shadow-color);
+    -webkit-text-stroke: 0.4px var(--text-shadow-color);
+    paint-order: stroke fill;
+}
+
+.prayer-check-mark {
+    color: var(--text-accent);
+}
+
+.prayer-redcheck-mark {
+    color: var(--color-checkmark-orange);
+}
+
+.prayer-time {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--text-accent);
+    text-shadow:
+        0 0 2px var(--text-shadow-strong),
+        0 0 6px var(--text-shadow-color),
+        0 0 12px var(--text-shadow-color),
+        0 1px 2px var(--text-shadow-color);
+    -webkit-text-stroke: 0.4px var(--text-shadow-color);
+    paint-order: stroke fill;
+    white-space: nowrap;
+}
+
+.prayer-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.prayer-meta .prayer-check-mark,
+.prayer-meta .prayer-redcheck-mark {
+    margin-left: 0;
+    margin-right: 8px;
+}
+
+.prayer-item.past {
+    opacity: 0.7;
+}
+
+.prayer-item.past .prayer-name,
+.prayer-item.past .prayer-time {
+    color: #6c757d;
+}
+
+/* Past prayer not checked → red */
+.prayer-item.past:not(:has(.prayer-check-mark, .prayer-redcheck-mark)) .prayer-name,
+.prayer-item.past:not(:has(.prayer-check-mark, .prayer-redcheck-mark)) .prayer-time {
+    color: var(--color-danger-past) !important;
+}
+
+/* Checked prayer → accent color */
+.prayer-item:has(.prayer-check-mark, .prayer-redcheck-mark) .prayer-name {
+    color: var(--text-accent) !important;
+}
+
+/* Daily Activities Section */
+.daily-activities-section {
+    padding: 2px 0;
+    background: transparent;
+    margin-bottom: 10px;
+}
+
+.daily-activities-content {
+    display: flex;
+    gap: 10px;
+    flex-wrap: nowrap;
+}
+
+.activity-item {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 8px 8px;
+    min-height: 59px;
+    background: var(--component-bg);
+    border: 1px solid var(--component-border);
+    border-radius: 8px;
+    color: var(--text-secondary);
+    transition: all 0.3s;
+    min-width: 0;
+}
+
+.activity-item:hover {
+    background: var(--component-bg-hover);
+    border-color: var(--component-border-hover);
+    transform: translateY(-1px);
+}
+
+.activity-item.past {
+    opacity: 0.7;
+}
+
+.activity-item.past .activity-name {
+    color: #6c757d;
+}
+
+/* Checked activity → green label */
+.activity-item:has(.prayer-check-mark, .prayer-redcheck-mark) .activity-label,
+.activity-item:has(.prayer-check-mark, .prayer-redcheck-mark) .activity-name {
+    color: var(--text-accent) !important;
+}
+
+.activity-name {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-family: 'Consolas', 'Courier New', monospace;
+    text-shadow:
+        0 0 2px var(--text-shadow-strong),
+        0 0 6px var(--text-shadow-color),
+        0 0 12px var(--text-shadow-color),
+        0 1px 2px var(--text-shadow-color);
+    -webkit-text-stroke: 0.4px var(--text-shadow-color);
+    paint-order: stroke fill;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.actions {
+    display: flex;
+    gap: 5px;
+    padding: 3px 0 8px;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    flex: 1;
+    padding: 8px 6px;
+    min-height: 59px;
+    font-size: 0.7rem;
+    border: 1px solid var(--component-border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-weight: 600;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: var(--component-bg);
+    color: var(--text-secondary);
+    text-shadow:
+        0 0 2px var(--text-shadow-strong),
+        0 0 5px var(--text-shadow-color),
+        0 1px 2px var(--text-shadow-color);
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.action-btn:hover {
+    background: var(--component-bg-hover);
+    border-color: var(--component-border-hover);
+    transform: translateY(-1px);
+}
+
+.action-btn .action-btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.4em;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.action-btn .action-btn-icon svg {
+    display: block;
+}
+
+.warning-btn {
+    background: var(--color-danger-bg);
+    color: var(--color-danger);
+    border: 1px solid var(--color-danger-border);
+    box-shadow: none;
+}
+
+.warning-btn:hover {
+    background: var(--color-danger-hover-bg);
+    color: var(--color-danger);
+}
+
+.btn-danger-light {
+    background: rgba(254, 226, 226, 0.7) !important;
+    color: #b91c1c !important;
+    box-shadow: 0 2px 5px rgba(220, 38, 38, 0.08) !important;
+    transition: all 0.3s ease;
+}
+
+.btn-danger-light:hover {
+    background: rgba(254, 202, 202, 0.85) !important;
+    color: #991b1b !important;
+}
+
+footer {
+    background: #f8f9fa;
+    padding: 20px;
+    text-align: center;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.footer-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.ramadan-moon-footer {
+    font-size: 50px;
+    line-height: 1;
+    display: block;
+    text-align: center;
+    margin-bottom: 10px;
+    color: #D4AF37;
+}
+
+.ramadan-moon-card,
+.ramadan-moon {
+    color: #D4AF37;
+}
+
+.app-version {
+    text-align: center;
+    color: #6c757d;
+    font-size: 0.85rem;
+    margin-top: 10px;
+}
+
+.ramadan-moon-card {
+    display: inline;
+    margin-left: 8px;
+    font-size: 1em;
+    line-height: 1;
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    overflow-y: auto;
+}
+
+.modal-content {
+    background-color: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    margin: 50px auto;
+    padding: 30px;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 20px;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+}
+
+.settings-section {
+    margin-bottom: 10px;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    overflow: hidden;
+    background: white;
+}
+
+.settings-section.settings-section-tight {
+    margin-bottom: 10px;
+}
+
+.settings-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.3s ease;
+}
+
+.settings-section-header:hover {
+    background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+}
+
+.settings-section-header.active {
+    background: linear-gradient(135deg, #2a6dd1 0%, #114bb2 100%);
+}
+
+.settings-section-header.active h3 {
+    color: white;
+}
+
+.settings-section-header.active .section-toggle {
+    color: white;
+}
+
+.settings-section h3 {
+    margin: 0;
+    color: #2a6dd1;
+    font-size: 1.1rem;
+    transition: color 0.3s ease;
+}
+
+.section-toggle {
+    font-size: 1.3rem;
+    color: #2a6dd1;
+    transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.settings-section-header.active .section-toggle {
+    transform: rotate(180deg);
+}
+
+.settings-section-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, padding 0.4s ease;
+    padding: 0 20px;
+}
+
+.settings-section-content.active {
+    max-height: 5000px;
+    padding: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #495057;
+}
+
+.input-field {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+}
+
+.input-field:focus {
+    outline: none;
+    border-color: #2a6dd1;
+}
+
+.btn {
+    padding: 10px 20px;
+    background: #2a6dd1;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-top: 10px;
+    transition: all 0.3s;
+}
+
+.btn:hover {
+    background: #114bb2;
+    transform: translateY(-2px);
+}
+
+.help-text {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-top: 5px;
+}
+
+.help-text a {
+    color: #2a6dd1;
+    text-decoration: none;
+}
+
+.help-text a:hover {
+    text-decoration: underline;
+}
+
+.server-time {
+    margin: 15px 0;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%);
+    color: white;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+}
+
+.server-time #serverTimeValue {
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.prayer-toggles {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.prayer-toggle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.toggle-switch {
+    position: relative;
+    width: 60px;
+    height: 30px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 30px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+input:checked+.slider {
+    background-color: #2a6dd1;
+}
+
+input:checked+.slider:before {
+    transform: translateX(30px);
+}
+
+/* Responsive */
+/* ====== UNIFIED DESIGN (mobile design applied to all viewports) ====== */
+
+body {
+    padding: 8px;
+    background-position: center, center calc(var(--bg-y-offset) + 100px);
+}
+
+.container {
+    margin-top: 50px;
+}
+
+.next-prayer-card {
+    margin-top: calc(var(--bg-image-height) * 0.01 + 15px);
+    margin-bottom: calc(var(--bg-image-height) * 0.02 - 23px);
+}
+
+body:not(.dark-mode) {
+    --component-bg: rgba(255, 255, 255, 0.5);
+    --component-bg-hover: rgba(255, 255, 255, 0.7);
+    --component-border: rgba(255, 255, 255, 0.7);
+    --component-border-hover: rgba(255, 255, 255, 0.85);
+    --color-danger-bg: rgba(254, 226, 226, 0.5);
+    --color-danger-border: rgba(254, 202, 202, 0.8);
+    --color-danger-hover-bg: rgba(254, 202, 202, 0.7);
+}
+
+body:not(.dark-mode) .next-prayer-card {
+    text-shadow:
+        0 0 3px rgba(212, 175, 55, 1),
+        0 0 7px rgba(212, 175, 55, 0.95),
+        0 0 14px rgba(212, 175, 55, 0.75),
+        0 0 22px rgba(212, 175, 55, 0.55),
+        0 1px 3px rgba(0, 0, 0, 0.45);
+    -webkit-text-stroke: 0.8px rgba(212, 175, 55, 0.85);
+}
+
+body.dark-mode .next-prayer-card {
+    text-shadow:
+        0 0 3px rgba(0, 0, 0, 1),
+        0 0 7px rgba(0, 0, 0, 0.95),
+        0 0 14px rgba(0, 0, 0, 0.75),
+        0 0 22px rgba(0, 0, 0, 0.55),
+        0 1px 3px rgba(0, 0, 0, 0.45);
+    -webkit-text-stroke: 0.8px rgba(0, 0, 0, 0.85);
+}
+
+.prayers-list {
+    padding: 2px 0;
+    width: 85%;
+    margin: 0 auto 21px;
+}
+
+.prayer-item {
+    padding: 10px 10px;
+    min-height: 59px;
+}
+
+.daily-activities-section {
+    padding: 2px 0;
+}
+
+header h1 {
+    font-size: 2rem;
+}
+
+.date-navigation {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 5px;
+    padding: 3px 0;
+}
+
+.date-input {
+    width: 100%;
+}
+
+.nav-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 59px;
+    padding: 8px 6px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+.nav-btn .nav-btn-label {
+    display: none;
+}
+
+.nav-btn .nav-btn-icon {
+    font-size: 1.5rem;
+}
+
+#calendarBtn {
+    gap: 2px;
+}
+
+.nav-btn .btn-date {
+    font-size: 1rem;
+    display: inline;
+    margin: 0;
+}
+
+.daily-activities-content {
+    gap: 6px;
+}
+
+.activity-item {
+    padding: 8px 6px;
+    min-height: 59px;
+}
+
+.activity-item .activity-label {
+    display: none;
+}
+
+.activity-item .activity-name {
+    font-size: 1.4rem;
+}
+
+.actions {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 5px;
+    padding: 4px 0;
+}
+
+.action-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 59px;
+    padding: 8px 6px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+.action-btn .action-btn-label {
+    display: none;
+}
+
+.action-btn .action-btn-icon {
+    font-size: 1.5rem;
+}
+
+.modal-content {
+    margin: 20px;
+    width: calc(100% - 40px);
+    padding: 20px;
+}
+
+
+/* Animation for missing ICS field */
+@keyframes pulse-red {
+
+    0%,
+    100% {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+    }
+
+    50% {
+        border-color: #ff6b7a;
+        box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
+    }
+}
+
+.ics-missing {
+    border-color: #dc3545 !important;
+    animation: pulse-red 2s infinite;
+    background-color: #fff5f5 !important;
+}
+
+.ics-missing-label {
+    color: #dc3545 !important;
+    font-weight: bold;
+}
+
+/* Slider de volume */
+.volume-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 8px;
+    border-radius: 5px;
+    background: linear-gradient(to right, #2a6dd1 0%, #114bb2 100%);
+    outline: none;
+    opacity: 0.9;
+    transition: opacity 0.2s;
+}
+
+.volume-slider:hover {
+    opacity: 1;
+}
+
+.volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    border: 2px solid #2a6dd1;
+}
+
+.volume-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    border: 2px solid #2a6dd1;
+}
+
+.volume-slider.volume-high::-webkit-slider-thumb {
+    border-color: #8B0000;
+    background: #ffe5e5;
+}
+
+.volume-slider.volume-high::-moz-range-thumb {
+    border-color: #8B0000;
+    background: #ffe5e5;
+}
+
+/* Schedule Matrix - Tabs + Sliders */
+.schedule-matrix {
+    margin: 10px 0;
+}
+
+.schedule-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 15px;
+    justify-content: center;
+}
+
+.schedule-tab {
+    padding: 8px 12px;
+    background: transparent;
+    border: 1px solid #2a6dd1;
+    border-radius: 6px;
+    color: #2a6dd1;
+    cursor: pointer;
+    font-size: 0.85em;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.schedule-tab:hover {
+    background: rgba(42, 109, 209, 0.1);
+}
+
+.schedule-tab.active {
+    background: #2a6dd1;
+    color: white;
+}
+
+.schedule-tab.all-tab {
+    border-color: #2a6dd1;
+    color: #2a6dd1;
+}
+
+.schedule-tab.all-tab.active {
+    background: #2a6dd1;
+    color: white;
+}
+
+.schedule-day-content {
+    background: transparent;
+}
+
+.schedule-prayer-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(42, 109, 209, 0.2);
+}
+
+.schedule-prayer-row:last-child {
+    border-bottom: none;
+}
+
+.schedule-prayer-name {
+    font-weight: 600;
+}
+
+.schedule-day-header {
+    font-size: 1.0em;
+    font-weight: 600;
+    color: #2a6dd1;
+    padding: 8px 0 12px 0;
+    border-bottom: 1px solid rgba(42, 109, 209, 0.3);
+    margin-bottom: 5px;
+}
+
+@media (prefers-color-scheme: dark) {
+    .schedule-day-header {
+        color: #2a6dd1;
+    }
+}
+
+.schedule-whole-day-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(42, 109, 209, 0.4);
+    margin-bottom: 5px;
+    color: #000;
+}
+
+.schedule-whole-day-row {
+    font-weight: 600;
+    color: #2a6dd1;
+}
+
+.schedule-prayer-row .toggle-switch {
+    margin: 0;
+}
+
+/* Mute alert banner */
+.mute-alert-banner {
+    /* Banner shares the same grid cell as .next-prayer-countdown.
+       When visible (JS sets display: block), it covers the countdown text.
+       Width matches a .prayer-item exactly: 0.98 × 0.85 = 0.833 × container width.
+       Use calc on door-width so it ignores the card's inner padding. */
+    width: calc(var(--door-width) * 0.833);
+    max-width: calc(100% + calc(var(--door-width) * 0.05));
+    justify-self: center;
+    align-self: center;
+    margin-inline: auto;
+    background: var(--color-danger-bg);
+    color: var(--color-danger);
+    border: 1px solid var(--color-danger-border);
+    padding: 8px 12px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.85rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(220, 38, 38, 0.08);
+    cursor: pointer;
+    z-index: 10;
+}
+
+/* When the mute alert is visible, hide the countdown underneath. */
+.next-prayer-card:has(.mute-alert-banner:not([style*="display: none"])) .next-prayer-countdown {
+    visibility: hidden;
+}
+
+/* Safety modifier (set by JS via ensureBannerDoesNotOverlap) — if the banner
+   would overlap with .prayers-list, snap it to the top of the card. */
+.next-prayer-card.banner-up .mute-alert-banner {
+    grid-area: label;
+}
+
+.next-prayer-card.banner-up .next-prayer-label {
+    visibility: hidden;
+}
+
+/* The countdown remains visible when the banner moves up (it no longer shares
+   the same cell). */
+.next-prayer-card.banner-up:has(.mute-alert-banner:not([style*="display: none"])) .next-prayer-countdown {
+    visibility: visible;
+}
+
+/* Skip button disabled state */
+.action-btn.disabled {
+    background: transparent !important;
+    cursor: not-allowed !important;
+    opacity: 0.5;
+}
+
+.action-btn.disabled:hover {
+    transform: none !important;
+    background: transparent !important;
+}
+
+/* Mute button when already activated (muted): keep light transparent bg + border */
+.action-btn.warning-btn.disabled,
+.action-btn.warning-btn.disabled:hover {
+    background: var(--color-danger-bg) !important;
+    color: var(--color-danger) !important;
+    border: 1px solid var(--color-danger-border) !important;
+    cursor: not-allowed !important;
+    opacity: 0.6;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* Grey out all buttons during audio playback */
+button.audio-playing-disabled,
+button.audio-playing-disabled:hover {
+    opacity: 0.4 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+    filter: grayscale(100%) !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.mute-alert-banner:hover {
+    background: var(--color-danger-hover-bg);
+    color: var(--color-danger);
+}
+
+/* Weekday mute banner */
+.weekday-mute-banner {
+    background: rgba(254, 226, 226, 0.7);
+    color: #b91c1c;
+    padding: 10px 14px;
+    text-align: center;
+    margin: 0 0 6px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(220, 38, 38, 0.08);
+}
+
+.weekday-mute-banner:hover {
+    background: rgba(254, 202, 202, 0.85);
+    color: #991b1b;
+}
+
+/* Stop Audio Button */
+.stop-audio-btn {
+    background: rgba(254, 226, 226, 0.7);
+    color: #b91c1c;
+    padding: 12px 20px;
+    text-align: center;
+    width: 100%;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(220, 38, 38, 0.08);
+}
+
+.stop-audio-btn:hover:not(:disabled) {
+    background: rgba(254, 202, 202, 0.85);
+    color: #991b1b;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(220, 38, 38, 0.15);
+}
+
+.stop-audio-btn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.stop-audio-btn:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    opacity: 0.6;
+    box-shadow: none;
+}
+
+/* Calendar Modal Styles */
+.calendar-modal-content {
+    max-width: 95vw;
+    max-height: 95vh;
+    overflow-y: auto;
+    padding: 30px;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #2a6dd1;
+}
+
+.calendar-header h2 {
+    color: #2a6dd1;
+    margin: 0;
+}
+
+.calendar-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.current-year {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2a6dd1;
+}
+
+.calendar-nav-btn {
+    padding: 10px 20px;
+    background: #2a6dd1;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s;
+}
+
+.calendar-nav-btn:hover {
+    background: #114bb2;
+    transform: translateY(-2px);
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    padding: 10px;
+}
+
+.calendar-month {
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 15px;
+    transition: all 0.3s;
+}
+
+.calendar-month:hover {
+    border-color: #2a6dd1;
+    box-shadow: 0 4px 12px rgba(42, 109, 209, 0.15);
+}
+
+.calendar-month-header {
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #2a6dd1;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #2a6dd1;
+}
+
+.calendar-header-row {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 8px;
+}
+
+.calendar-week-header {
+    width: 32px;
+    flex-shrink: 0;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #2a6dd1;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.calendar-weekdays-wrapper {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    flex: 1;
+}
+
+.calendar-weekday {
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6c757d;
+    padding: 4px;
+}
+
+.calendar-body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.calendar-week-row {
+    display: flex;
+    gap: 4px;
+}
+
+.calendar-week-number {
+    width: 32px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #2a6dd1;
+    background: rgba(42, 109, 209, 0.1);
+    border-radius: 6px;
+    padding: 4px;
+}
+
+.calendar-days-row {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    flex: 1;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    background: #f8f9fa;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.calendar-day:hover {
+    background: #2a6dd1;
+    color: white;
+    transform: scale(1.1);
+}
+
+.calendar-day.empty {
+    background: transparent;
+    cursor: default;
+}
+
+.calendar-day.empty:hover {
+    background: transparent;
+    transform: none;
+}
+
+.calendar-day.today {
+    background: #2a6dd1;
+    color: white;
+    font-weight: 700;
+    box-shadow: 0 0 0 2px #114bb2;
+}
+
+.calendar-day.selected {
+    background: #114bb2;
+    color: white;
+    font-weight: 700;
+}
+
+.calendar-day-number {
+    font-size: 0.9rem;
+    line-height: 1;
+}
+
+.calendar-day-symbols {
+    display: flex;
+    gap: 3px;
+    margin-top: 2px;
+    font-size: 0.7rem;
+    line-height: 1;
+}
+
+.prayer-check-green {
+    color: #2a6dd1;
+}
+
+.prayer-check-orange {
+    color: #ff8c00;
+}
+
+.ramadan-moon {
+    font-size: 0.7rem;
+}
+
+.calendar-day.other-month {
+    opacity: 0.3;
+}
+
+@media (max-width: 768px) {
+    .calendar-grid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 15px;
+    }
+
+    .calendar-modal-content {
+        padding: 15px;
+    }
+
+    .calendar-month {
+        padding: 10px;
+    }
+}
+
+/* ===========================
+   DARK MODE STYLES
+   =========================== */
+
+/* Main-page elements share layout & colors between light and dark modes
+   via CSS variables defined in :root. Only --bg-overlay differs in dark mode. */
+
+body.dark-mode .settings-btn {
+    background: #2d3748;
+    color: #e4e6eb;
+    border: 1px solid #4a5568;
+}
+
+body.dark-mode .settings-btn:hover {
+    background: #4a5568;
+    border-color: #718096;
+}
+
+body.dark-mode .modal-content {
+    background: rgba(28, 30, 38, 0.92);
+    color: #e4e6eb;
+}
+
+body.dark-mode .close-btn {
+    color: #e4e6eb;
+    background: #2d3748;
+}
+
+body.dark-mode .close-btn:hover {
+    background: #4a5568;
+    color: #ffffff;
+}
+
+body.dark-mode .input-field,
+body.dark-mode .btn,
+body.dark-mode select {
+    background: #2d3748;
+    color: #e4e6eb;
+    border: 1px solid #4a5568;
+}
+
+body.dark-mode .input-field:focus,
+body.dark-mode select:focus {
+    border-color: #114bb2;
+    background: #3a4556;
+}
+
+body.dark-mode .btn:hover {
+    background: #114bb2;
+    border-color: #114bb2;
+}
+
+body.dark-mode .settings-section {
+    background: #1c1e26;
+    border: 1px solid #4a5568;
+}
+
+body.dark-mode .settings-section h3 {
+    color: #a0aec0;
+    border-bottom: none;
+}
+
+body.dark-mode .settings-section-header.active h3 {
+    color: #ffffff;
+}
+
+body.dark-mode .section-toggle {
+    color: #a0aec0;
+}
+
+body.dark-mode .settings-section-header.active .section-toggle {
+    color: #ffffff;
+}
+
+body.dark-mode .settings-section-content {
+    background: #1c1e26;
+}
+
+body.dark-mode .update-info-card {
+    background: #252830 !important;
+    border: 1px solid #4a5568;
+}
+
+body.dark-mode .form-group label {
+    color: #cbd5e0;
+}
+
+body.dark-mode .help-text {
+    background: #1c1e26;
+    color: #a0aec0;
+}
+
+body.dark-mode .prayer-toggle {
+    background: #2d3748;
+    color: #e4e6eb;
+}
+
+body.dark-mode .toggle-switch {
+    background-color: #4a5568;
+}
+
+body.dark-mode .slider {
+    background-color: #ccc;
+}
+
+body.dark-mode .toggle-switch input:checked+.slider {
+    background-color: #114bb2;
+}
+
+body.dark-mode .dua-card {
+    background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+    border: 2px solid #4a5568;
+}
+
+body.dark-mode .dua-text,
+body.dark-mode .dua-text.arabic,
+body.dark-mode .dua-text.english {
+    color: #60A5FA;
+}
+
+body.dark-mode .calendar-modal-content {
+    background: #1c1e26;
+    color: #e4e6eb;
+}
+
+body.dark-mode .calendar-nav {
+    background: #2d3748;
+}
+
+body.dark-mode .calendar-month {
+    background: #2d3748;
+    border: 1px solid #4a5568;
+}
+
+body.dark-mode .calendar-month-header {
+    background: #2d3748;
+    color: #ffffff;
+}
+
+body.dark-mode .calendar-week-header {
+    color: #3B82F6;
+}
+
+body.dark-mode .calendar-week-number {
+    color: #3B82F6;
+    background: rgba(59, 130, 246, 0.15);
+}
+
+body.dark-mode .calendar-weekday {
+    color: #a0aec0;
+}
+
+body.dark-mode .calendar-weekday {
+    color: #a0aec0;
+    border-bottom: 1px solid #4a5568;
+}
+
+body.dark-mode .calendar-day {
+    background: #1c1e26;
+    color: #e4e6eb;
+    border: 1px solid #4a5568;
+}
+
+body.dark-mode .calendar-day:hover:not(.empty) {
+    background: #3a4556;
+}
+
+body.dark-mode .calendar-day.today {
+    background: #114bb2;
+    color: white;
+}
+
+body.dark-mode .calendar-day.selected {
+    background: #1E3A8A;
+    color: white;
+}
+
+body.dark-mode code {
+    background: #2d3748;
+    color: #114bb2;
+    border: 1px solid #4a5568;
+}
+
+body.dark-mode a {
+    color: #60A5FA;
+}
+
+body.dark-mode a:hover {
+    color: #2563EB;
+}
+
+body.dark-mode .skip-next-btn {
+    background: #dc2626;
+    border-color: #dc2626;
+}
+
+body.dark-mode .skip-next-btn:hover {
+    background: #b91c1c;
+}
+
+body.dark-mode .skip-next-btn.disabled {
+    background: #4a5568;
+    border-color: #4a5568;
+}
+
+body.dark-mode .mute-alert {
+    background: #7c2d12;
+    border-color: #ea580c;
+}
+
+body.dark-mode .stop-audio-btn,
+body.dark-mode .btn-danger-light {
+    background: rgba(74, 28, 28, 0.6) !important;
+    color: #fca5a5 !important;
+    border-color: transparent;
+}
+
+body.dark-mode .stop-audio-btn:hover,
+body.dark-mode .btn-danger-light:hover {
+    background: rgba(94, 36, 36, 0.8) !important;
+    color: #fecaca !important;
+}
+
+body.dark-mode .mute-alert-banner,
+body.dark-mode .weekday-mute-banner {
+    background: rgba(74, 28, 28, 0.6);
+    color: #fca5a5;
+}
+
+body.dark-mode .mute-alert-banner:hover,
+body.dark-mode .weekday-mute-banner:hover {
+    background: rgba(94, 36, 36, 0.8);
+    color: #fecaca;
+}
+
+body.dark-mode .app-version {
+    color: #a0aec0;
+}
+
+/* Main-page action-btn / warning-btn already use CSS vars,
+   so dark-mode overrides are no longer needed for them. */
+
+/* Settings modal: red help texts and warnings → light red in dark mode */
+body.dark-mode #settingsModal [style*="color: #8B0000"],
+body.dark-mode #settingsModal [style*="color:#8B0000"],
+body.dark-mode #settingsModal [style*="color: #8b0000"],
+body.dark-mode #settingsModal [style*="color: rgb(139, 0, 0)"],
+body.dark-mode #settingsModal .help-text[style*="#8B0000"],
+body.dark-mode #settingsModal .help-text[style*="#8b0000"],
+body.dark-mode #volumeWarning,
+body.dark-mode #fajrVolumeWarning,
+body.dark-mode .audio-output-warning,
+body.dark-mode #serverAudioSupport[style*="#8B0000"],
+body.dark-mode #serverAudioSupport[style*="#8b0000"],
+body.dark-mode #serverAudioSupport[style*="rgb(139, 0, 0)"],
+body.dark-mode #serverAudioSupport[style*="rgb(139,0,0)"] {
+    color: #ef4444 !important;
+}
+
+/* ===== Floating Audio Notification Banner ===== */
+.audio-notification-banner {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    animation: slideUp 0.3s ease-out, pulseBanner 2s ease-in-out infinite;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+@keyframes pulseBanner {
+
+    0%,
+    100% {
+        box-shadow: 0 4px 20px rgba(42, 109, 209, 0.4);
+    }
+
+    50% {
+        box-shadow: 0 4px 30px rgba(42, 109, 209, 0.7);
+    }
+}
+
+.audio-notification-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(135deg, #2a6dd1, #114bb2);
+    color: white;
+    padding: 14px 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(42, 109, 209, 0.4);
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.audio-notification-content:hover {
+    transform: scale(1.02);
+    box-shadow: 0 6px 25px rgba(42, 109, 209, 0.5);
+}
+
+.audio-notification-icon {
+    font-size: 1.4rem;
+    animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.2);
+    }
+}
+
+.audio-notification-text {
+    flex: 1;
+    white-space: nowrap;
+}
+
+.audio-notification-close {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease;
+}
+
+.audio-notification-close:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+/* Dark mode adjustments for audio notification banner */
+body.dark-mode .audio-notification-content {
+    background: linear-gradient(135deg, #114bb2, #1E3A8A);
+}
+
+/* ============================================================
+   DESKTOP-ONLY LAYOUT (>= 769px)
+   Activities sidebar = LEFT of prayers-list (vertical)
+   Actions sidebar    = RIGHT of prayers-list (vertical)
+   Buttons widened to show their text label
+   ============================================================ */
+@media (min-width: 769px) {
+    .container {
+        max-width: 760px;
+        display: grid;
+        /* 4 columns:
+           1 = activities sidebar (1fr)
+           2 = left half of door (door-width / 2)
+           3 = right half of door (door-width / 2)
+           4 = actions sidebar (1fr)
+        */
+        grid-template-columns:
+            minmax(0, 1fr)
+            calc((var(--door-width) - 6px) / 2)
+            calc((var(--door-width) - 6px) / 2)
+            minmax(0, 1fr);
+        grid-template-areas:
+            ".          card     card     ."
+            ".          weekday  weekday  ."
+            "activities prayers  prayers  actions"
+            "prev       today    cal      next";
+        column-gap: 6px;
+        align-items: start;
+        justify-items: center;
+    }
+
+    #nextPrayerCard           { grid-area: card; justify-self: center; }
+    #weekdayMuteBanner        { grid-area: weekday; }
+    .prayers-list             { grid-area: prayers; }
+    .daily-activities-section { grid-area: activities; width: 100%; align-self: start; }
+    .actions                  { grid-area: actions; width: 100%; align-self: start; }
+
+    /* Date-navigation buttons are placed directly into the grid */
+    .date-navigation {
+        display: contents;
+    }
+    #prevDay      { grid-area: prev; width: 100%; }
+    #todayBtn     { grid-area: today; width: 100%; }
+    #calendarBtn  { grid-area: cal; width: 100%; }
+    #nextDay      { grid-area: next; width: 100%; }
+
+    /* Reduce card margin-bottom by 20px on desktop */
+    .next-prayer-card {
+        margin-bottom: calc(var(--bg-image-height) * 0.02 - 68px);
+    }
+
+    /* Vertical layout for sidebars */
+    .daily-activities-content {
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .actions {
+        flex-direction: column;
+        gap: 6px;
+        padding: 0;
+    }
+
+    /* Show text labels next to icons on desktop */
+    .nav-btn .nav-btn-label,
+    .action-btn .action-btn-label,
+    .activity-item .activity-label {
+        display: inline;
+    }
+
+    /* Smaller icons since labels are visible */
+    .nav-btn .nav-btn-icon,
+    .action-btn .action-btn-icon {
+        font-size: 1.1rem;
+    }
+
+    /* Sidebar buttons widened and aligned, with comfortable padding */
+    .activity-item,
+    .action-btn {
+        width: 100%;
+        padding: 10px 12px;
+        font-size: 1.15rem;
+        gap: 8px;
+        justify-content: flex-start;
+    }
+
+    /* Nav buttons fill their grid cell and show labels horizontally */
+    .nav-btn {
+        font-size: 1.15rem;
+        padding: 10px 12px;
+        justify-content: flex-start;
+        gap: 8px;
+    }
+
+    /* prevDay: default left alignment.
+       todayBtn and calendarBtn: centered (middle column).
+       nextDay: right-aligned. */
+    #todayBtn,
+    #calendarBtn {
+        justify-content: center;
+    }
+
+    #nextDay {
+        justify-content: flex-end;
+    }
+
+    /* Activity name allows label to display naturally with the same size as prayer-name */
+    .activity-name {
+        font-size: 1.15rem;
+        white-space: nowrap;
+    }
+
+    /* Mute alert banner: grid-placement handles positioning,
+       so no specific desktop override needed. */
+}
+
+/* ===== QUICK FILL MODAL ===== */
+.qf-modal-content {
+    padding: 0;
+    max-width: 520px;
+    margin: 12px auto;
+    border-radius: 14px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100dvh - 24px);
+}
+
+.qf-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--component-border);
+    flex-shrink: 0;
+}
+
+.qf-modal-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.qf-modal-content .close {
+    position: static;
+    font-size: 1.6rem;
+    line-height: 1;
+    cursor: pointer;
+    color: var(--text-secondary);
+    background: none;
+    border: none;
+    padding: 0 4px;
+}
+
+.qf-body {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    flex: 1;
+    padding: 0 8px 8px;
+    container-type: inline-size;
+}
+
+/* Table wrapper makes it fill width */
+.qf-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+/* Header row: prayer initials */
+.qf-table thead th {
+    padding: 6px 2px 4px;
+    text-align: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    width: 18%;
+}
+
+.qf-table thead th.qf-day-col {
+    width: 10%;
+    text-align: left;
+    padding-left: 4px;
+}
+
+/* Body rows */
+.qf-table tbody tr {
+    border-bottom: 1px solid var(--component-border);
+}
+
+.qf-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+/* Day label cell */
+.qf-day-label {
+    text-align: left;
+    padding: 4px 4px 4px 6px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    vertical-align: middle;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.qf-lbl-short { display: none; }
+.qf-lbl-full  { display: inline; }
+
+/* Mobile: always show compact labels */
+@media (max-width: 768px) {
+    .qf-lbl-full  { display: none; }
+    .qf-lbl-short { display: inline; }
+}
+
+/* Desktop but very narrow container fallback */
+@container (max-width: 310px) {
+    .qf-lbl-full  { display: none; }
+    .qf-lbl-short { display: inline; }
+}
+
+/* Prayer toggle cell */
+.qf-table tbody td.qf-prayer-cell {
+    padding: 3px 2px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* The toggle button itself */
+.qf-prayer-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    max-width: 52px;
+    border-radius: 8px;
+    border: 2px solid var(--component-border);
+    background: var(--component-bg);
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+    font-family: 'Apple Braille', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--text-secondary);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.qf-prayer-btn:active {
+    transform: scale(0.92);
+}
+
+/* State: orange (state 2) */
+.qf-prayer-btn[data-state="2"] {
+    background: var(--color-warning-bg, #fff3cd);
+    border-color: var(--color-warning, #f59e0b);
+    color: var(--color-warning, #f59e0b);
+}
+
+/* State: blue (state 1) */
+.qf-prayer-btn[data-state="1"] {
+    background: #dbeafe;
+    border-color: #3b82f6;
+    color: #3b82f6;
+}
+
+/* Dark mode overrides */
+.dark-mode .qf-prayer-btn[data-state="1"] {
+    background: #1e3a5f;
+    border-color: #60a5fa;
+    color: #60a5fa;
+}
+
+.dark-mode .qf-prayer-btn[data-state="2"] {
+    background: #3d2e00;
+    border-color: #f59e0b;
+    color: #f59e0b;
+}
+
+/* Week separator row */
+.qf-week-sep td {
+    padding: 8px 6px 2px;
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    opacity: 0.55;
+    border-bottom: none;
+}
+
+.qf-week-sep:first-child td {
+    padding-top: 4px;
+}
+
+/* Today row highlight */
+.qf-row-today {
+    background: rgba(59, 130, 246, 0.06);
+}
+
+.qf-row-today .qf-day-label {
+    color: #3b82f6;
+    font-weight: 700;
+}
+
+.dark-mode .qf-row-today {
+    background: rgba(96, 165, 250, 0.1);
+}
+
+.dark-mode .qf-row-today .qf-day-label {
+    color: #60a5fa;
+}

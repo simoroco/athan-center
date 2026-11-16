@@ -1,0 +1,279 @@
+import SwiftUI
+
+// MARK: - Prayers list, daily activities, date navigation, action buttons.
+
+struct PrayerListView: View {
+    @EnvironmentObject var store: AppStore
+    let theme: AppTheme
+
+    var body: some View {
+        VStack(spacing: 2) {
+            if store.prayers.isEmpty {
+                Text("No prayers available for this date")
+                    .font(.system(size: 14))
+                    .foregroundStyle(theme.muted)
+                    .padding(20)
+            } else {
+                ForEach(store.prayers) { prayer in
+                    row(prayer)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 22)   // ~85% of container width
+        .padding(.bottom, 21)
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("prayersList")
+    }
+
+    private func row(_ prayer: Prayer) -> some View {
+        let checked = store.prayerChecks[prayer.prayer_name] ?? 0
+        let past = store.isPastPrayer(prayer)
+        let canToggle = !store.isFutureDate
+
+        return Button {
+            guard canToggle else { return }
+            Task { await store.togglePrayer(prayer.prayer_name) }
+        } label: {
+            HStack {
+                Text(AC.displayPrayerName(prayer.prayer_name))
+                    .font(.system(size: 20.8, weight: .heavy).monospaced())
+                    .foregroundStyle(nameColor(checked: checked, past: past))
+                Spacer()
+                HStack(spacing: 6) {
+                    if checked == 1 {
+                        Text("✓").font(.system(size: 24, weight: .bold)).foregroundStyle(theme.textAccent)
+                    } else if checked == 2 {
+                        Text("✓").font(.system(size: 24, weight: .bold)).foregroundStyle(AppTheme.checkmarkOrange)
+                    }
+                    Text(prayer.prayer_time)
+                        .font(.system(size: 18.4, weight: .heavy))
+                        .foregroundStyle(timeColor(checked: checked, past: past))
+                }
+            }
+            .glowText(theme)
+            .padding(.horizontal, 12).padding(.vertical, 10)
+            .frame(minHeight: 59)
+            .glassBox(theme)
+            .opacity(past ? 0.7 : 1)
+        }
+        .buttonStyle(.plain)
+        .allowsHitTesting(canToggle)
+        .accessibilityIdentifier("prayer-\(prayer.prayer_name)")
+    }
+
+    private func nameColor(checked: Int, past: Bool) -> Color {
+        if checked >= 1 { return theme.textAccent }
+        if past { return theme.dangerPast }       // unchecked past → red
+        return theme.textPrimary
+    }
+    private func timeColor(checked: Int, past: Bool) -> Color {
+        if checked >= 1 { return theme.textAccent }
+        if past { return theme.dangerPast }
+        return theme.textAccent
+    }
+}
+
+// MARK: - Daily activities (Coran / Tasbih / Nawafil)
+
+struct DailyActivitiesView: View {
+    @EnvironmentObject var store: AppStore
+    let theme: AppTheme
+
+    var body: some View {
+        HStack(spacing: 8) {
+            ForEach(AC.activities, id: \.name) { activity in
+                cell(activity.name, icon: activity.icon)
+            }
+        }
+        .padding(.bottom, 12)
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("dailyActivities")
+    }
+
+    private func cell(_ name: String, icon: String) -> some View {
+        let checked = store.activityChecks[name] ?? 0
+        let past = store.selectedDateStr < store.todayStr
+        let canToggle = !store.isFutureDate
+
+        return Button {
+            guard canToggle else { return }
+            Task { await store.toggleActivity(name) }
+        } label: {
+            VStack(spacing: 2) {
+                HStack(spacing: 4) {
+                    Image(icon).resizable().frame(width: 26, height: 26)
+                    if checked == 1 {
+                        Text("✓").font(.system(size: 20, weight: .bold)).foregroundStyle(theme.textAccent)
+                    } else if checked == 2 {
+                        Text("✓").font(.system(size: 20, weight: .bold)).foregroundStyle(AppTheme.checkmarkOrange)
+                    }
+                }
+                Text(name)
+                    .font(.system(size: 11, weight: .bold).monospaced())
+                    .foregroundStyle(checked >= 1 ? theme.textAccent : (past ? theme.muted : theme.textPrimary))
+            }
+            .glowText(theme)
+            .frame(maxWidth: .infinity, minHeight: 59)
+            .glassBox(theme)
+            .opacity(past ? 0.7 : 1)
+        }
+        .buttonStyle(.plain)
+        .allowsHitTesting(canToggle)
+        .accessibilityIdentifier("activity-\(name)")
+    }
+}
+
+// MARK: - Date navigation bar
+
+struct DateNavView: View {
+    @EnvironmentObject var store: AppStore
+    let theme: AppTheme
+    @Binding var showCalendar: Bool
+
+    var body: some View {
+        HStack(spacing: 5) {
+            navButton(
+                icon: "chevron.left",
+                label: prevLabel,
+                accessibility: "prevDay"
+            ) { store.goPrevDay() }
+
+            navButton(
+                icon: "house",
+                label: DateUtil.shortFmt.string(from: store.serverNow),
+                accessibility: "todayBtn",
+                disabled: store.isViewingToday
+            ) { store.goToday() }
+
+            navButton(
+                icon: "calendar",
+                label: "\(DateUtil.relativeDayLabel(store.selectedDate, today: store.serverNow)) \(DateUtil.shortFmt.string(from: store.selectedDate))",
+                accessibility: "calendarBtn"
+            ) { showCalendar = true }
+
+            navButton(
+                icon: "chevron.right",
+                label: nextLabel,
+                iconFirst: false,
+                accessibility: "nextDay"
+            ) { store.goNextDay() }
+        }
+        .padding(.bottom, 10)
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("dateNav")
+    }
+
+    private var prevLabel: String {
+        switch store.dayDiff {
+        case 0: return "Yesterday"
+        case 1: return "Go Today"
+        case -1: return "Before Yesterday"
+        default: return "Previous Day"
+        }
+    }
+    private var nextLabel: String {
+        switch store.dayDiff {
+        case 0: return "Tomorrow"
+        case 1: return "After Tomorrow"
+        case -1: return "Go Today"
+        default: return "Next Day"
+        }
+    }
+
+    private func navButton(icon: String, label: String, iconFirst: Bool = true,
+                           accessibility: String, disabled: Bool = false,
+                           action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 5) {
+                if iconFirst { Image(systemName: icon).font(.system(size: 17, weight: .semibold)) }
+                Text(label)
+                    .font(.system(size: 11, weight: .semibold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+                if !iconFirst { Image(systemName: icon).font(.system(size: 17, weight: .semibold)) }
+            }
+            .foregroundStyle(theme.textPrimary)
+            .glowText(theme)
+            .frame(maxWidth: .infinity, minHeight: 59)
+            .glassBox(theme)
+            .opacity(disabled ? 0.5 : 1)
+        }
+        .buttonStyle(.plain)
+        .disabled(disabled)
+        .accessibilityIdentifier(accessibility)
+    }
+}
+
+// MARK: - Action buttons row (Mute / Quick Pray / History / Settings)
+
+struct ActionsRow: View {
+    @EnvironmentObject var store: AppStore
+    let theme: AppTheme
+    @Binding var showQuickPray: Bool
+    @Binding var showStats: Bool
+    @Binding var showSettings: Bool
+
+    var body: some View {
+        HStack(spacing: 5) {
+            if store.pastDayIncomplete {
+                actionButton(icon: "emoji-zap", label: "Quick Pray", accessibility: "quickPrayBtn") {
+                    showQuickPray = true
+                }
+            } else {
+                // Mute next Athan (warning style)
+                Button {
+                    Task { await store.muteNext() }
+                } label: {
+                    VStack(spacing: 3) {
+                        Image(systemName: "speaker.slash").font(.system(size: 18))
+                        Text("Mute next Athan")
+                            .font(.system(size: 9.5, weight: .semibold))
+                            .lineLimit(2).multilineTextAlignment(.center).minimumScaleFactor(0.7)
+                    }
+                    .foregroundStyle(theme.danger)
+                    .frame(maxWidth: .infinity, minHeight: 59)
+                    .background(theme.dangerBg)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(theme.dangerBorder, lineWidth: 1))
+                    .opacity(store.skipNext || !store.cardVisible ? 0.55 : 1)
+                }
+                .buttonStyle(.plain)
+                .disabled(store.skipNext || !store.cardVisible)
+                .accessibilityIdentifier("muteNextBtn")
+            }
+
+            actionButton(icon: "", label: "History", systemIcon: "chart.bar", accessibility: "historyBtn") {
+                showStats = true
+            }
+            actionButton(icon: "", label: "Settings", systemIcon: "gearshape", accessibility: "settingsBtn") {
+                showSettings = true
+            }
+        }
+        .padding(.bottom, 12)
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("actionsRow")
+    }
+
+    private func actionButton(icon: String, label: String, systemIcon: String? = nil,
+                              accessibility: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            VStack(spacing: 3) {
+                if let systemIcon {
+                    Image(systemName: systemIcon).font(.system(size: 18))
+                } else {
+                    Image(icon).resizable().frame(width: 20, height: 20)
+                }
+                Text(label)
+                    .font(.system(size: 10.5, weight: .semibold))
+                    .lineLimit(1).minimumScaleFactor(0.7)
+            }
+            .foregroundStyle(theme.textPrimary)
+            .glowText(theme)
+            .frame(maxWidth: .infinity, minHeight: 59)
+            .glassBox(theme)
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier(accessibility)
+    }
+}

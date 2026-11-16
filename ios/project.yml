@@ -1,0 +1,47 @@
+name: AthanCenter
+options:
+  bundleIdPrefix: com.athancenter
+  deploymentTarget:
+    iOS: "18.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "5.0.0"
+    CURRENT_PROJECT_VERSION: "1"
+    TARGETED_DEVICE_FAMILY: "1"
+targets:
+  AthanCenter:
+    type: application
+    platform: iOS
+    deploymentTarget: "18.0"
+    sources:
+      - path: AthanCenter
+    info:
+      path: AthanCenter/Info.plist
+      properties:
+        CFBundleDisplayName: Athan Center
+        UILaunchScreen:
+          UIColorName: ""
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        NSAppTransportSecurity:
+          NSAllowsArbitraryLoads: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.athancenter.app
+        GENERATE_INFOPLIST_FILE: NO
+        ENABLE_PREVIEWS: YES
+  AthanCenterUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    deploymentTarget: "18.0"
+    sources:
+      - path: AthanCenterUITests
+    dependencies:
+      - target: AthanCenter
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.athancenter.app.uitests
+        TEST_TARGET_NAME: AthanCenter
+        GENERATE_INFOPLIST_FILE: YES

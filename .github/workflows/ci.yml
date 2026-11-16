@@ -23,26 +23,26 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-        cache-dependency-path: app/package-lock.json
+        cache-dependency-path: web/athan-center/package-lock.json
     
     - name: Install dependencies
       run: |
-        cd app
+        cd web/athan-center
         npm ci
     
     - name: Check code style
       run: |
-        cd app
+        cd web/athan-center
         echo "Code style check passed"
     
     - name: Build application
       run: |
-        cd app
+        cd web/athan-center
         echo "Build successful"
     
     - name: Run basic tests
       run: |
-        cd app
+        cd web/athan-center
         echo "Tests passed"
 
   docker-build:
@@ -57,7 +57,7 @@ jobs:
     
     - name: Build Docker image
       run: |
-        cd app
+        cd web/athan-center
         docker build -t athan-center:test .
     
     - name: Test Docker image
@@ -78,10 +78,10 @@ jobs:
     
     - name: Install dependencies
       run: |
-        cd app
+        cd web/athan-center
         npm ci
     
     - name: Lint check
       run: |
-        cd app
+        cd web/athan-center
         echo "Linting passed"

@@ -1,7 +1,7 @@
 # 🕌 Athan Center
 
 <p align="center">
-  <img src="./app/public/logo.png" alt="Athan Center Logo" width="150"/>
+  <img src="./web/athan-center/public/logo.png" alt="Athan Center Logo" width="150"/>
 </p>
 
 <p align="center">
@@ -62,7 +62,7 @@ Athan Center provides accurate prayer times with automatic Athan playback throug
 
 ```bash
 git clone https://github.com/simoroco/athan-center.git
-cd athan-center
+cd athan-center/web/athan-center
 npm install
 npm run dev
 ```
@@ -104,8 +104,8 @@ Use the **automatic deployment script** that works on all platforms:
 mkdir athan-center && cd athan-center
 
 # Download deployment files
-wget https://raw.githubusercontent.com/simoroco/athan-center/main/deploy_prod/docker-compose.yml
-wget https://raw.githubusercontent.com/simoroco/athan-center/main/deploy_prod/start.sh
+wget https://raw.githubusercontent.com/simoroco/athan-center/main/web/athan-center/deploy_prod/docker-compose.yml
+wget https://raw.githubusercontent.com/simoroco/athan-center/main/web/athan-center/deploy_prod/start.sh
 chmod +x start.sh
 
 # Start (auto-detects OS and configures accordingly)
@@ -152,7 +152,7 @@ All endpoints are available on `http://IP:7777/api` and `https://IP:7778/api`.
 | Next prayer text | `/next-prayer-text?lang=FR` | Returns next prayer in natural language (FR/EN) |
 | Permanent silence | `/silence/permanent` | Disables **all athans for the whole week** AND **Al Kahf Sourat on Friday** in one call (GET, no auth) |
 
-For complete API documentation, see [API.md](./docs/API.md).
+For complete API documentation, see [API.md](./web/athan-center/docs/API.md).
 
 ## 📄 License
 

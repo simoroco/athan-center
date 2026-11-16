@@ -2,6 +2,7 @@
 # Keep the folder structure (via .gitkeep), exclude actual data files
 
 .athan-center.log
+.athan-center.pid
 
 # Development files (moved to dev/)
 dev/
