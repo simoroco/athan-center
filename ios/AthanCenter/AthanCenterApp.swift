@@ -7,10 +7,10 @@ struct AthanCenterApp: App {
     var body: some Scene {
         WindowGroup {
             Group {
-                if store.configured {
+                if store.setupComplete {
                     ContentView()
                 } else {
-                    ServerSetupView()
+                    SetupView()
                 }
             }
             .environmentObject(store)

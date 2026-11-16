@@ -4,17 +4,21 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var store: AppStore
+    @Environment(\.scenePhase) private var scenePhase
     @State private var showCalendar = false
     @State private var showQuickPray = false
     @State private var showStats = false
     @State private var showSettings = false
+    @State private var showTasbih = false
+    /// Live horizontal drag: <0 while revealing Tasbih (swipe left),
+    /// >0 while dismissing it (swipe right). Drives the slide animation.
+    @State private var tasbihDrag: CGFloat = 0
 
     var body: some View {
         let theme = store.theme
-        NavigationStack {
-            GeometryReader { geo in
-                let metrics = DoorMetrics(screenWidth: geo.size.width)
-                ZStack(alignment: .bottom) {
+        GeometryReader { geo in
+            let metrics = DoorMetrics(screenWidth: geo.size.width)
+            ZStack(alignment: .bottom) {
                 // --- Background: photo + fixed dim overlay (body CSS) ---
                 theme.bgBase.ignoresSafeArea()
                 Image("background")
@@ -23,6 +27,7 @@ struct ContentView: View {
                     .frame(width: metrics.bgImageWidth, height: metrics.bgImageHeight)
                     .position(x: geo.size.width / 2, y: metrics.bgImageHeight * 0.06)
                     .clipped()
+                    .ignoresSafeArea()
                 theme.bgOverlay.ignoresSafeArea()
 
                 // --- Content column (container, width = doorWidth) ---
@@ -47,7 +52,7 @@ struct ContentView: View {
                         .frame(width: metrics.doorWidth)
                         .frame(maxWidth: .infinity)
                         .padding(.top, 50)
-                        .padding(.bottom, 20)
+                        .padding(.bottom, 130)   // content scrolls under the floating bar
                         // Tick: refresh the card when the 15-min window ends.
                         .onChange(of: context.date) { _, _ in
                             storeTick()
@@ -55,97 +60,124 @@ struct ContentView: View {
                     }
                 }
                 .scrollIndicators(.hidden)
-
-                // --- Floating audio notification banner ---
-                if let banner = store.audio.bannerText {
-                    audioBanner(theme, text: banner)
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
-                        .padding(.bottom, 18)
-                }
-
-                // --- Toast ---
-                if let toast = store.toast {
-                    Text(toast)
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 18).padding(.vertical, 10)
-                        .background(Color.black.opacity(0.75))
-                        .clipShape(Capsule())
-                        .padding(.bottom, 80)
-                        .transition(.opacity)
+                .ignoresSafeArea(.container, edges: [.top, .bottom])
+                // Slide left → Tasbih counter. The overlay follows the finger
+                // live, then snaps open/closed on release.
+                .simultaneousGesture(
+                    DragGesture(minimumDistance: 15)
+                        .onChanged { v in
+                            guard !showTasbih, v.translation.width < 0,
+                                  abs(v.translation.width) > abs(v.translation.height)
+                            else { return }
+                            tasbihDrag = v.translation.width
+                        }
+                        .onEnded { v in
+                            let w = v.translation.width
+                            let open = w < -80 || (w < -40 && v.predictedEndTranslation.width < -120)
+                            withAnimation(.easeOut(duration: 0.25)) {
+                                showTasbih = open && abs(v.translation.height) < abs(w)
+                                tasbihDrag = 0
+                            }
+                        })
+            }
+            // --- Top corner buttons ---
+            .overlay(alignment: .top) { topBar(theme) }
+            // --- Tasbih overlay: slides in from the right, in continuity
+            // with the swipe; swipe right (or the X) dismisses it.
+            .overlay {
+                if showTasbih || tasbihDrag < 0 {
+                    TasbihView(onClose: {
+                        withAnimation(.easeOut(duration: 0.25)) { showTasbih = false }
+                    })
+                        .environmentObject(store)
+                        .offset(x: showTasbih ? max(0, tasbihDrag) : max(0, geo.size.width + tasbihDrag))
+                        .ignoresSafeArea()
+                        .simultaneousGesture(
+                            DragGesture(minimumDistance: 10)
+                                .onChanged { v in
+                                    if showTasbih && v.translation.width > 0 {
+                                        tasbihDrag = v.translation.width
+                                    }
+                                }
+                                .onEnded { v in
+                                    withAnimation(.easeOut(duration: 0.25)) {
+                                        if v.translation.width > 80 {
+                                            showTasbih = false
+                                        }
+                                        tasbihDrag = 0
+                                    }
+                                })
+                        .zIndex(20)
                 }
             }
-            .ignoresSafeArea(.container, edges: .top)
-            .toolbar {
-                // Top-left: mute next Athan (or Quick Pray on incomplete past days).
-                ToolbarItem(placement: .topBarLeading) {
-                    if store.pastDayIncomplete {
-                        Button { showQuickPray = true } label: {
-                            Image("emoji-zap").resizable().frame(width: 22, height: 22)
-                        }
-                        .accessibilityIdentifier("quickPrayBtn")
-                    } else {
-                        Button { Task { await store.muteNext() } } label: {
-                            Image(systemName: "speaker.slash")
-                                .font(.system(size: 17, weight: .semibold))
-                                .foregroundStyle(theme.danger)
-                        }
-                        .disabled(store.skipNext || !store.cardVisible)
-                        .opacity(store.skipNext || !store.cardVisible ? 0.55 : 1)
-                        .accessibilityIdentifier("muteNextBtn")
+            // --- Floating bottom bar + audio banner + toast ---
+            .overlay(alignment: .bottom) {
+                VStack(spacing: 10) {
+                    if let toast = store.toast {
+                        Text(toast)
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 18).padding(.vertical, 10)
+                            .background(Color.black.opacity(0.78))
+                            .clipShape(Capsule())
+                            .transition(.opacity)
+                            .accessibilityIdentifier("toast")
                     }
+                    if store.audio.isActive, let banner = store.audio.bannerText {
+                        AudioStopBar(theme: theme, text: banner)
+                    }
+                    FloatingNavBar(theme: theme) { showCalendar = true }
                 }
-                // Top-right: statistics + settings.
-                ToolbarItemGroup(placement: .topBarTrailing) {
-                    Button { showStats = true } label: {
-                        Image(systemName: "chart.bar")
-                            .font(.system(size: 17, weight: .semibold))
-                    }
-                    .accessibilityIdentifier("historyBtn")
-                    Button { showSettings = true } label: {
-                        Image(systemName: "gearshape")
-                            .font(.system(size: 17, weight: .semibold))
-                    }
-                    .accessibilityIdentifier("settingsBtn")
-                }
-                // Native bottom bar: date navigation.
-                ToolbarItemGroup(placement: .bottomBar) {
-                    Button { store.goPrevDay() } label: {
-                        Image(systemName: "chevron.left").font(.system(size: 17, weight: .semibold))
-                    }
-                    .accessibilityIdentifier("prevDay")
-                    Spacer()
-                    Button { store.goToday() } label: {
-                        Image(systemName: "house").font(.system(size: 17, weight: .semibold))
-                    }
-                    .disabled(store.isViewingToday)
-                    .opacity(store.isViewingToday ? 0.4 : 1)
-                    .accessibilityIdentifier("todayBtn")
-                    Spacer()
-                    Button { showCalendar = true } label: {
-                        Image(systemName: "calendar").font(.system(size: 17, weight: .semibold))
-                    }
-                    .accessibilityIdentifier("calendarBtn")
-                    Spacer()
-                    Button { store.goNextDay() } label: {
-                        Image(systemName: "chevron.right").font(.system(size: 17, weight: .semibold))
-                    }
-                    .accessibilityIdentifier("nextDay")
-                }
+                .padding(.bottom, 6)
             }
-            .toolbarBackground(.hidden, for: .navigationBar)
-            .tint(theme.textPrimary)
         }
         .animation(.spring(response: 0.3), value: store.audio.bannerText)
         .animation(.easeOut, value: store.toast)
         .task { await store.boot() }
-        .onDisappear { store.stopLoops() }
-        .onAppear { store.startLoops() }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { Task { await store.appDidBecomeActive() } }
+        }
         .sheet(isPresented: $showCalendar) { CalendarSheet().environmentObject(store) }
         .sheet(isPresented: $showQuickPray) { QuickPraySheet().environmentObject(store) }
         .sheet(isPresented: $showStats) { StatisticsSheet().environmentObject(store) }
         .sheet(isPresented: $showSettings) { SettingsSheet().environmentObject(store) }
+    }
+
+    // MARK: Top bar — mute / quick-pray (left), history + settings (right)
+
+    private func topBar(_ theme: AppTheme) -> some View {
+        HStack {
+            Group {
+                if store.pastDayIncomplete {
+                    BarIconButton(theme: theme, id: "quickPrayBtn", a11y: "Quick pray",
+                                  action: { showQuickPray = true }) {
+                        Image("emoji-zap").resizable().frame(width: 22, height: 22)
+                    }
+                } else {
+                    let off = store.skipNext || !store.cardVisible
+                    BarIconButton(theme: theme, id: "muteNextBtn", a11y: "Mute next athan", disabled: off,
+                                  action: { Task { await store.muteNext() } }) {
+                        Image(systemName: "speaker.slash").foregroundStyle(theme.danger)
+                    }
+                }
+            }
+            .floatingGlass(dark: theme.dark, in: Circle())
+            Spacer()
+            HStack(spacing: 0) {
+                BarIconButton(theme: theme, id: "historyBtn", a11y: "Statistics",
+                              action: { showStats = true }) {
+                    Image(systemName: "chart.bar").foregroundStyle(barIconColor(theme))
+                }
+                BarIconButton(theme: theme, id: "settingsBtn", a11y: "Settings",
+                              action: { showSettings = true }) {
+                    Image(systemName: "gearshape").foregroundStyle(barIconColor(theme))
+                }
+            }
+            .padding(.horizontal, 4)
+            .floatingGlass(dark: theme.dark, in: Capsule())
         }
+        .padding(.horizontal, 16)
+        .padding(.top, 4)
     }
 
     /// Every second: when next-prayer window has expired, reload next prayer.
@@ -185,39 +217,5 @@ struct ContentView: View {
         .buttonStyle(.plain)
         .padding(.bottom, 8)
         .accessibilityIdentifier("weekdayMuteBanner")
-    }
-
-    // MARK: Audio notification banner
-
-    private func audioBanner(_ theme: AppTheme, text: String) -> some View {
-        HStack(spacing: 12) {
-            Image(systemName: "speaker.wave.2.fill")
-                .font(.system(size: 20))
-                .symbolEffect(.pulse)
-            Button { Task { await store.stopAllAudio() } } label: {
-                Text(text)
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(.white)
-            }
-            .buttonStyle(.plain)
-            Spacer(minLength: 0)
-            Button { store.audio.hideBanner() } label: {
-                Image(systemName: "xmark")
-                    .font(.system(size: 12, weight: .bold))
-                    .foregroundStyle(.white)
-                    .frame(width: 28, height: 28)
-                    .background(Color.white.opacity(0.2))
-                    .clipShape(Circle())
-            }
-            .buttonStyle(.plain)
-            .accessibilityIdentifier("closeAudioBanner")
-        }
-        .padding(.horizontal, 18).padding(.vertical, 13)
-        .background(theme.audioBannerGradient)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .shadow(color: Color(hex: 0x2A6DD1).opacity(0.4), radius: 10, y: 4)
-        .padding(.horizontal, 20)
-        .accessibilityIdentifier("audioBanner")
-        .onTapGesture { Task { await store.stopAllAudio() } }
     }
 }

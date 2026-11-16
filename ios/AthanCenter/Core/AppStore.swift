@@ -43,10 +43,13 @@ final class AppStore: ObservableObject {
     @Published var audioDevices: [AudioDevice] = []
     @Published var connected = false
     @Published var loadingPrayers = false
+    var loadGeneration = 0
+    var probing = false
     @Published var toast: String? = nil
 
     // MARK: Audio
     let audio = AudioManager()
+    private var cancellables = Set<AnyCancellable>()
     private var lastPlayedPrayer = ""                     // "date-name" dedup key
     private var lastPlayedQuran = ""
 
@@ -55,20 +58,43 @@ final class AppStore: ObservableObject {
     @Published var muteAlertGeneral = false
 
     private var loops: [Task<Void, Never>] = []
-    private var booted = false
+    var booted = false
     private var toastTask: Task<Void, Never>?
 
     init() {
+        let args = ProcessInfo.processInfo.arguments
+        // UI-test mode: kill animations so element frames are stable for XCUI hit-testing.
+        if args.contains("-resetLocal") || args.contains("-serverBase") {
+            UIView.setAnimationsEnabled(false)
+        }
+        let resetLocal = args.contains("-resetLocal")
+        // UI-test hook: -resetLocal → behave like a fresh install.
+        if resetLocal {
+            LocalStore.shared.reset()
+            if let bid = Bundle.main.bundleIdentifier {
+                UserDefaults.standard.removePersistentDomain(forName: bid)
+            }
+        }
         var saved = UserDefaults.standard.string(forKey: "serverBaseURL") ?? ""
         // UI-test hook: -serverBase <url>
-        let args = ProcessInfo.processInfo.arguments
         if let i = args.firstIndex(of: "-serverBase"), args.count > i + 1 {
             saved = args[i + 1]
             UserDefaults.standard.set(saved, forKey: "serverBaseURL")
         }
+        if resetLocal { saved = "" }
         serverBase = saved
-        api = APIClient(base: saved.isEmpty ? AC.defaultServer : saved)
+        api = APIClient(base: saved)
+        if !saved.isEmpty {
+            // Existing/legacy installs with a server URL stay in server mode.
+            LocalStore.shared.snap.mode = .server
+            LocalStore.shared.save()
+        }
         selectedDate = Date()
+        // AudioManager is a child ObservableObject: forward its changes so
+        // store.audio.* reads in views (stop banner, card pulse) re-render.
+        audio.objectWillChange
+            .sink { [weak self] _ in self?.objectWillChange.send() }
+            .store(in: &cancellables)
     }
 
     var configured: Bool { !serverBase.isEmpty }
@@ -76,9 +102,19 @@ final class AppStore: ObservableObject {
     // MARK: - Boot
 
     func boot() async {
-        guard configured, !Task.isCancelled else { return }
+        guard !Task.isCancelled else { return }
+        if isStandalone { await bootStandalone(); return }
+        guard configured else { return }
         booted = true
-        await syncTime()
+        if await !syncTime() {
+            // Server unreachable → offline mode from the local cache (never block the UI on timeouts).
+            connected = false
+            bootOfflineFromCache()
+            startLoops()
+            return
+        }
+        connected = true
+        if !local.snap.pendingOps.isEmpty { await resyncFromServer(); return }
         await initializeLastPlayedPrayer()
         async let s: () = loadSettings()
         async let p: () = loadDay()
@@ -93,8 +129,8 @@ final class AppStore: ObservableObject {
         async let qf: () = loadQuranFiles()
         async let dv: () = loadAudioDevices()
         _ = await (af, qf, dv)
-        connected = true
         startLoops()
+        Task { await cacheUpcomingFromServer() }
         await playOnPageLoad()
     }
 
@@ -105,17 +141,31 @@ final class AppStore: ObservableObject {
             while !Task.isCancelled {
                 try? await Task.sleep(nanoseconds: 5_000_000_000)
                 guard !Task.isCancelled, let self else { return }
-                await self.checkAudioTriggers()
+                if self.isStandalone {
+                    self.checkAthanLocal()
+                } else if !self.connected {
+                    self.checkAthanLocal()
+                    await self.probeConnectivity()
+                } else {
+                    await self.checkAudioTriggers()
+                }
             }
         })
-        // 60s — prayers + update info + skip status
+        // 60s — prayers + update info + skip status + connectivity probe
         loops.append(Task { [weak self] in
             while !Task.isCancelled {
                 try? await Task.sleep(nanoseconds: 60_000_000_000)
                 guard !Task.isCancelled, let self else { return }
-                await self.loadDay()
-                await self.loadUpdateInfo()
-                await self.refreshMuteState()
+                if self.isStandalone {
+                    await self.loadDay()
+                    await self.refreshICSIfStale()
+                } else if !self.connected {
+                    self.loadDayLocal()
+                } else {
+                    await self.loadDay()
+                    await self.loadUpdateInfo()
+                    await self.refreshMuteState()
+                }
             }
         })
         // 5min — clock resync
@@ -137,7 +187,9 @@ final class AppStore: ObservableObject {
 
     // MARK: - Server clock
 
-    func syncTime() async {
+    @discardableResult
+    func syncTime() async -> Bool {
+        guard configured, !isStandalone else { return false }
         let send = Date()
         do {
             let t = try await api.serverTime()
@@ -145,8 +197,9 @@ final class AppStore: ObservableObject {
             let rtt = recv.timeIntervalSince(send)
             serverOffset = (t.timestampMs / 1000.0) + rtt / 2 - recv.timeIntervalSince1970
             serverTimeInfo = t
+            return true
         } catch {
-            // keep previous offset
+            return false   // keep previous offset
         }
     }
 
@@ -166,35 +219,59 @@ final class AppStore: ObservableObject {
 
     /// Isha of today has passed (drives next-prayer card on tomorrow view).
     private func ishaPassedToday() async -> Bool {
-        let todayPrayers = (try? await api.prayers(date: todayStr)) ?? prayers
+        let todayPrayers = await prayersOn(todayStr)
         guard let isha = todayPrayers.first(where: { $0.prayer_name == "Isha" }) else { return false }
         return currentTimeStr > isha.prayer_time
     }
 
     // MARK: - Loading
 
+    /// Loads the selected day. Every call supersedes the previous one (generation token) so rapid
+    /// navigation can never display a stale response nor be ignored by an in-flight load.
     func loadDay() async {
-        guard configured, !loadingPrayers else { return }
+        loadGeneration += 1
+        let gen = loadGeneration
+        if isStandalone || !connected {
+            loadDayLocal()
+            return
+        }
+        guard configured else { return }
         loadingPrayers = true
-        defer { loadingPrayers = false }
+        defer { if gen == loadGeneration { loadingPrayers = false } }
         let dateStr = selectedDateStr
-        async let p = api.prayers(date: dateStr)
-        async let c = api.prayerChecks(date: dateStr)
-        async let a = api.dailyActivities(date: dateStr)
-        let (pr, ch, ac) = await ((try? p) ?? [], (try? c) ?? [], (try? a) ?? [])
+        let pr: [Prayer], ch: [PrayerCheck], ac: [DailyActivity]
+        do {
+            async let p = api.prayers(date: dateStr)
+            async let c = api.prayerChecks(date: dateStr)
+            async let a = api.dailyActivities(date: dateStr)
+            (pr, ch, ac) = try await (p, c, a)
+        } catch {
+            guard gen == loadGeneration else { return }
+            markOffline()
+            return
+        }
+        guard gen == loadGeneration, dateStr == selectedDateStr else { return }
         prayers = pr
-        prayerChecks = Dictionary(uniqueKeysWithValues: ch.map { ($0.prayer_name, $0.checked) })
-        activityChecks = Dictionary(uniqueKeysWithValues: ac.map { ($0.activity_name, $0.checked) })
+        prayerChecks = Dictionary(ch.map { ($0.prayer_name, $0.checked) }, uniquingKeysWith: { _, new in new })
+        // Keep iOS-only custom action states: the server only knows the built-in activities.
+        var acts = Dictionary(ac.map { ($0.activity_name, $0.checked) }, uniquingKeysWith: { _, new in new })
+        for (k, v) in local.snap.activities[dateStr] ?? [:] where !AC.activities.contains(where: { $0.name == k }) { acts[k] = v }
+        activityChecks = acts
+        cacheDayToLocal(date: dateStr, prayers: pr, checks: prayerChecks, acts: activityChecks)
 
         // Next prayer card visibility rules (loadPrayers in app.js)
         if isViewingToday {
             await loadNextPrayer()
+            guard gen == loadGeneration else { return }
             if let np = nextPrayer, validateNextPrayer(np) {
                 cardVisible = true; cardDateOnly = false
             } else if nextPrayer != nil {
                 cardVisible = false
-                try? await Task.sleep(nanoseconds: 5_000_000_000)
-                if !Task.isCancelled { await loadDay() }
+                Task { [weak self] in          // non-blocking retry in 5s (superseded by any newer load)
+                    try? await Task.sleep(nanoseconds: 5_000_000_000)
+                    guard let self, gen == self.loadGeneration else { return }
+                    await self.loadDay()
+                }
             } else {
                 cardVisible = false
             }
@@ -214,6 +291,21 @@ final class AppStore: ObservableObject {
         }
     }
 
+    /// Server stopped answering: switch to the local cache (probe loop will resync).
+    func markOffline() {
+        guard !isStandalone, connected else { return }
+        connected = false
+        loadDayLocal()
+    }
+
+    /// Offline boot: everything from the last known server snapshot.
+    func bootOfflineFromCache() {
+        settings = local.snap.settings
+        schedule = local.snap.schedule
+        selectedDate = Date()
+        loadDayLocal()
+    }
+
     /// validateNextPrayer: no main prayer may sit between now and nextPrayer.time.
     private func validateNextPrayer(_ np: Prayer) -> Bool {
         guard np.date == todayStr else { return true }
@@ -225,11 +317,24 @@ final class AppStore: ObservableObject {
     }
 
     func loadNextPrayer() async {
-        nextPrayer = try? await api.nextPrayer()
+        if isStandalone || !connected {
+            nextPrayer = localNextPrayer()
+        } else {
+            if let np = try? await api.nextPrayer() { nextPrayer = np }
+            else if !connected { nextPrayer = localNextPrayer() }
+        }
     }
 
     func loadSettings() async {
-        settings = (try? await api.settings()) ?? [:]
+        if isStandalone {
+            settings = local.snap.settings
+            return
+        }
+        if let s = try? await api.settings() {
+            settings = s
+            local.snap.settings = s
+            local.save()
+        }
     }
 
     func loadUpdateInfo() async {
@@ -241,12 +346,17 @@ final class AppStore: ObservableObject {
     }
 
     func loadSchedule() async {
-        schedule = (try? await api.prayerSchedule()) ?? []
+        if isStandalone { schedule = local.snap.schedule; return }
+        if let s = try? await api.prayerSchedule() {
+            schedule = s
+            local.snap.schedule = s
+            local.save()
+        }
     }
 
     func loadMutedWeekdays() async {
         let rows = (try? await api.mutedWeekdays()) ?? []
-        mutedWeekdays = Dictionary(uniqueKeysWithValues: rows.map { ($0.weekday, $0.muted) })
+        mutedWeekdays = Dictionary(rows.map { ($0.weekday, $0.muted) }, uniquingKeysWith: { _, new in new })
     }
 
     func loadRamadan() async {
@@ -268,6 +378,10 @@ final class AppStore: ObservableObject {
     @Published var ishaPassedSync = false
 
     func refreshMuteState() async {
+        if isStandalone || !connected {
+            refreshMuteStateLocal()
+            return
+        }
         skipNext = (try? await api.skipNextStatus()) ?? skipNext
         if schedule.isEmpty { await loadSchedule() }
         if mutedWeekdays.isEmpty { await loadMutedWeekdays() }
@@ -311,19 +425,33 @@ final class AppStore: ObservableObject {
 
     func togglePrayer(_ name: String) async {
         guard !isFutureDate else { return }
+        if isStandalone || !connected {
+            let next = localNextCycle(prayerChecks[name] ?? 0)
+            prayerChecks[name] = next
+            local.setPrayerState(selectedDateStr, name, next)
+            if !isStandalone {
+                local.enqueue(PendingOp(kind: .prayerCheck, date: selectedDateStr, name: name, value: next, text: nil))
+            }
+            return
+        }
         if let newState = try? await api.togglePrayerCheck(date: selectedDateStr, prayer: name) {
             prayerChecks[name] = newState
+            local.setPrayerState(selectedDateStr, name, newState)
         }
     }
 
     func toggleActivity(_ name: String) async {
-        guard !isFutureDate else { return }
-        if let newState = try? await api.toggleDailyActivity(date: selectedDateStr, activity: name) {
-            activityChecks[name] = newState
-        }
+        await toggleActionLocal(name)
     }
 
     func muteNext() async {
+        if isStandalone || !connected {
+            muteNextLocal()
+            if !isStandalone {
+                local.enqueue(PendingOp(kind: .muteNext, date: nil, name: "mute", value: 1, text: nil))
+            }
+            return
+        }
         do {
             let r = try await api.muteNextAthan()
             if r.success == true {
@@ -338,6 +466,11 @@ final class AppStore: ObservableObject {
     }
 
     func unmuteNext() async {
+        if isStandalone || !connected {
+            unmuteNextLocal()
+            if !isStandalone { _ = try? await api.resetSkipNext() }
+            return
+        }
         _ = try? await api.resetSkipNext()
         skipNext = false
         muteAlertManual = false
@@ -354,18 +487,39 @@ final class AppStore: ObservableObject {
     }
 
     func setSchedule(_ prayer: String, _ day: Int, _ enabled: Bool) async {
+        if isStandalone {
+            local.setSchedule(prayer, day, enabled)
+            schedule = local.snap.schedule
+            refreshMuteStateLocal()
+            rescheduleNotifications()
+            return
+        }
         try? await api.setScheduleCell(prayer: prayer, day: day, enabled: enabled)
         await loadSchedule()
         await refreshMuteState()
     }
 
     func bulkSchedulePrayer(_ prayer: String, _ enabled: Bool) async {
+        if isStandalone {
+            local.bulkSchedule(prayer: prayer, enabled: enabled)
+            schedule = local.snap.schedule
+            refreshMuteStateLocal()
+            rescheduleNotifications()
+            return
+        }
         try? await api.bulkSchedule(type: "prayer", target: prayer, enabled: enabled)
         await loadSchedule()
         await refreshMuteState()
     }
 
     func bulkScheduleDay(_ day: Int, _ enabled: Bool) async {
+        if isStandalone {
+            local.bulkSchedule(day: day, enabled: enabled)
+            schedule = local.snap.schedule
+            refreshMuteStateLocal()
+            rescheduleNotifications()
+            return
+        }
         try? await api.bulkSchedule(type: "day", target: day, enabled: enabled)
         await loadSchedule()
         await refreshMuteState()
@@ -374,8 +528,18 @@ final class AppStore: ObservableObject {
     // MARK: - Settings actions
 
     func updateSetting(_ key: String, _ value: String) async {
-        try? await api.setSetting(key, value)
         settings[key] = value
+        local.snap.settings[key] = value
+        local.save()
+        if isStandalone || !connected {
+            if !isStandalone {
+                local.enqueue(PendingOp(kind: .setting, date: nil, name: key, value: 0, text: value))
+            }
+            if key == "ics_url" { await refreshICSIfStale(force: true) }
+            if key.hasPrefix("quran") || key.contains("schedule") { rescheduleNotifications() }
+            return
+        }
+        try? await api.setSetting(key, value)
         if key == "ics_url" {
             try? await Task.sleep(nanoseconds: 2_000_000_000)
             await loadDay()
@@ -383,17 +547,37 @@ final class AppStore: ObservableObject {
     }
 
     func forceUpdatePrayers() async -> String {
+        if isStandalone {
+            await refreshICSIfStale(force: true)
+            return "Prayer times updated"
+        }
         let r = try? await api.updatePrayers()
         await loadDay(); await loadNextPrayer(); await loadUpdateInfo()
         return r?.message ?? "Updated"
     }
 
     func resetChecks() async {
+        if isStandalone || !connected {
+            local.snap.checks[selectedDateStr] = [:]
+            local.save()
+            prayerChecks = [:]
+            return
+        }
         _ = try? await api.resetPrayerChecks()
         await loadDay()
     }
 
     func restoreDefaults() async {
+        if isStandalone {
+            local.snap.checks = [:]
+            local.snap.activities = [:]
+            local.snap.customActions = []
+            local.snap.settings = [:]
+            local.snap.schedule = []
+            local.ensureDefaultsAfterReset()
+            await bootStandalone()
+            return
+        }
         _ = try? await api.restoreDefaults()
         await boot()
     }
@@ -405,6 +589,13 @@ final class AppStore: ObservableObject {
     }
 
     func permanentSilence() async {
+        if isStandalone {
+            local.bulkSchedule(enabled: false)
+            schedule = local.snap.schedule
+            refreshMuteStateLocal()
+            rescheduleNotifications()
+            return
+        }
         _ = try? await api.permanentSilence()
         await loadSchedule(); await loadSettings(); await refreshMuteState()
     }
@@ -413,7 +604,7 @@ final class AppStore: ObservableObject {
 
     private func initializeLastPlayedPrayer() async {
         // Prevent the athan from firing right after launch (web parity).
-        let todayPs = (try? await api.prayers(date: todayStr)) ?? []
+        let todayPs = await prayersOn(todayStr)
         let now = currentTimeStr
         let passed = todayPs.filter { AC.mainPrayers.contains($0.prayer_name) && $0.prayer_time <= now }
         if let last = passed.last {
@@ -432,7 +623,7 @@ final class AppStore: ObservableObject {
             let key = "\(todayStr)-\(name)"
             guard key != lastPlayedPrayer else { return }
             lastPlayedPrayer = key
-            if let url = api.athanURL(file) {
+            if iosAudioEnabled, let url = api.athanURL(file) {
                 audio.play(url: url, banner: "Athan calling...", isPrayer: true)
             }
         }
@@ -440,14 +631,17 @@ final class AppStore: ObservableObject {
 
     private func checkQuran() async {
         guard let r = try? await api.checkFridayQuran() else { return }
-        if r.serverPlayingQuran == true && audio.bannerText == nil {
-            audio.bannerText = "Al Kahf Sourat recitation playing"
+        if r.serverPlayingQuran == true && !audio.isPlaying {
+            audio.showServerBanner("Al Kahf Sourat recitation playing", duration: 15)   // refreshed by each poll
+        } else if r.serverPlayingQuran == false, audio.serverPlaying,
+                  audio.bannerText == "Al Kahf Sourat recitation playing" {
+            audio.clearServerBanner()
         }
         if r.shouldPlay == true, r.type == "friday_quran", let file = r.quranFile {
             let key = "\(todayStr)-quran"
             guard key != lastPlayedQuran else { return }
             lastPlayedQuran = key
-            if let url = api.quranURL(file) {
+            if iosAudioEnabled, let url = api.quranURL(file) {
                 audio.play(url: url, banner: "Al Kahf Sourat recitation playing")
             }
         }
@@ -463,12 +657,14 @@ final class AppStore: ObservableObject {
 
     // MARK: - Audio actions
 
+    /// Stop everything: local player immediately, then the Pi (if reachable).
     func stopAllAudio() async {
         audio.stopLocal()
-        try? await api.stopAudio()
+        if !isStandalone && configured { try? await api.stopAudio() }
     }
 
     func testAthanWeb() {
+        if isStandalone { playLocalAthan(); return }
         let file = settings["audio_file"] ?? "Masjid Al-Haram.mp3"
         if let url = api.athanURL(file) {
             audio.play(url: url, banner: "Athan calling (app)...")
@@ -476,6 +672,7 @@ final class AppStore: ObservableObject {
     }
 
     func testQuranWeb() {
+        guard !isStandalone else { showToast("Quran recitation requires a server"); return }
         let file = settings["friday_quran_file"] ?? "Sourat Al Kahf - Hani Arrifai.mp3"
         if let url = api.quranURL(file) {
             audio.play(url: url, banner: "Quran reciting (30s preview)...", limit30s: true)
@@ -483,22 +680,25 @@ final class AppStore: ObservableObject {
     }
 
     func testAthanServer() async {
+        guard connected else { showToast("Server unreachable"); return }
         _ = try? await api.testAthanServer()
-        audio.bannerText = "Athan calling (server)..."
+        audio.showServerBanner("Athan calling (server)...", duration: 40)
     }
 
     func testQuranServer() async {
+        guard connected else { showToast("Server unreachable"); return }
         _ = try? await api.testQuranServer()
-        audio.bannerText = "Quran reciting (30s server preview)..."
+        audio.showServerBanner("Quran reciting (30s server preview)...", duration: 32)
     }
 
     /// "Listen to Sourat Al Kahf now"
     func playFullQuran() async {
+        guard !isStandalone else { showToast("Quran recitation requires a server"); return }
         let output = settings["audio_output"] ?? "both"
         let file = settings["friday_quran_file"] ?? ""
         if output == "server" || output == "both" {
             _ = try? await api.triggerFridayQuran()
-            if output == "server" { audio.bannerText = "Al Kahf Sourat recitation playing" }
+            if output == "server" { audio.showServerBanner("Al Kahf Sourat recitation playing", duration: 3600) }
         }
         if output == "browser" || output == "both", let url = api.quranURL(file) {
             audio.play(url: url, banner: "Al Kahf Sourat recitation playing")
@@ -508,6 +708,7 @@ final class AppStore: ObservableObject {
     // MARK: - Quick Pray data (14-day window)
 
     func quickFillRows() async -> (days: [(date: String, label: String)], checks: [String: [String: Int]]) {
+        if isStandalone || !connected { return quickFillRowsLocal() }
         let year = Calendar.current.component(.year, from: serverNow)
         var all = (try? await api.prayerChecksRange(year: year)) ?? []
         // If window crosses Jan 1, also fetch previous year.
@@ -560,11 +761,20 @@ final class AppStore: ObservableObject {
 
     func goPrevDay() { shiftDay(-1) }
     func goNextDay() { shiftDay(1) }
-    func goToday() { selectedDate = serverNow; Task { await loadDay() } }
-    func goToDate(_ d: Date) { selectedDate = d; Task { await loadDay() } }
+    func goToday() { setDate(serverNow) }
+    func goToDate(_ d: Date) { setDate(d) }
 
     private func shiftDay(_ delta: Int) {
-        selectedDate = Calendar.current.date(byAdding: .day, value: delta, to: selectedDate) ?? selectedDate
+        setDate(Calendar.current.date(byAdding: .day, value: delta, to: selectedDate) ?? selectedDate)
+    }
+
+    /// Paint the cached day immediately (no flash of stale/empty data), then refresh from the source.
+    private func setDate(_ d: Date) {
+        selectedDate = d
+        let ds = selectedDateStr
+        prayers = local.snap.prayers[ds] ?? []
+        prayerChecks = local.snap.checks[ds] ?? [:]
+        activityChecks = local.snap.activities[ds] ?? [:]
         Task { await loadDay() }
     }
 

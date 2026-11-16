@@ -15,6 +15,8 @@ struct SettingsSheet: View {
     @State private var confirmReset = false
     @State private var confirmRestore = false
     @State private var busy = false
+    @State private var cityDraft = ""
+    @StateObject private var location = LocationManager()
 
     private var theme: AppTheme { store.theme }
 
@@ -55,6 +57,7 @@ struct SettingsSheet: View {
                     accordion(3, "Quran recitation", "book") { quranSection }
                     accordion(4, "Audio control", "speaker.wave.1") { audioSection }
                     accordion(5, "Backup & Restore", "externaldrive") { backupSection }
+                    accordion(6, "iPhone", "iphone") { iosSection }
 
                     Text(AC.appVersion)
                         .font(.system(size: 13)).foregroundStyle(theme.muted)
@@ -79,9 +82,20 @@ struct SettingsSheet: View {
         .task {
             icsDraft = store.settings["ics_url"] ?? ""
             serverDraft = store.serverBase
-            await store.loadUpdateInfo()
-            await store.syncTime()
+            if !store.isStandalone {
+                await store.loadUpdateInfo()
+                await store.syncTime()
+            }
         }
+        .overlay(alignment: .bottom) {
+            // The main-screen banner is hidden behind this sheet: audio must be stoppable from here too.
+            if store.audio.isActive, let text = store.audio.bannerText {
+                AudioStopBar(theme: theme, text: text,
+                             stopId: "stopAudioBannerSheet", barId: "audioBannerSheet")
+                    .padding(.bottom, 10)
+            }
+        }
+        .animation(.spring(response: 0.3), value: store.audio.bannerText)
         .fileImporter(isPresented: $showImporter, allowedContentTypes: [.commaSeparatedText, .plainText]) { result in
             if case .success(let url) = result {
                 guard url.startAccessingSecurityScopedResource() else { return }
@@ -110,6 +124,30 @@ struct SettingsSheet: View {
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("This will reset ALL settings to their default values")
+        }
+    }
+
+    private var currentCityName: String {
+        if store.isStandalone { return store.local.snap.cityName.isEmpty ? "—" : store.local.snap.cityName }
+        return store.updateInfo?.city_name ?? "—"
+    }
+
+    private func applyPlace(_ p: Place) async {
+        let ok = await store.changeLocation(city: p.city, lat: p.lat, lon: p.lon, tz: p.tz)
+        store.showToast(ok ? "Location set to \(p.city)" : "Could not update prayer times")
+        if ok { icsDraft = store.settings["ics_url"] ?? icsDraft; await store.loadUpdateInfo() }
+    }
+
+    private func searchCity() {
+        guard !busy else { return }
+        Task {
+            busy = true
+            defer { busy = false }
+            guard let p = await LocationManager.search(city: cityDraft) else {
+                store.showToast("City not found"); return
+            }
+            await applyPlace(p)
+            cityDraft = ""
         }
     }
 
@@ -184,7 +222,7 @@ struct SettingsSheet: View {
                         .clipShape(RoundedRectangle(cornerRadius: 8))
                         .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(theme.inputBorder, lineWidth: 1))
                         .accessibilityIdentifier("serverField")
-                    Button("Apply") { store.serverBase = serverDraft }
+                    Button("Apply") { store.connectToServer(serverDraft) }
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(.white)
                         .padding(.horizontal, 14).padding(.vertical, 10)
@@ -192,14 +230,31 @@ struct SettingsSheet: View {
                         .clipShape(RoundedRectangle(cornerRadius: 8))
                         .accessibilityIdentifier("applyServerBtn")
                 }
-                Text("HTTP address of your Athan Center server (Raspberry Pi)")
+                Text(store.isStandalone
+                     ? "Optional: connect to your Athan Center server (Raspberry Pi) to sync data and play on its speakers."
+                     : "HTTP address of your Athan Center server (Raspberry Pi)")
                     .font(.system(size: 12)).foregroundStyle(theme.helpText)
+                if !store.isStandalone {
+                    Button("Disconnect — use standalone mode") { store.switchToStandalone() }
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(theme.danger)
+                        .accessibilityIdentifier("standaloneModeBtn")
+                }
             }
         }
     }
 
     private var infoCard: some View {
         VStack(alignment: .leading, spacing: 5) {
+            if store.isStandalone {
+                infoRow("mappin", "City:", store.local.snap.cityName.isEmpty ? "My location" : store.local.snap.cityName)
+                TimelineView(.periodic(from: .now, by: 1)) { _ in
+                    infoRow("clock", "Device time:", liveServerTime)
+                }
+                .frame(height: 20)
+                infoRow("calendar", "Last prayer times update:", store.local.snap.lastIcsFetch)
+                infoRow("wifi.slash", "Mode:", "Standalone (no server)")
+            } else {
             infoRow("mappin", "City:", store.updateInfo?.city_name ?? "Loading...")
             infoRow("calendar", "Server date:", store.serverTimeInfo?.date ?? "--/--/----")
             TimelineView(.periodic(from: .now, by: 1)) { _ in
@@ -211,9 +266,56 @@ struct SettingsSheet: View {
             infoRow("hourglass", "Last prayer times update:", lastUpdateText)
             infoRow("timer", "Next prayer times update:", nextUpdateText)
             infoRow("speaker.wave.2", "Server audio support:", store.audioSupport?.message ?? "Loading...")
+            }
+            if !store.isStandalone && !store.connected {
+                infoRow("wifi.slash", "Connection:", "Offline — local cache, will resync")
+            }
         }
         .padding(15)
         .sheetCard(theme)
+    }
+
+    // MARK: - iPhone (iOS-only features)
+
+    private var iosSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            ToggleRow(theme: theme, title: "Athan notifications",
+                      isOn: Binding(get: { store.notificationsEnabled },
+                                    set: { store.notificationsEnabled = $0 }))
+                .accessibilityIdentifier("notificationsToggle")
+            Text("Sends a local notification at each enabled prayer time, even when the app is closed")
+                .font(.system(size: 12)).foregroundStyle(theme.helpText)
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Tasbih goal").font(.system(size: 14, weight: .semibold)).foregroundStyle(theme.labelText)
+                HStack(spacing: 8) {
+                    ForEach([10, 11, 33, 99, 100, 101], id: \.self) { n in
+                        let on = store.tasbihTarget == n
+                        Button { store.tasbihTarget = n } label: {
+                            Text("\(n)")
+                                .font(.system(size: 15, weight: .bold).monospacedDigit())
+                                .frame(maxWidth: .infinity, minHeight: 40)
+                                .foregroundStyle(on ? .white : theme.sheetText)
+                                .background(on ? AnyShapeStyle(theme.brandGradient) : AnyShapeStyle(theme.inputBg))
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                                .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(theme.inputBorder, lineWidth: on ? 0 : 1))
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("tasbihTarget-\(n)")
+                        .accessibilityAddTraits(on ? .isSelected : [])
+                    }
+                }
+                Text("Swipe left on the main screen to open the Tasbih counter")
+                    .font(.system(size: 12)).foregroundStyle(theme.helpText)
+            }
+
+            ToggleRow(theme: theme, title: "Play audio on this iPhone",
+                      isOn: Binding(get: { store.iosAudioEnabled },
+                                    set: { store.iosAudioEnabled = $0 }))
+                .accessibilityIdentifier("iosAudioToggle")
+            Text("Plays the athan and Quran recitation through the iPhone speaker")
+                .font(.system(size: 12)).foregroundStyle(theme.helpText)
+        }
     }
 
     private var liveServerTime: String {
@@ -251,6 +353,50 @@ struct SettingsSheet: View {
 
     private var locationSection: some View {
         VStack(alignment: .leading, spacing: 10) {
+            Text("City:").font(.system(size: 14, weight: .semibold)).foregroundStyle(theme.labelText)
+            Text(currentCityName)
+                .font(.system(size: 15, weight: .semibold)).foregroundStyle(theme.sheetText)
+                .accessibilityIdentifier("currentCity")
+            PrimaryButton(theme: theme, title: "Use my location",
+                          systemImage: "location.fill", disabled: busy || location.resolving,
+                          accessibility: "locateBtn") {
+                Task {
+                    busy = true
+                    defer { busy = false }
+                    guard let p = await location.resolve() else {
+                        store.showToast(location.error ?? "Location unavailable"); return
+                    }
+                    await applyPlace(p)
+                }
+            }
+            HStack(spacing: 8) {
+                TextField("Enter a city (e.g. Paris)", text: $cityDraft)
+                    .textInputAutocapitalization(.words)
+                    .autocorrectionDisabled()
+                    .submitLabel(.search)
+                    .font(.system(size: 14))
+                    .padding(10)
+                    .background(theme.inputBg).foregroundStyle(theme.inputText)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(theme.inputBorder, lineWidth: 1))
+                    .accessibilityIdentifier("cityField")
+                    .onSubmit { searchCity() }
+                Button { searchCity() } label: {
+                    Image(systemName: "magnifyingglass")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(width: 42, height: 40)
+                        .background(Color(hex: 0x2A6DD1))
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                }
+                .disabled(busy || cityDraft.trimmingCharacters(in: .whitespaces).isEmpty)
+                .accessibilityIdentifier("citySearchBtn")
+            }
+            Text(store.isStandalone
+                 ? "Prayer times are downloaded directly from the ICS link on this iPhone."
+                 : "The new location is applied to the server ICS link.")
+                .font(.system(size: 12)).foregroundStyle(theme.helpText)
+
             Text("ICS link:").font(.system(size: 14, weight: .semibold)).foregroundStyle(theme.labelText)
             TextField("ICS calendar URL", text: $icsDraft)
                 .textInputAutocapitalization(.never)
@@ -296,12 +442,15 @@ struct SettingsSheet: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Athan call audio file:").font(.system(size: 14, weight: .semibold)).foregroundStyle(theme.labelText)
             PickerField(theme: theme,
-                        options: store.audioFiles,
+                        options: store.isStandalone ? ["default_athan.mp3"] : store.audioFiles,
+                        labels: ["default_athan.mp3": "Athan (Nice An-Nour Institute)"],
                         selection: Binding(
                             get: { store.settings["audio_file"] ?? "" },
                             set: { v in Task { await store.updateSetting("audio_file", v) } }))
                 .accessibilityIdentifier("audioFilePicker")
-            Text("Upload your audio files into /audio/athan so they appear in this list.")
+            Text(store.isStandalone
+                 ? "Athan bundled with the app. Connect a server to use your own audio files."
+                 : "Upload your audio files into /audio/athan so they appear in this list.")
                 .font(.system(size: 12)).foregroundStyle(theme.helpText)
 
             Text("Athan Schedule:").font(.system(size: 14, weight: .semibold)).foregroundStyle(theme.labelText)
@@ -313,7 +462,16 @@ struct SettingsSheet: View {
 
     // MARK: - Quran recitation
 
+    @ViewBuilder
     private var quranSection: some View {
+        if store.isStandalone {
+            Text("Quran recitation is streamed from your Athan Center server. Connect a server in General settings to enable it.")
+                .font(.system(size: 13)).foregroundStyle(theme.helpText)
+                .accessibilityIdentifier("quranStandaloneNote")
+        } else { quranServerSection }
+    }
+
+    private var quranServerSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Al Kahf Sourat audio file:").font(.system(size: 14, weight: .semibold)).foregroundStyle(theme.labelText)
             PickerField(theme: theme,
@@ -346,7 +504,28 @@ struct SettingsSheet: View {
 
     // MARK: - Audio control
 
+    @ViewBuilder
     private var audioSection: some View {
+        if store.isStandalone { standaloneAudioSection } else { serverAudioSection }
+    }
+
+    private var standaloneAudioSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            PrimaryButton(theme: theme, title: "Stop playing Athan",
+                          systemImage: "stop.circle", danger: true,
+                          accessibility: "stopAudioBtn") {
+                Task { await store.stopAllAudio() }
+            }
+            PrimaryButton(theme: theme, title: "Athan call now (app)",
+                          systemImage: "speaker.wave.2", accessibility: "testAthanBtn") {
+                store.testAthanWeb()
+            }
+            Text("The athan plays on this iPhone at each enabled prayer time while the app is open. Use notifications (iPhone settings) to be alerted when it is closed.")
+                .font(.system(size: 12)).foregroundStyle(theme.helpText)
+        }
+    }
+
+    private var serverAudioSection: some View {
         let supported = store.audioSupport?.supported ?? true
         return VStack(alignment: .leading, spacing: 12) {
             // Audio output

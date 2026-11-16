@@ -3,10 +3,11 @@ import Foundation
 // MARK: - APIClient — covers every endpoint used by the web app.
 
 enum APIError: Error, LocalizedError {
-    case badURL, http(Int, String?), decode(Error)
+    case badURL, noServer, http(Int, String?), decode(Error)
     var errorDescription: String? {
         switch self {
         case .badURL: return "Invalid server URL"
+        case .noServer: return "No server configured"
         case .http(let code, let msg): return msg ?? "HTTP \(code)"
         case .decode(let e): return "Invalid response: \(e.localizedDescription)"
         }
@@ -20,12 +21,14 @@ actor APIClient {
     init(base: String) {
         self.base = base.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
         let cfg = URLSessionConfiguration.default
-        cfg.timeoutIntervalForRequest = 15
+        cfg.timeoutIntervalForRequest = 8
+        cfg.waitsForConnectivity = false
         cfg.timeoutIntervalForResource = 120
         self.session = URLSession(configuration: cfg)
     }
 
     private func url(_ path: String, query: [URLQueryItem] = []) throws -> URL {
+        guard !base.isEmpty else { throw APIError.noServer }
         var comps = URLComponents(string: base + path)
         if !query.isEmpty { comps?.queryItems = query }
         guard let u = comps?.url else { throw APIError.badURL }
@@ -79,12 +82,12 @@ actor APIClient {
     // MARK: Prayers
 
     func prayers(date: String) async throws -> [Prayer] {
-        (try? decode([Prayer].self, await get("/api/prayers/\(date)"))) ?? []
+        try decode([Prayer].self, await get("/api/prayers/\(date)"))
     }
     func nextPrayer() async throws -> Prayer? {
         let data = try await get("/api/prayers/next/upcoming")
         if String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) == "null" { return nil }
-        return try? decode(Prayer.self, data)
+        return try decode(Prayer.self, data)
     }
     func updatePrayers() async throws -> SuccessMessage {
         try decode(SuccessMessage.self, await post("/api/update-prayers"))
@@ -97,7 +100,7 @@ actor APIClient {
     // MARK: Prayer checks
 
     func prayerChecks(date: String) async throws -> [PrayerCheck] {
-        (try? decode([PrayerCheck].self, await get("/api/prayer-checks/\(date)"))) ?? []
+        try decode([PrayerCheck].self, await get("/api/prayer-checks/\(date)"))
     }
     func prayerChecksRange(year: Int) async throws -> [PrayerCheck] {
         let resp = try decode(ChecksRangeResponse.self, await get("/api/prayer-checks-range", query: [URLQueryItem(name: "year", value: String(year))]))
@@ -115,7 +118,7 @@ actor APIClient {
     // MARK: Daily activities
 
     func dailyActivities(date: String) async throws -> [DailyActivity] {
-        (try? decode([DailyActivity].self, await get("/api/daily-activities/\(date)"))) ?? []
+        try decode([DailyActivity].self, await get("/api/daily-activities/\(date)"))
     }
     @discardableResult
     func toggleDailyActivity(date: String, activity: String) async throws -> Int {
@@ -126,7 +129,7 @@ actor APIClient {
     // MARK: Settings
 
     func settings() async throws -> [String: String] {
-        (try? decode([String: String].self, await get("/api/settings"))) ?? [:]
+        try decode([String: String].self, await get("/api/settings"))
     }
     func setSetting(_ key: String, _ value: String) async throws {
         _ = try await post("/api/settings", body: ["key": key, "value": value])
@@ -145,7 +148,7 @@ actor APIClient {
     // MARK: Schedule matrix
 
     func prayerSchedule() async throws -> [ScheduleEntry] {
-        (try? decode([ScheduleEntry].self, await get("/api/prayer-schedule"))) ?? []
+        try decode([ScheduleEntry].self, await get("/api/prayer-schedule"))
     }
     func setScheduleCell(prayer: String, day: Int, enabled: Bool) async throws {
         _ = try await post("/api/prayer-schedule", body: ["prayer_name": prayer, "day_of_week": day, "enabled": enabled ? 1 : 0])
@@ -157,7 +160,7 @@ actor APIClient {
     // MARK: Mute / silence
 
     func skipNextStatus() async throws -> Bool {
-        (try? decode(SkipStatus.self, await get("/api/skip-next")))?.skip ?? false
+        try decode(SkipStatus.self, await get("/api/skip-next")).skip
     }
     func muteNextAthan() async throws -> SuccessMessage {
         try decode(SuccessMessage.self, await post("/api/skip-next"))
@@ -169,7 +172,7 @@ actor APIClient {
         try decode(SuccessMessage.self, await get("/api/silence/permanent"))
     }
     func mutedWeekdays() async throws -> [MutedWeekday] {
-        (try? decode([MutedWeekday].self, await get("/api/muted-weekdays"))) ?? []
+        try decode([MutedWeekday].self, await get("/api/muted-weekdays"))
     }
     func setMutedWeekday(_ weekday: Int, muted: Bool) async throws {
         _ = try await post("/api/muted-weekdays/\(weekday)", body: ["muted": muted ? 1 : 0])
@@ -199,38 +202,40 @@ actor APIClient {
         try decode(FridayQuranStatus.self, await get("/api/friday-quran-status"))
     }
     func audioFiles() async throws -> [String] {
-        (try? decode([String].self, await get("/api/audio-files"))) ?? []
+        try decode([String].self, await get("/api/audio-files"))
     }
     func quranFiles() async throws -> [String] {
-        (try? decode([String].self, await get("/api/quran-files"))) ?? []
+        try decode([String].self, await get("/api/quran-files"))
     }
     func audioDevices() async throws -> [AudioDevice] {
-        (try? decode(AudioDevicesResponse.self, await get("/api/audio/devices")))?.devices ?? []
+        try decode(AudioDevicesResponse.self, await get("/api/audio/devices")).devices
     }
 
     /// Streaming URLs (AVPlayer) — nonisolated, base is a let.
     nonisolated func athanURL(_ file: String) -> URL? {
+        guard !base.isEmpty else { return nil }
         let e = file.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? file
         return URL(string: base + "/api/audio/" + e)
     }
     nonisolated func quranURL(_ file: String) -> URL? {
+        guard !base.isEmpty else { return nil }
         let e = file.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? file
         return URL(string: base + "/api/quran/" + e)
     }
-    nonisolated func startupURL() -> URL? { URL(string: base + "/audio/system/startup.mp3") }
+    nonisolated func startupURL() -> URL? { base.isEmpty ? nil : URL(string: base + "/audio/system/startup.mp3") }
 
     // MARK: Statistics
 
     func statisticsPrayers() async throws -> [WeekStat] {
-        (try? decode(StatsResponse.self, await get("/api/statistics/prayers")))?.statistics ?? []
+        try decode(StatsResponse.self, await get("/api/statistics/prayers")).statistics
     }
     func statisticsActivities() async throws -> [WeekStat] {
-        (try? decode(StatsResponse.self, await get("/api/statistics/activities")))?.statistics ?? []
+        try decode(StatsResponse.self, await get("/api/statistics/activities")).statistics
     }
     func exportExcel() async throws -> Data {
         try await get("/api/statistics/export-excel")
     }
     func ramadanDates() async throws -> [RamadanDate] {
-        (try? decode(RamadanResponse.self, await get("/api/hijri/ramadan-weeks")))?.ramadan_dates ?? []
+        try decode(RamadanResponse.self, await get("/api/hijri/ramadan-weeks")).ramadan_dates
     }
 }

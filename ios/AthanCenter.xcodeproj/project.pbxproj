@@ -9,16 +9,27 @@
 /* Begin PBXBuildFile section */
 		075218E5A2996A67B58829E6 /* PrayerListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 317825494731B397267FF3C2 /* PrayerListView.swift */; };
 		0E62A930181AEEAEDA1E5A43 /* ServerSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A357D0FC185A298216E3AD2D /* ServerSetupView.swift */; };
+		100017C0CBD528AEB1D06834 /* ICSClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40DBAF2AAB09FC2276C6DDAE /* ICSClient.swift */; };
 		1415C20FE5C9FDC5E098FD77 /* ScheduleMatrixView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9CB5BAF437A5DF6C97BAB29 /* ScheduleMatrixView.swift */; };
+		16E5ABA8C21C080DFA6B37B9 /* AthanCenterStandaloneTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6D7BD14DE0A4BE0BE301D19 /* AthanCenterStandaloneTests.swift */; };
+		215E85B58B4C41258712CA7D /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6354D7B387C6CE40811EFD06 /* NotificationManager.swift */; };
 		30B1F6DCCB51D4CC7AD5711C /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF7C0CFAF599599F4F309894 /* Theme.swift */; };
 		31397D73175A4F1BC9FD06EF /* NextPrayerCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4692A100286580C3B5E67B9A /* NextPrayerCard.swift */; };
+		4B6CCE3B76A0AC27554D71F5 /* LocalStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BCAB872020A089F611B5214 /* LocalStore.swift */; };
 		57F29A15AEF0ED7F6AEF7518 /* AthanCenterApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52FC287D2FC45C3D7DC222C5 /* AthanCenterApp.swift */; };
+		618C494A60E008BA223EBA7F /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A04EACD4898D14EFAD6E859 /* SetupView.swift */; };
 		668312A2BF0B1A9EA0A48E52 /* AppStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57FBDC45FD8A2FFEA41697D /* AppStore.swift */; };
 		69AFD974D110A2DD6445FC8C /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46C106F5020EDADCBE7EE779 /* APIClient.swift */; };
+		723D909592E74C60310B0A77 /* TasbihView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90D7983809D8D296703B0B51 /* TasbihView.swift */; };
 		845596D4A321500B848221AA /* AudioManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 487311D78FA2E80A71E029C2 /* AudioManager.swift */; };
+		873C8F351018C3AEBA28AC6A /* FloatingBars.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FC7CD00A064D24AAE0A0D02 /* FloatingBars.swift */; };
+		8C8AA9C7AC4881DFCE41A09C /* AppStoreOffline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0712B998E2CAB7685385DE6D /* AppStoreOffline.swift */; };
 		9C902AB97389F1D65BD5D237 /* CalendarSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58FACB8AFAB0C3FF5E98A21D /* CalendarSheet.swift */; };
+		A3A55945FA5004AFC8A98311 /* default_athan.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 59C83550E0D7A9D84F7E66A6 /* default_athan.mp3 */; };
 		B1F79470D39643AFC2178474 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 70763AAB11D82B2F2EADE546 /* Assets.xcassets */; };
 		B381837AE8404F20CB6543BE /* SettingsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF51B1C3166E0289BEB1EA25 /* SettingsSheet.swift */; };
+		BF90666572F0C4D91D017F4C /* ActionEditSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3243D70F7FDED3A2930E2ED /* ActionEditSheet.swift */; };
+		D20DD75234505E7D3C2B6404 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9828B5D6638B9A6DBDAF9319 /* LocationManager.swift */; };
 		D96EFB40494ED7C9313C0CB5 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0A24D382175103CEEB17F7 /* ContentView.swift */; };
 		DDCFB5C5A4B87809A6627CDD /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D7ADE5000C30D8E219E0727 /* Models.swift */; };
 		EB2C42DDC556404884228117 /* AthanCenterUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27C570AF77E40794D470F64B /* AthanCenterUITests.swift */; };
@@ -37,23 +48,34 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0712B998E2CAB7685385DE6D /* AppStoreOffline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStoreOffline.swift; sourceTree = "<group>"; };
 		076C8DFC3DEAE1B78C2BA11A /* StatisticsSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticsSheet.swift; sourceTree = "<group>"; };
+		1BCAB872020A089F611B5214 /* LocalStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalStore.swift; sourceTree = "<group>"; };
 		1BD29C1A073F88CBC3B1A676 /* QuickPraySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickPraySheet.swift; sourceTree = "<group>"; };
 		1C0D2B908C15772CE55EBF23 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		27C570AF77E40794D470F64B /* AthanCenterUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AthanCenterUITests.swift; sourceTree = "<group>"; };
 		317825494731B397267FF3C2 /* PrayerListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerListView.swift; sourceTree = "<group>"; };
+		40DBAF2AAB09FC2276C6DDAE /* ICSClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ICSClient.swift; sourceTree = "<group>"; };
 		4692A100286580C3B5E67B9A /* NextPrayerCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NextPrayerCard.swift; sourceTree = "<group>"; };
 		46C106F5020EDADCBE7EE779 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
 		487311D78FA2E80A71E029C2 /* AudioManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioManager.swift; sourceTree = "<group>"; };
 		52FC287D2FC45C3D7DC222C5 /* AthanCenterApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AthanCenterApp.swift; sourceTree = "<group>"; };
 		58FACB8AFAB0C3FF5E98A21D /* CalendarSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarSheet.swift; sourceTree = "<group>"; };
+		59C83550E0D7A9D84F7E66A6 /* default_athan.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = default_athan.mp3; sourceTree = "<group>"; };
+		6354D7B387C6CE40811EFD06 /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
+		6FC7CD00A064D24AAE0A0D02 /* FloatingBars.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingBars.swift; sourceTree = "<group>"; };
 		70763AAB11D82B2F2EADE546 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		90D7983809D8D296703B0B51 /* TasbihView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TasbihView.swift; sourceTree = "<group>"; };
 		91B42FAAD6309126C3471536 /* AthanCenter.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = AthanCenter.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9828B5D6638B9A6DBDAF9319 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
+		9A04EACD4898D14EFAD6E859 /* SetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupView.swift; sourceTree = "<group>"; };
 		9D7ADE5000C30D8E219E0727 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		9F9AB209453C1E239E0B4489 /* AthanCenterUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = AthanCenterUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A357D0FC185A298216E3AD2D /* ServerSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerSetupView.swift; sourceTree = "<group>"; };
 		AB0A24D382175103CEEB17F7 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		B3243D70F7FDED3A2930E2ED /* ActionEditSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionEditSheet.swift; sourceTree = "<group>"; };
 		B57FBDC45FD8A2FFEA41697D /* AppStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStore.swift; sourceTree = "<group>"; };
+		B6D7BD14DE0A4BE0BE301D19 /* AthanCenterStandaloneTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AthanCenterStandaloneTests.swift; sourceTree = "<group>"; };
 		BF51B1C3166E0289BEB1EA25 /* SettingsSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsSheet.swift; sourceTree = "<group>"; };
 		CF7C0CFAF599599F4F309894 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		E9CB5BAF437A5DF6C97BAB29 /* ScheduleMatrixView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleMatrixView.swift; sourceTree = "<group>"; };
@@ -65,6 +87,7 @@
 			children = (
 				70763AAB11D82B2F2EADE546 /* Assets.xcassets */,
 				52FC287D2FC45C3D7DC222C5 /* AthanCenterApp.swift */,
+				59C83550E0D7A9D84F7E66A6 /* default_athan.mp3 */,
 				1C0D2B908C15772CE55EBF23 /* Info.plist */,
 				EA73693E10362AE62AF5402A /* Core */,
 				C68D7A9E041D8A2E640D01B8 /* Views */,
@@ -84,15 +107,19 @@
 		C68D7A9E041D8A2E640D01B8 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				B3243D70F7FDED3A2930E2ED /* ActionEditSheet.swift */,
 				58FACB8AFAB0C3FF5E98A21D /* CalendarSheet.swift */,
 				AB0A24D382175103CEEB17F7 /* ContentView.swift */,
+				6FC7CD00A064D24AAE0A0D02 /* FloatingBars.swift */,
 				4692A100286580C3B5E67B9A /* NextPrayerCard.swift */,
 				317825494731B397267FF3C2 /* PrayerListView.swift */,
 				1BD29C1A073F88CBC3B1A676 /* QuickPraySheet.swift */,
 				E9CB5BAF437A5DF6C97BAB29 /* ScheduleMatrixView.swift */,
 				A357D0FC185A298216E3AD2D /* ServerSetupView.swift */,
 				BF51B1C3166E0289BEB1EA25 /* SettingsSheet.swift */,
+				9A04EACD4898D14EFAD6E859 /* SetupView.swift */,
 				076C8DFC3DEAE1B78C2BA11A /* StatisticsSheet.swift */,
+				90D7983809D8D296703B0B51 /* TasbihView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -109,6 +136,7 @@
 		CEA6CCA68345A42FAE00781F /* AthanCenterUITests */ = {
 			isa = PBXGroup;
 			children = (
+				B6D7BD14DE0A4BE0BE301D19 /* AthanCenterStandaloneTests.swift */,
 				27C570AF77E40794D470F64B /* AthanCenterUITests.swift */,
 			);
 			path = AthanCenterUITests;
@@ -119,8 +147,13 @@
 			children = (
 				46C106F5020EDADCBE7EE779 /* APIClient.swift */,
 				B57FBDC45FD8A2FFEA41697D /* AppStore.swift */,
+				0712B998E2CAB7685385DE6D /* AppStoreOffline.swift */,
 				487311D78FA2E80A71E029C2 /* AudioManager.swift */,
+				40DBAF2AAB09FC2276C6DDAE /* ICSClient.swift */,
+				1BCAB872020A089F611B5214 /* LocalStore.swift */,
+				9828B5D6638B9A6DBDAF9319 /* LocationManager.swift */,
 				9D7ADE5000C30D8E219E0727 /* Models.swift */,
+				6354D7B387C6CE40811EFD06 /* NotificationManager.swift */,
 				CF7C0CFAF599599F4F309894 /* Theme.swift */,
 			);
 			path = Core;
@@ -205,6 +238,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B1F79470D39643AFC2178474 /* Assets.xcassets in Resources */,
+				A3A55945FA5004AFC8A98311 /* default_athan.mp3 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -216,19 +250,28 @@
 			buildActionMask = 2147483647;
 			files = (
 				69AFD974D110A2DD6445FC8C /* APIClient.swift in Sources */,
+				BF90666572F0C4D91D017F4C /* ActionEditSheet.swift in Sources */,
 				668312A2BF0B1A9EA0A48E52 /* AppStore.swift in Sources */,
+				8C8AA9C7AC4881DFCE41A09C /* AppStoreOffline.swift in Sources */,
 				57F29A15AEF0ED7F6AEF7518 /* AthanCenterApp.swift in Sources */,
 				845596D4A321500B848221AA /* AudioManager.swift in Sources */,
 				9C902AB97389F1D65BD5D237 /* CalendarSheet.swift in Sources */,
 				D96EFB40494ED7C9313C0CB5 /* ContentView.swift in Sources */,
+				873C8F351018C3AEBA28AC6A /* FloatingBars.swift in Sources */,
+				100017C0CBD528AEB1D06834 /* ICSClient.swift in Sources */,
+				4B6CCE3B76A0AC27554D71F5 /* LocalStore.swift in Sources */,
+				D20DD75234505E7D3C2B6404 /* LocationManager.swift in Sources */,
 				DDCFB5C5A4B87809A6627CDD /* Models.swift in Sources */,
 				31397D73175A4F1BC9FD06EF /* NextPrayerCard.swift in Sources */,
+				215E85B58B4C41258712CA7D /* NotificationManager.swift in Sources */,
 				075218E5A2996A67B58829E6 /* PrayerListView.swift in Sources */,
 				F3588C02541461FE2A9BC1AA /* QuickPraySheet.swift in Sources */,
 				1415C20FE5C9FDC5E098FD77 /* ScheduleMatrixView.swift in Sources */,
 				0E62A930181AEEAEDA1E5A43 /* ServerSetupView.swift in Sources */,
 				B381837AE8404F20CB6543BE /* SettingsSheet.swift in Sources */,
+				618C494A60E008BA223EBA7F /* SetupView.swift in Sources */,
 				F5CCD229309C3ED7DEFDBF9B /* StatisticsSheet.swift in Sources */,
+				723D909592E74C60310B0A77 /* TasbihView.swift in Sources */,
 				30B1F6DCCB51D4CC7AD5711C /* Theme.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -237,6 +280,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				16E5ABA8C21C080DFA6B37B9 /* AthanCenterStandaloneTests.swift in Sources */,
 				EB2C42DDC556404884228117 /* AthanCenterUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -336,7 +380,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
-				MARKETING_VERSION = 5.1.0;
+				MARKETING_VERSION = 6.0.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -401,7 +445,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
-				MARKETING_VERSION = 5.1.0;
+				MARKETING_VERSION = 6.0.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;

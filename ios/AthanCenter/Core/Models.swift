@@ -12,7 +12,7 @@ enum AC {
     ]
     static let weekdayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] // prayer_schedule: 0=Mon
     static let weekdayNamesSun = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"] // JS getDay(): 0=Sun
-    static let appVersion = "© 2026 Athan Center | v5.1.0"
+    static let appVersion = "© 2026 Athan Center | v6.0.0"
     static let defaultServer = "http://192.168.1.50:7777"
 
     /// getPrayerName() from app.js — normalizes ICS event names for display.
@@ -34,6 +34,8 @@ struct Prayer: Codable, Identifiable, Hashable {
     let date: String
     let prayer_name: String
     let prayer_time: String
+    /// Stable identity: locally-parsed (ICS) prayers have no DB id, so `id` can't be used in ForEach.
+    var rowKey: String { "\(date)|\(prayer_name)|\(prayer_time)" }
 }
 
 struct PrayerCheck: Codable, Hashable {
@@ -56,7 +58,7 @@ struct ScheduleEntry: Codable, Identifiable, Hashable {
     var id: Int?
     let prayer_name: String
     let day_of_week: Int   // 0 = Monday … 6 = Sunday
-    let enabled: Int
+    var enabled: Int
 }
 
 struct ServerTime: Codable {
@@ -167,7 +169,7 @@ enum DateUtil {
     /// Whole days between two dates (midnight-aligned), like getDayDifference().
     static func dayDifference(_ from: Date, _ to: Date) -> Int {
         guard let a = parseDate(dateString(from)), let b = parseDate(dateString(to)) else { return 0 }
-        return Int(b.timeIntervalSince(a) / 86400)
+        return Int((b.timeIntervalSince(a) / 86400).rounded())   // rounded: DST days are 23h/25h
     }
 
     /// ISO week label "YYYY-Www" like the web app's statistics.

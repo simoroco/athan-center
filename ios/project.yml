@@ -7,7 +7,7 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.0"
-    MARKETING_VERSION: "5.1.0"
+    MARKETING_VERSION: "6.0.0"
     CURRENT_PROJECT_VERSION: "1"
     TARGETED_DEVICE_FAMILY: "1"
 targets:
@@ -27,6 +27,7 @@ targets:
           - UIInterfaceOrientationPortrait
         NSAppTransportSecurity:
           NSAllowsArbitraryLoads: true
+        NSLocationWhenInUseUsageDescription: Your location is used once to download prayer times for your city.
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.athancenter.app

@@ -87,12 +87,35 @@ struct StatisticsSheet: View {
     }
 
     private func load() async {
-        async let pTask = store.api.statisticsPrayers()
-        async let aTask = store.api.statisticsActivities()
-        async let rTask = store.api.ramadanDates()
-        prayerStats = (try? await pTask) ?? []
-        activityStats = (try? await aTask) ?? []
-        ramadanWeeks = Set(((try? await rTask) ?? []).map { isoWeek($0.gregorian_date) })
+        if store.isStandalone || !store.connected {
+            let stats = store.localWeeklyStats()
+            prayerStats = stats.prayers
+            activityStats = stats.activities
+            ramadanWeeks = []
+        } else {
+            async let pTask = store.api.statisticsPrayers()
+            async let aTask = store.api.statisticsActivities()
+            async let rTask = store.api.ramadanDates()
+            prayerStats = (try? await pTask) ?? []
+            let serverActs = (try? await aTask) ?? []
+            ramadanWeeks = Set(((try? await rTask) ?? []).map { isoWeek($0.gregorian_date) })
+            // Merge iOS-only custom actions into the activity stats.
+            let localActs = store.localWeeklyStats().activities
+            var merged: [String: WeekStat] = Dictionary(serverActs.map { ($0.week, $0) }, uniquingKeysWith: { _, new in new })
+            for l in localActs {
+                if var s = merged[l.week] {
+                    merged[l.week] = WeekStat(
+                        week: s.week, year: s.year, weekNumber: s.weekNumber,
+                        not_done: s.not_done, on_time: s.on_time + l.on_time,
+                        late: s.late + l.late,
+                        total_prayers: s.total_prayers,
+                        total_activities: (s.total_activities ?? 0) + (l.total_activities ?? 0),
+                        on_time_percent: s.on_time_percent,
+                        total_completed_percent: s.total_completed_percent)
+                }
+            }
+            activityStats = merged.values.sorted { $0.week < $1.week }
+        }
         loading = false
     }
 
@@ -133,7 +156,7 @@ private struct StatsSection: View {
 
     private func zeroFilled() -> [WeekStat] {
         guard !stats.isEmpty else { return [] }
-        let byWeek = Dictionary(uniqueKeysWithValues: stats.map { ($0.week, $0) })
+        let byWeek = Dictionary(stats.map { ($0.week, $0) }, uniquingKeysWith: { _, new in new })
         var out: [WeekStat] = []
         // Walk 104 weeks back from the latest stat week.
         guard let lastDate = weekStartDate(stats.last!.week) else { return stats }
@@ -318,7 +341,7 @@ private struct FullscreenChartView: View {
 
     private var filled: [WeekStat] {
         guard let last = stats.last else { return stats }
-        let byWeek = Dictionary(uniqueKeysWithValues: stats.map { ($0.week, $0) })
+        let byWeek = Dictionary(stats.map { ($0.week, $0) }, uniquingKeysWith: { _, new in new })
         let parts = last.week.split(separator: "-")
         guard parts.count == 2, let y = Int(parts[0]), let w = Int(parts[1].dropFirst()) else { return stats }
         var comps = DateComponents(); comps.weekOfYear = w; comps.yearForWeekOfYear = y; comps.weekday = 2

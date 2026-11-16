@@ -10,6 +10,11 @@ final class AudioManager: ObservableObject {
     @Published var isPlaying = false
     @Published var bannerText: String? = nil      // nil = hidden
     @Published var playingIsPrayer = false        // prayer audio keeps card pulsing
+    @Published var serverPlaying = false          // audio currently playing on the Pi (stop = API call)
+
+    /// True while ANY audio (local playback or server playback) is active → a stop control must be visible.
+    var isActive: Bool { isPlaying || serverPlaying || bannerText != nil }
+    private var serverBannerTask: Task<Void, Never>?
 
     private var player: AVPlayer?
     private var endObserver: NSObjectProtocol?
@@ -18,12 +23,12 @@ final class AudioManager: ObservableObject {
 
     init() {
         try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
-        try? AVAudioSession.sharedInstance().setActive(true)
     }
 
     /// Play a remote audio URL. `limit30s` trims like the web 30s previews.
     func play(url: URL, banner: String, limit30s: Bool = false, isPrayer: Bool = false) {
         stopLocal()
+        try? AVAudioSession.sharedInstance().setActive(true)
         bannerText = banner
         playingIsPrayer = isPrayer
         let item = AVPlayerItem(url: url)
@@ -63,6 +68,8 @@ final class AudioManager: ObservableObject {
 
     /// Stop only local playback (equivalent of audioElement.pause()).
     func stopLocal() {
+        serverBannerTask?.cancel()
+        serverPlaying = false
         stopTimer?.cancel()
         player?.pause()
         cleanupPlayer()
@@ -79,4 +86,23 @@ final class AudioManager: ObservableObject {
     }
 
     func hideBanner() { bannerText = nil }
+
+    /// Banner for audio played by the server; auto-clears (the Pi gives no end-of-playback event).
+    func showServerBanner(_ text: String, duration: TimeInterval) {
+        serverPlaying = true
+        bannerText = text
+        serverBannerTask?.cancel()
+        serverBannerTask = Task { [weak self] in
+            try? await Task.sleep(nanoseconds: UInt64(duration * 1_000_000_000))
+            guard !Task.isCancelled else { return }
+            self?.clearServerBanner()
+        }
+    }
+
+    func clearServerBanner() {
+        serverBannerTask?.cancel()
+        guard serverPlaying else { return }
+        serverPlaying = false
+        if !isPlaying { bannerText = nil }
+    }
 }

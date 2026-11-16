@@ -159,6 +159,83 @@ final class AthanCenterUITests: XCTestCase {
     }
 }
 
+// MARK: - Server-mode stability / regression tests
+
+extension AthanCenterUITests {
+
+    private func dayValue(_ app: XCUIApplication) -> String {
+        (app.otherElements["prayersList"].value as? String) ?? ""
+    }
+
+    private func day(offset: Int) -> String {
+        let f = DateFormatter(); f.dateFormat = "yyyy-MM-dd"; f.locale = Locale(identifier: "en_US_POSIX")
+        return f.string(from: Calendar.current.date(byAdding: .day, value: offset, to: Date())!)
+    }
+
+    /// Root cause of "navigation buttons sometimes dead": loadDay() was ignored while a load was in flight,
+    /// leaving the previous date's data on screen. Rapid taps must always converge on the last date.
+    func testRapidNavigationConverges() throws {
+        let app = launch()
+        XCTAssertTrue(waitFor(app.buttons["nextDay"], 20))
+        XCTAssertEqual(dayValue(app), day(offset: 0))
+        for _ in 0..<6 { app.buttons["nextDay"].tap() }
+        sleep(3)
+        XCTAssertEqual(dayValue(app), day(offset: 6))
+        for _ in 0..<6 { app.buttons["prevDay"].tap() }
+        sleep(3)
+        XCTAssertEqual(dayValue(app), day(offset: 0))
+        XCTAssertFalse(app.buttons["todayBtn"].isEnabled)
+        app.buttons["nextDay"].tap()
+        app.buttons["nextDay"].tap()
+        app.buttons["todayBtn"].tap()
+        sleep(2)
+        XCTAssertEqual(dayValue(app), day(offset: 0))
+    }
+
+    /// Navigation must keep working after every sheet has been presented and dismissed.
+    func testNavigationWorksAfterSheets() throws {
+        let app = launch()
+        XCTAssertTrue(waitFor(app.buttons["calendarBtn"], 20))
+        app.buttons["calendarBtn"].tap()
+        XCTAssertTrue(waitFor(app.buttons["closeCalendar"]))
+        app.buttons["closeCalendar"].tap()
+        sleep(1)
+        app.buttons["settingsBtn"].tap()
+        XCTAssertTrue(waitFor(app.buttons["closeSettings"]))
+        app.buttons["closeSettings"].tap()
+        sleep(1)
+        app.buttons["historyBtn"].tap()
+        XCTAssertTrue(waitFor(app.buttons["closeStatistics"]))
+        app.buttons["closeStatistics"].tap()
+        sleep(1)
+        app.buttons["nextDay"].tap()
+        sleep(2)
+        XCTAssertEqual(dayValue(app), day(offset: 1))
+        app.buttons["prevDay"].tap()
+        sleep(2)
+        XCTAssertEqual(dayValue(app), day(offset: 0))
+    }
+
+    /// Unreachable server → app must boot from its cache within seconds (no 60s hang, no empty list).
+    func testOfflineBootUsesCache() throws {
+        let online = launch()
+        XCTAssertTrue(waitFor(online.buttons["prayer-Dohr"], 20))
+        sleep(3)   // let the day be cached
+        online.terminate()
+
+        let app = XCUIApplication()
+        app.launchArguments = ["-serverBase", "http://127.0.0.1:9"]
+        app.launch()
+        XCTAssertTrue(waitFor(app.buttons["prayer-Dohr"], 15), "Offline boot must show cached prayers")
+        XCTAssertTrue(app.buttons["nextDay"].exists)
+        app.terminate()
+
+        // Restore the real server for the following tests.
+        let back = launch()
+        XCTAssertTrue(waitFor(back.buttons["prayer-Dohr"], 20))
+    }
+}
+
 // MARK: - Visual regression: capture every screen as attachments.
 
 extension AthanCenterUITests {
