@@ -1,6 +1,6 @@
-name: AthanCenter
+name: MasjidCenter
 options:
-  bundleIdPrefix: com.athancenter
+  bundleIdPrefix: com.masjidcenter
   deploymentTarget:
     iOS: "18.0"
   createIntermediateGroups: true
@@ -11,16 +11,16 @@ settings:
     CURRENT_PROJECT_VERSION: "1"
     TARGETED_DEVICE_FAMILY: "1"
 targets:
-  AthanCenter:
+  MasjidCenter:
     type: application
     platform: iOS
     deploymentTarget: "18.0"
     sources:
-      - path: AthanCenter
+      - path: MasjidCenter
     info:
-      path: AthanCenter/Info.plist
+      path: MasjidCenter/Info.plist
       properties:
-        CFBundleDisplayName: Athan Center
+        CFBundleDisplayName: Masjid Center
         UILaunchScreen:
           UILaunchScreen_Generation: true
         UISupportedInterfaceOrientations:
@@ -30,21 +30,21 @@ targets:
         NSLocationWhenInUseUsageDescription: Your location is used once to download prayer times for your city.
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.athancenter.app
+        PRODUCT_BUNDLE_IDENTIFIER: com.masjidcenter.app
         GENERATE_INFOPLIST_FILE: NO
         DEVELOPMENT_TEAM: "HZ947F72NK"
         CODE_SIGN_STYLE: Automatic
         ENABLE_PREVIEWS: YES
-  AthanCenterUITests:
+  MasjidCenterUITests:
     type: bundle.ui-testing
     platform: iOS
     deploymentTarget: "18.0"
     sources:
-      - path: AthanCenterUITests
+      - path: MasjidCenterUITests
     dependencies:
-      - target: AthanCenter
+      - target: MasjidCenter
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.athancenter.app.uitests
-        TEST_TARGET_NAME: AthanCenter
+        PRODUCT_BUNDLE_IDENTIFIER: com.masjidcenter.app.uitests
+        TEST_TARGET_NAME: MasjidCenter
         GENERATE_INFOPLIST_FILE: YES

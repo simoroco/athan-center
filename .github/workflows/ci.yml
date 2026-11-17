@@ -23,26 +23,26 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-        cache-dependency-path: web/athan-center/package-lock.json
+        cache-dependency-path: web/masjid-center/package-lock.json
     
     - name: Install dependencies
       run: |
-        cd web/athan-center
+        cd web/masjid-center
         npm ci
     
     - name: Check code style
       run: |
-        cd web/athan-center
+        cd web/masjid-center
         echo "Code style check passed"
     
     - name: Build application
       run: |
-        cd web/athan-center
+        cd web/masjid-center
         echo "Build successful"
     
     - name: Run basic tests
       run: |
-        cd web/athan-center
+        cd web/masjid-center
         echo "Tests passed"
 
   docker-build:
@@ -57,12 +57,12 @@ jobs:
     
     - name: Build Docker image
       run: |
-        cd web/athan-center
-        docker build -t athan-center:test .
+        cd web/masjid-center
+        docker build -t masjid-center:test .
     
     - name: Test Docker image
       run: |
-        docker run --rm athan-center:test node --version
+        docker run --rm masjid-center:test node --version
 
   lint:
     runs-on: ubuntu-latest
@@ -78,10 +78,10 @@ jobs:
     
     - name: Install dependencies
       run: |
-        cd web/athan-center
+        cd web/masjid-center
         npm ci
     
     - name: Lint check
       run: |
-        cd web/athan-center
+        cd web/masjid-center
         echo "Linting passed"

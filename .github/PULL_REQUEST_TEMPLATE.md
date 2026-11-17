@@ -63,4 +63,4 @@ Add any additional notes, concerns, or questions for reviewers here.
 
 ---
 
-**Thank you for contributing to Athan Center!** 🤲
+**Thank you for contributing to Masjid Center!** 🤲

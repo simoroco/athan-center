@@ -1,7 +1,7 @@
-# 🕌 Athan Center
+# 🕌 Masjid Center
 
 <p align="center">
-  <img src="./web/athan-center/public/logo.png" alt="Athan Center Logo" width="150"/>
+  <img src="./web/masjid-center/public/logo.png" alt="Masjid Center Logo" width="150"/>
 </p>
 
 <p align="center">
@@ -9,11 +9,11 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/simoroco/athan-center/stargazers"><img src="https://img.shields.io/github/stars/simoroco/athan-center?style=flat-square" alt="GitHub stars"></a>
-  <a href="https://github.com/simoroco/athan-center/issues"><img src="https://img.shields.io/github/issues/simoroco/athan-center?style=flat-square" alt="GitHub issues"></a>
-  <a href="https://github.com/simoroco/athan-center/network/members"><img src="https://img.shields.io/github/forks/simoroco/athan-center?style=flat-square" alt="GitHub forks"></a>
-  <a href="https://github.com/simoroco/athan-center/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-GPLv3-green?style=flat-square" alt="License"></a>
-  <a href="https://hub.docker.com/r/simoroco/athan-center"><img src="https://img.shields.io/docker/pulls/simoroco/athan-center?style=flat-square" alt="Docker pulls"></a>
+  <a href="https://github.com/simoroco/masjid-center/stargazers"><img src="https://img.shields.io/github/stars/simoroco/masjid-center?style=flat-square" alt="GitHub stars"></a>
+  <a href="https://github.com/simoroco/masjid-center/issues"><img src="https://img.shields.io/github/issues/simoroco/masjid-center?style=flat-square" alt="GitHub issues"></a>
+  <a href="https://github.com/simoroco/masjid-center/network/members"><img src="https://img.shields.io/github/forks/simoroco/masjid-center?style=flat-square" alt="GitHub forks"></a>
+  <a href="https://github.com/simoroco/masjid-center/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-GPLv3-green?style=flat-square" alt="License"></a>
+  <a href="https://hub.docker.com/r/simoroco/masjid-center"><img src="https://img.shields.io/docker/pulls/simoroco/masjid-center?style=flat-square" alt="Docker pulls"></a>
   <img src="https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen?style=flat-square" alt="Node version">
   <img src="https://img.shields.io/badge/platform-linux%20%7C%20macos%20%7C%20windows-blue?style=flat-square" alt="Platform">
 </p>
@@ -27,7 +27,7 @@
 
 **May Allah accept your prayers** 🤲 **لا تنسى أخاك في دعائك**
 
-Athan Center provides accurate prayer times with automatic Athan playback through a beautiful web interface. Optimized for Raspberry Pi and Docker, it works seamlessly on Linux, macOS, and Windows.
+Masjid Center provides accurate prayer times with automatic Athan playback through a beautiful web interface. Optimized for Raspberry Pi and Docker, it works seamlessly on Linux, macOS, and Windows.
 
 ⭐ **Star this repo** if it helps your mosque or home • 🐛 **Report issues** • 🤝 **Contribute**
 
@@ -61,33 +61,33 @@ Athan Center provides accurate prayer times with automatic Athan playback throug
 ## ⚡ Quick Start
 
 ```bash
-git clone https://github.com/simoroco/athan-center.git
-cd athan-center/web/athan-center
+git clone https://github.com/simoroco/masjid-center.git
+cd masjid-center/web/masjid-center
 npm install
 npm run dev
 ```
 
 - Default UI: [http://localhost:7777](http://localhost:7777/) or [https://localhost:7778](https://localhost:7778/)
 - Configure location via [Prayer WebCal ICS](https://prayerwebcal.dsultan.com/)
-- Docker image: [simoroco/athan-center](https://hub.docker.com/r/simoroco/athan-center)
+- Docker image: [simoroco/masjid-center](https://hub.docker.com/r/simoroco/masjid-center)
 
 ```bash
-docker pull simoroco/athan-center:latest
+docker pull simoroco/masjid-center:latest
 # OR publish from your fork
-docker push simoroco/athan-center:latest
+docker push simoroco/masjid-center:latest
 ```
 
 ## 🖥️ Demo
 
 <p align="center">
-  <img src="./Screens.gif" alt="Athan Center Demo" width="100%"/>
+  <img src="./Screens.gif" alt="Masjid Center Demo" width="100%"/>
 </p>
 
-> **Note:** The animated demo shows the main features of Athan Center including prayer times display, settings configuration, and audio controls.
+> **Note:** The animated demo shows the main features of Masjid Center including prayer times display, settings configuration, and audio controls.
 
 ## 🚀 Production Deployment
 
-Deploy Athan Center on **Linux, macOS, or Windows** using Docker Hub.
+Deploy Masjid Center on **Linux, macOS, or Windows** using Docker Hub.
 
 ### 📋 Prerequisites
 
@@ -101,11 +101,11 @@ Deploy Athan Center on **Linux, macOS, or Windows** using Docker Hub.
 Use the **automatic deployment script** that works on all platforms:
 
 ```bash
-mkdir athan-center && cd athan-center
+mkdir masjid-center && cd masjid-center
 
 # Download deployment files
-wget https://raw.githubusercontent.com/simoroco/athan-center/main/web/athan-center/deploy_prod/docker-compose.yml
-wget https://raw.githubusercontent.com/simoroco/athan-center/main/web/athan-center/deploy_prod/start.sh
+wget https://raw.githubusercontent.com/simoroco/masjid-center/main/web/masjid-center/deploy_prod/docker-compose.yml
+wget https://raw.githubusercontent.com/simoroco/masjid-center/main/web/masjid-center/deploy_prod/start.sh
 chmod +x start.sh
 
 # Start (auto-detects OS and configures accordingly)
@@ -152,7 +152,7 @@ All endpoints are available on `http://IP:7777/api` and `https://IP:7778/api`.
 | Next prayer text | `/next-prayer-text?lang=FR` | Returns next prayer in natural language (FR/EN) |
 | Permanent silence | `/silence/permanent` | Disables **all athans for the whole week** AND **Al Kahf Sourat on Friday** in one call (GET, no auth) |
 
-For complete API documentation, see [API.md](./web/athan-center/docs/API.md).
+For complete API documentation, see [API.md](./web/masjid-center/docs/API.md).
 
 ## 📄 License
 
@@ -170,7 +170,7 @@ By using, modifying, or redistributing this software, you accept the terms of th
 ## 🌍 Community & Roadmap
 
 - ⭐️ Star the repo if it helps your mosque or home.
-- 🐛 [Open an issue](https://github.com/simoroco/athan-center/issues) for bugs or feature ideas.
+- 🐛 [Open an issue](https://github.com/simoroco/masjid-center/issues) for bugs or feature ideas.
 - 🙌 Check the roadmap and “good first issue” label to start contributing.
 
 🤲🙏 Don't forget your brother in your du'a 🤲🙏 لا تنسى أخاك في دعائك 🤲🙏

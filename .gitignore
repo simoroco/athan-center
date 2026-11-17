@@ -1,8 +1,8 @@
 # ===== Data directory structure =====
 # Keep the folder structure (via .gitkeep), exclude actual data files
 
-.athan-center.log
-.athan-center.pid
+.masjid-center.log
+.masjid-center.pid
 
 # Development files (moved to dev/)
 dev/

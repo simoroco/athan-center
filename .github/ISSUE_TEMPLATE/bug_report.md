@@ -1,6 +1,6 @@
 ---
 name: Bug Report
-about: Create a report to help us improve Athan Center
+about: Create a report to help us improve Masjid Center
 title: '[BUG] '
 labels: bug
 assignees: ''
@@ -35,7 +35,7 @@ If applicable, add screenshots to help explain your problem.
 - OS: [e.g., Ubuntu 22.04, macOS 13, Windows 11]
 - Node.js version: [e.g., 18.17.0]
 - Docker version (if applicable): [e.g., 24.0.5]
-- Athan Center version: [e.g., 3.0.1]
+- Masjid Center version: [e.g., 3.0.1]
 
 **Browser (if UI issue):**
 - Browser: [e.g., Chrome, Firefox, Safari]
@@ -63,4 +63,4 @@ If applicable, paste relevant logs here:
 - [ ] I have searched existing issues to avoid duplicates
 - [ ] I have provided all requested information
 - [ ] I have included relevant logs/screenshots
-- [ ] I am using the latest version of Athan Center
+- [ ] I am using the latest version of Masjid Center

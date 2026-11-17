@@ -1,6 +1,6 @@
 ---
 name: Feature Request
-about: Suggest an idea for Athan Center
+about: Suggest an idea for Masjid Center
 title: '[FEATURE] '
 labels: enhancement
 assignees: ''
@@ -49,7 +49,7 @@ Where would this feature be used?
 ## 🌟 Priority
 
 How important is this feature to you?
-- [ ] Critical - Blocking my use of Athan Center
+- [ ] Critical - Blocking my use of Masjid Center
 - [ ] High - Would significantly improve my experience
 - [ ] Medium - Nice to have
 - [ ] Low - Just an idea
