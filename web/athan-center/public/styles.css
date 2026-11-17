@@ -1125,6 +1125,90 @@ header h1 {
     background-color: #fff5f5 !important;
 }
 
+/* City search suggestions (Location settings) */
+.city-suggestions {
+    display: none;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    z-index: 50;
+    margin-top: 4px;
+    background: #ffffff;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+    max-height: 230px;
+    overflow-y: auto;
+}
+
+.city-suggestions.open {
+    display: block;
+}
+
+.city-suggestion {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    width: 100%;
+    padding: 9px 12px;
+    border: none;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+    font-size: 0.92rem;
+    color: #212529;
+}
+
+.city-suggestion:hover,
+.city-suggestion:focus {
+    background: #f1f5ff;
+    outline: none;
+}
+
+.city-suggestion .city-pin {
+    color: #2a6dd1;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.city-suggestion .city-name {
+    display: block;
+    font-weight: 600;
+}
+
+.city-suggestion .city-sub {
+    display: block;
+    color: #6c757d;
+    font-size: 0.78rem;
+    margin-top: 1px;
+}
+
+.city-suggestions .city-empty {
+    padding: 9px 12px;
+    color: #6c757d;
+    font-size: 0.85rem;
+}
+
+body.dark-mode .city-suggestions {
+    background: #2d3748;
+    border-color: #4a5568;
+}
+
+body.dark-mode .city-suggestion {
+    color: #e4e6eb;
+}
+
+body.dark-mode .city-suggestion:hover,
+body.dark-mode .city-suggestion:focus {
+    background: #3a4556;
+}
+
+body.dark-mode .city-suggestion .city-sub,
+body.dark-mode .city-suggestions .city-empty {
+    color: #a0aec0;
+}
+
 .ics-missing-label {
     color: #dc3545 !important;
     font-weight: bold;

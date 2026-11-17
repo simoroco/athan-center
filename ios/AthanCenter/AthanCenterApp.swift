@@ -3,6 +3,7 @@ import SwiftUI
 @main
 struct AthanCenterApp: App {
     @StateObject private var store = AppStore()
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {
         WindowGroup {
@@ -15,6 +16,10 @@ struct AthanCenterApp: App {
             }
             .environmentObject(store)
             .preferredColorScheme(store.theme.dark ? .dark : .light)
+            .task { store.requestLocationPermissionOnce() }
+            .onChange(of: scenePhase) { _, phase in
+                if phase == .active { store.requestLocationPermissionOnce() }
+            }
         }
     }
 }

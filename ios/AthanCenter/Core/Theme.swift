@@ -129,9 +129,22 @@ struct GlassBox: ViewModifier {
     }
 }
 
+struct GlassCircle: ViewModifier {
+    let theme: AppTheme
+    func body(content: Content) -> some View {
+        content
+            .background(theme.componentBg)
+            .clipShape(Circle())
+            .overlay(Circle().strokeBorder(theme.componentBorder, lineWidth: 1))
+    }
+}
+
 extension View {
     func glassBox(_ theme: AppTheme, radius: CGFloat = 8) -> some View {
         modifier(GlassBox(theme: theme, radius: radius))
+    }
+    func glassCircle(_ theme: AppTheme) -> some View {
+        modifier(GlassCircle(theme: theme))
     }
 }
 

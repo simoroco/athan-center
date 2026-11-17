@@ -78,6 +78,14 @@ struct StatisticsSheet: View {
             }
         }
         .task { await load() }
+        // The main-screen toast is hidden behind this sheet.
+        .overlay(alignment: .bottom) {
+            if let toast = store.toast {
+                ToastCapsule(text: toast)
+                    .padding(.bottom, 10)
+            }
+        }
+        .animation(.easeOut, value: store.toast)
         .sheet(item: $fullscreen) { fs in
             FullscreenChartView(theme: theme, title: fs.title, stats: fs.data, ramadanWeeks: ramadanWeeks)
         }

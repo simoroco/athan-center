@@ -1,5 +1,6 @@
 import Foundation
 import CoreLocation
+import MapKit
 
 // MARK: - Place — resolved city (name + coordinates + IANA timezone)
 
@@ -26,6 +27,14 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
         super.init()
         manager.delegate = self
         manager.desiredAccuracy = kCLLocationAccuracyKilometer   // city-level is enough
+    }
+
+    /// Asks for location access once. iOS only shows the prompt while the
+    /// status is undetermined, so later calls are silent no-ops — the
+    /// permission is re-asked only through `resolve()` (the locate button).
+    func requestPermissionIfNeeded() {
+        guard manager.authorizationStatus == .notDetermined else { return }
+        manager.requestWhenInUseAuthorization()
     }
 
     /// Asks permission if needed, then resolves the current position to a city. nil on any failure (see `error`).
@@ -100,4 +109,54 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
         return Place(city: mark.locality ?? q, lat: loc.coordinate.latitude, lon: loc.coordinate.longitude,
                      tz: mark.timeZone?.identifier ?? TimeZone.current.identifier)
     }
+}
+
+// MARK: - CitySearchCompleter — live city suggestions while typing
+// (MKLocalSearchCompleter throttles/rate-limits requests internally).
+
+@MainActor
+final class CitySearchCompleter: NSObject, ObservableObject {
+    @Published private(set) var results: [MKLocalSearchCompletion] = []
+    private let completer = MKLocalSearchCompleter()
+
+    override init() {
+        super.init()
+        completer.resultTypes = .address
+        completer.delegate = self
+    }
+
+    /// Feed every keystroke; suggestions appear from 2 characters.
+    func update(_ query: String) {
+        let q = query.trimmingCharacters(in: .whitespaces)
+        if q.count < 2 {
+            completer.queryFragment = ""
+            results = []
+        } else if completer.queryFragment != q {
+            completer.queryFragment = q
+        }
+    }
+
+    func clear() {
+        completer.queryFragment = ""
+        results = []
+    }
+
+    /// Resolves a picked suggestion into a Place (coordinates + timezone).
+    static func resolve(_ completion: MKLocalSearchCompletion) async -> Place? {
+        let request = MKLocalSearch.Request(completion: completion)
+        guard let item = try? await MKLocalSearch(request: request).start().mapItems.first,
+              let loc = item.placemark.location else { return nil }
+        return Place(city: item.placemark.locality ?? completion.title,
+                     lat: loc.coordinate.latitude, lon: loc.coordinate.longitude,
+                     tz: item.placemark.timeZone?.identifier ?? TimeZone.current.identifier)
+    }
+}
+
+extension CitySearchCompleter: MKLocalSearchCompleterDelegate {
+    nonisolated func completerDidUpdateResults(_ completer: MKLocalSearchCompleter) {
+        let found = completer.results
+        Task { @MainActor in self.results = found }
+    }
+
+    nonisolated func completer(_ completer: MKLocalSearchCompleter, didFailWithError error: Error) {}
 }

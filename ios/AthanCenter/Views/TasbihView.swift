@@ -2,8 +2,8 @@ import SwiftUI
 import UIKit
 
 // MARK: - Tasbih — fullscreen dhikr counter (iOS-only feature).
-// Tap anywhere: +1, haptic + flash. At the target: long vibration and the
-// Tasbih activity of the day is auto-checked (blue).
+// Tap anywhere: +1, haptic + flash. At the target: long vibration, the Tasbih
+// activity of the day is auto-checked (blue) and the page closes itself.
 
 struct TasbihView: View {
     @EnvironmentObject var store: AppStore
@@ -18,10 +18,11 @@ struct TasbihView: View {
 
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            // Mostly-opaque dim: the main page only hints through underneath.
+            Color.black.opacity(0.82).ignoresSafeArea()
             // Subtle radial glow matching the app's gold accent.
             RadialGradient(
-                colors: [Color(hex: 0x1A1200), Color.black],
+                colors: [Color(hex: 0xD4AF37).opacity(0.14), Color.clear],
                 center: .center, startRadius: 40, endRadius: 420)
                 .ignoresSafeArea()
 
@@ -40,7 +41,7 @@ struct TasbihView: View {
                             .frame(width: 46, height: 46)
                     }
                     .padding(.leading, 14)
-                    .padding(.top, 22)
+                    .padding(.top, 52)
                     .accessibilityIdentifier("tasbihClose")
                     Spacer()
                 }
@@ -64,11 +65,7 @@ struct TasbihView: View {
 
                 Spacer()
 
-                if done {
-                    Text("Counter resets automatically")
-                        .font(.system(size: 13))
-                        .foregroundStyle(.white.opacity(0.3))
-                } else {
+                if !done {
                     Text("Tap anywhere to count")
                         .font(.system(size: 13))
                         .foregroundStyle(.white.opacity(0.3))
@@ -92,10 +89,9 @@ struct TasbihView: View {
         if count >= target {
             done = true
             store.completeTasbih()
-            // Auto-reset after a short celebration pause.
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
-                count = 0
-                done = false
+            // Short celebration pause, then the page closes itself.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.3) {
+                onClose?() ?? dismiss()
             }
             // Long completion vibration.
             let g = UINotificationFeedbackGenerator()

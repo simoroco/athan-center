@@ -1323,6 +1323,27 @@ function setupEventListeners() {
         }
     });
 
+    // City search → suggestions → ICS link (Location settings)
+    const citySearchInput = document.getElementById('citySearch');
+    const citySuggestions = document.getElementById('citySuggestions');
+    if (citySearchInput && citySuggestions) {
+        let citySearchTimer = null;
+        citySearchInput.addEventListener('input', () => {
+            const q = citySearchInput.value.trim();
+            clearTimeout(citySearchTimer);
+            if (q.length < 2) { hideCitySuggestions(); return; }
+            citySearchTimer = setTimeout(() => searchCities(q), 350);
+        });
+        citySearchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') hideCitySuggestions();
+        });
+        document.addEventListener('click', (e) => {
+            if (!citySuggestions.contains(e.target) && e.target !== citySearchInput) {
+                hideCitySuggestions();
+            }
+        });
+    }
+
     // Update audio file
     document.getElementById('audioFile').addEventListener('change', async (e) => {
         try {
@@ -2712,6 +2733,117 @@ function startCountdown() {
             }
         }
     }, 1000);
+}
+
+// --- City → ICS link (Location settings) ---
+// Same public pipeline PrayerWebCal itself runs in the browser:
+// Nominatim for suggestions, GeoNames then TimeZoneDB for the timezone,
+// then the ics_url is generated and saved via the existing apply button.
+
+function hideCitySuggestions() {
+    const box = document.getElementById('citySuggestions');
+    if (box) { box.classList.remove('open'); box.innerHTML = ''; }
+}
+
+async function searchCities(q) {
+    const box = document.getElementById('citySuggestions');
+    if (!box) return;
+    try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&addressdetails=1&limit=5`);
+        const places = await res.json();
+        renderCitySuggestions(places);
+    } catch (e) {
+        console.error('City search failed:', e);
+        box.innerHTML = '';
+        const d = document.createElement('div');
+        d.className = 'city-empty';
+        d.textContent = 'Search unavailable — check your connection';
+        box.appendChild(d);
+        box.classList.add('open');
+    }
+}
+
+function renderCitySuggestions(places) {
+    const box = document.getElementById('citySuggestions');
+    if (!box) return;
+    box.innerHTML = '';
+    if (!places.length) {
+        const d = document.createElement('div');
+        d.className = 'city-empty';
+        d.textContent = 'No city found';
+        box.appendChild(d);
+        box.classList.add('open');
+        return;
+    }
+    places.forEach(place => {
+        const name = (place.address && place.address[place.addresstype]) || 'Unknown';
+        const x = Math.round(parseFloat(place.lat) * 1000) / 1000;
+        const y = Math.round(parseFloat(place.lon) * 1000) / 1000;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'city-suggestion';
+        const pin = document.createElement('span');
+        pin.className = 'city-pin';
+        pin.innerHTML = '<svg class="icon"><use href="#i-pin"/></svg>';
+        const txt = document.createElement('span');
+        const nm = document.createElement('span');
+        nm.className = 'city-name';
+        nm.textContent = name;
+        const sub = document.createElement('span');
+        sub.className = 'city-sub';
+        sub.textContent = `${place.display_name} · ${x}° N, ${y}° E`;
+        txt.appendChild(nm);
+        txt.appendChild(sub);
+        btn.appendChild(pin);
+        btn.appendChild(txt);
+        btn.addEventListener('click', () => pickCity(name, x, y));
+        box.appendChild(btn);
+    });
+    box.classList.add('open');
+}
+
+async function pickCity(name, x, y) {
+    const input = document.getElementById('citySearch');
+    hideCitySuggestions();
+    if (input) { input.value = name; input.disabled = true; }
+    try {
+        const tz = await resolveTimezone(x, y);
+        if (!tz) {
+            alert(`Can't find timezone for ${name}`);
+            return;
+        }
+        document.getElementById('icsUrl').value = buildIcsUrl(name, x, y, tz);
+        // Same save flow as "Apply ICS link configuration".
+        document.getElementById('updateLocationBtn').click();
+    } finally {
+        if (input) input.disabled = false;
+    }
+}
+
+async function resolveTimezone(x, y) {
+    try {
+        const res = await fetchWithTimeout(`https://api.geonames.org/timezoneJSON?lat=${x}&lng=${y}&username=dsultanr`, 5000);
+        const d = await res.json();
+        if (d && d.timezoneId) return d.timezoneId;
+    } catch (e) { console.warn('GeoNames failed:', e); }
+    try {
+        const res = await fetchWithTimeout(`https://api.timezonedb.com/v2.1/get-time-zone?key=TXX5G17GA9J9&format=json&by=position&lat=${x}&lng=${y}`, 5000);
+        const d = await res.json();
+        if (d && d.zoneName) return d.zoneName;
+    } catch (e) { console.warn('TimeZoneDB failed:', e); }
+    return null;
+}
+
+function fetchWithTimeout(url, ms) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), ms);
+    return fetch(url, { signal: controller.signal }).finally(() => clearTimeout(id));
+}
+
+// Same URL format the server (and the iOS app) stores and fetches.
+function buildIcsUrl(city, x, y, tz) {
+    const c = encodeURIComponent(city.replace(/ /g, '_'));
+    return `https://prayerwebcal.dsultan.com/ics/${c}/cq=0:csr=0:ct=0:ee=0:qs=0:srs=0:ss=0:sus=0:ts=0:tz=${encodeURIComponent(tz)}:x=${x}:y=${y}`;
 }
 
 // Check if ICS configuration exists

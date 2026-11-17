@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Athan Center - Prayer Times</title>
+    <title>Athan Center</title>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="styles.css">
@@ -184,6 +184,14 @@
 
                 <div class="settings-section">
                     <h3><svg class="icon"><use href="#i-pin"/></svg> Location</h3>
+                    <div class="form-group" style="position: relative;">
+                        <label for="citySearch">City:</label>
+                        <input type="text" id="citySearch" class="input-field" placeholder="Search your city (e.g. Paris)" autocomplete="off">
+                        <div id="citySuggestions" class="city-suggestions"></div>
+                        <p class="help-text">
+                            Pick a suggestion: the ICS link below is filled and applied automatically.
+                        </p>
+                    </div>
                     <div class="form-group">
                         <label id="icsLabel">ICS link:</label>
                         <input type="text" id="icsUrl" class="input-field" placeholder="ICS calendar URL">
@@ -428,7 +436,7 @@
                         <svg class="icon"><use href="#i-alert"/></svg> This will reset ALL settings to their default values
                     </p>
                 </div>
-                <p class="app-version">© 2026 Athan Center | v6.0.0</p>
+                <p class="app-version">© 2026 Athan Center | v6.5.0</p>
             </div>
         </div>
 

@@ -12,6 +12,7 @@ struct ActionEditSheet: View {
     @State private var name: String = ""
     @State private var icon: String = "📿"
     @State private var counter: Bool = false
+    @State private var confirmDelete = false
 
     private let icons = ["📿", "🤲", "📖", "🕌", "🌙", "⭐", "💧", "🧎", "🙏", "❤️", "✨", "🌟", "☀️", "🕯️", "📿", "🚶"]
 
@@ -64,8 +65,7 @@ struct ActionEditSheet: View {
 
                     if editing != nil {
                         Button(role: .destructive) {
-                            if let e = editing { store.removeAction(id: e.id) }
-                            dismiss()
+                            confirmDelete = true
                         } label: {
                             Label("Delete this action", systemImage: "trash")
                                 .font(.system(size: 15, weight: .semibold))
@@ -74,6 +74,29 @@ struct ActionEditSheet: View {
                         }
                         .buttonStyle(.bordered)
                         .accessibilityIdentifier("actionDelete")
+                    }
+
+                    // Built-in actions hidden via the jiggle X can be restored here.
+                    if editing == nil && !store.local.snap.hiddenBuiltins.isEmpty {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Hidden actions")
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundStyle(theme.muted)
+                            ForEach(store.local.snap.hiddenBuiltins, id: \.self) { n in
+                                HStack(spacing: 10) {
+                                    if let bi = AC.activities.first(where: { $0.name == n }) {
+                                        Image(bi.icon).resizable().frame(width: 26, height: 26)
+                                    }
+                                    Text(n).foregroundStyle(theme.textPrimary)
+                                    Spacer()
+                                    Button("Restore") { store.restoreBuiltin(id: n) }
+                                        .font(.system(size: 14, weight: .semibold))
+                                        .foregroundStyle(theme.textAccent)
+                                        .accessibilityIdentifier("restore-\(n)")
+                                }
+                                .padding(.vertical, 6)
+                            }
+                        }
                     }
 
                     Spacer(minLength: 8)
@@ -97,6 +120,15 @@ struct ActionEditSheet: View {
                 if let e = editing {
                     name = e.name; icon = e.icon; counter = e.counter
                 }
+            }
+            .alert("Delete this action?", isPresented: $confirmDelete) {
+                Button("Delete", role: .destructive) {
+                    if let e = editing { store.removeAction(id: e.id) }
+                    dismiss()
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("This custom action and its history will be deleted.")
             }
         }
         .presentationDetents([.medium])

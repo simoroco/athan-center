@@ -137,14 +137,34 @@ final class AthanCenterUITests: XCTestCase {
 
     func testActivityToggle() throws {
         let app = launch()
-        XCTAssertTrue(waitFor(app.buttons["activity-Tasbih"], 20))
-        let cell = app.buttons["activity-Tasbih"]
+        XCTAssertTrue(waitFor(app.buttons["activity-Coran"], 20))
+        let cell = app.buttons["activity-Coran"]
         cell.tap()
         usleep(700_000)
         cell.tap()
         usleep(700_000)
         cell.tap() // back to unchecked — leave server state clean
         XCTAssertTrue(cell.exists)
+    }
+
+    // MARK: 7b — Unchecked Tasbih tile opens the counter without checking it
+
+    func testTasbihTileOpensCounter() throws {
+        let app = launch()
+        let cell = app.buttons["activity-Tasbih"]
+        XCTAssertTrue(waitFor(cell, 20))
+        // Live-server state varies day to day: uncheck the tile first if needed.
+        for _ in 0..<2 where (cell.value as? String) != "not done" {
+            cell.tap(); usleep(700_000)
+        }
+        XCTAssertEqual(cell.value as? String, "not done", "Precondition: Tasbih unchecked")
+        cell.tap()
+        let screen = app.otherElements["tasbihScreen"]
+        XCTAssertTrue(screen.waitForExistence(timeout: 5),
+                      "Tapping the unchecked Tasbih tile must open the counter")
+        XCTAssertEqual(cell.value as? String, "not done",
+                       "Opening the counter must not check the action")
+        app.buttons["tasbihClose"].tap()
     }
 
     // MARK: 8 — Mute next athan button exists and is actionable

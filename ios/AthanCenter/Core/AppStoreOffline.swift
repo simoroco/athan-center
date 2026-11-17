@@ -12,7 +12,10 @@ extension AppStore {
     var local: LocalStore { LocalStore.shared }
 
     var isStandalone: Bool { local.snap.mode == .standalone }
-    var standaloneReady: Bool { !local.snap.icsUrl.isEmpty && !local.snap.prayers.isEmpty }
+    /// Standalone can boot as soon as prayer times exist locally — they may
+    /// come from an ICS fetch OR from a previous server-mode session (cache).
+    /// The ICS link itself can be configured later in Settings → Location.
+    var standaloneReady: Bool { !local.snap.prayers.isEmpty }
     /// Whether first-launch setup (location OR server) is complete.
     var setupComplete: Bool { isStandalone ? standaloneReady : configured }
 
@@ -27,7 +30,9 @@ extension AppStore {
         local.snap.icsUrl = url
         local.snap.lat = lat
         local.snap.lon = lon
-        local.snap.prayers = map
+        // Merge, don't replace: keep prayer times cached from a previous
+        // server-mode session (past days are absent from the ICS feed).
+        local.snap.prayers.merge(map) { _, new in new }
         local.snap.lastIcsFetch = todayStr
         local.save()
         serverBase = ""                    // no server in standalone mode
@@ -45,7 +50,7 @@ extension AppStore {
             local.snap.icsUrl = url
             local.snap.lat = lat
             local.snap.lon = lon
-            local.snap.prayers = map
+            local.snap.prayers.merge(map) { _, new in new }
             local.snap.lastIcsFetch = todayStr
             local.save()
             settings["ics_url"] = url
@@ -62,6 +67,12 @@ extension AppStore {
     /// Leave the server and go back to the standalone (on-device) mode.
     func switchToStandalone() {
         local.snap.mode = .standalone
+        // Keep the city shown on the server side (real name, or geocoded ICS coords).
+        let n = serverCityName
+        if local.snap.cityName.isEmpty,
+           !n.isEmpty, n != "Unknown", n != "—", n != "Loading..." {
+            local.snap.cityName = n
+        }
         local.save()
         serverBase = ""
         connected = false
@@ -78,9 +89,18 @@ extension AppStore {
     /// Standalone boot — no network calls except ICS refresh.
     func bootStandalone() async {
         booted = true
+        // Continuity after a server-mode session: adopt the ICS link that was
+        // synced from the server so standalone can still refresh prayer times.
+        if local.snap.icsUrl.isEmpty,
+           let synced = local.snap.settings["ics_url"], !synced.isEmpty {
+            local.snap.icsUrl = synced
+            local.save()
+        }
         settings = local.snap.settings
         settings["ics_url"] = local.snap.icsUrl     // shown in the Location settings field
         schedule = local.snap.schedule
+        mutedWeekdays = local.snap.mutedWeekdays
+        ramadanDates = Set(local.snap.ramadanDates)
         prayers = local.snap.prayers[selectedDateStr] ?? []
         prayerChecks = local.snap.checks[selectedDateStr] ?? [:]
         activityChecks = local.snap.activities[selectedDateStr] ?? [:]
@@ -110,7 +130,7 @@ extension AppStore {
             Calendar.current.date(byAdding: .day, value: 14, to: serverNow) ?? serverNow)
         guard force || stale || maxDate < horizon else { return }
         if let map = try? await ICSClient.fetch(urlString: local.snap.icsUrl), !map.isEmpty {
-            local.snap.prayers = map
+            local.snap.prayers.merge(map) { _, new in new }
             local.snap.lastIcsFetch = todayStr
             local.save()
             await loadDay()
@@ -220,6 +240,23 @@ extension AppStore {
         rescheduleNotifications()
     }
 
+    /// Cache the whole year's prayer checks so local stats and the Quick Pray
+    /// view stay complete when the server later becomes unreachable or the
+    /// app goes standalone (server data keeps working locally).
+    func cacheAllChecksFromServer() async {
+        guard !isStandalone, connected else { return }
+        let year = Calendar.current.component(.year, from: serverNow)
+        var all = (try? await api.prayerChecksRange(year: year)) ?? []
+        if Calendar.current.component(.month, from: serverNow) == 1 {
+            all += (try? await api.prayerChecksRange(year: year - 1)) ?? []
+        }
+        guard !all.isEmpty else { return }
+        for c in all where AC.mainPrayers.contains(c.prayer_name) {
+            local.snap.checks[c.date, default: [:]][c.prayer_name] = c.checked
+        }
+        local.save()
+    }
+
     /// Reconnect: push queued writes, then reload — server is authoritative.
     func resyncFromServer() async {
         for op in local.snap.pendingOps {
@@ -261,7 +298,7 @@ extension AppStore {
     func checkAthanLocal() {
         guard isStandalone || !connected else { return }
         guard settings["athan_enabled"] == "1" else { return }
-        guard settings["ios_audio_enabled"] != "0" else { return }
+        guard iosAudioEnabled else { return }   // merged with iOS notifications
         guard !skipNext else { return }
         let now = currentTimeStr
         let dow = DateUtil.scheduleDay(serverNow)
@@ -290,6 +327,30 @@ extension AppStore {
         set { UserDefaults.standard.set(newValue, forKey: "lastAthanLocal") }
     }
     func markPlayed(_ key: String) { lastPlayedPrayerKey = key }
+
+    /// Plays the bundled Quran recitation — full local playback, no server.
+    func playLocalQuran() {
+        let file = settings["friday_quran_file"] ?? AC.bundledQurans[0]
+        let name = file.replacingOccurrences(of: ".mp3", with: "")
+        let url = Bundle.main.url(forResource: name, withExtension: "mp3")
+            ?? Bundle.main.url(forResource: AC.bundledQurans[0].replacingOccurrences(of: ".mp3", with: ""), withExtension: "mp3")
+        guard let url else { showToast("Quran audio is not bundled"); return }
+        audio.play(url: url, banner: "Al Kahf Sourat recitation playing")
+    }
+
+    /// Standalone/offline Friday recitation trigger (runs in the 5s loop) —
+    /// same "Friday at HH:MM" schedule the server applies, played locally.
+    func checkQuranLocal() {
+        guard isStandalone || !connected else { return }
+        guard settings["friday_quran_enabled"] == "1" else { return }
+        guard iosAudioEnabled else { return }
+        guard DateUtil.jsDay(serverNow) == 5 else { return }   // Friday
+        guard (settings["friday_quran_time"] ?? "07:00") == currentTimeStr else { return }
+        let key = "\(todayStr)-quran-local"
+        guard key != lastPlayedPrayerKey else { return }
+        markPlayed(key)
+        playLocalQuran()
+    }
 
     // MARK: Standalone mute banners
 
@@ -347,15 +408,28 @@ extension AppStore {
 
     // MARK: Custom actions (iOS only — local persistence)
 
-    /// All actions shown in the row: built-in 3 + user customs.
+    /// All actions shown in the row: built-ins (minus hidden ones) + user
+    /// customs, in the user's drag-and-drop order when one was saved.
     var allActions: [ActionItem] {
-        var list = AC.activities.map {
-            ActionItem(id: $0.name, name: $0.name, icon: $0.icon, isAsset: true, counter: false, builtin: true)
-        }
+        var list = AC.activities
+            .filter { !local.snap.hiddenBuiltins.contains($0.name) }
+            .map {
+                ActionItem(id: $0.name, name: $0.name, icon: $0.icon, isAsset: true, counter: false, builtin: true)
+            }
         list += local.snap.customActions.map {
             ActionItem(id: $0.id, name: $0.name, icon: $0.icon, isAsset: false, counter: $0.counter, builtin: false)
         }
-        return list
+        let order = local.snap.actionOrder
+        guard !order.isEmpty else { return list }
+        let pos = Dictionary(uniqueKeysWithValues: order.enumerated().map { ($0.element, $0.offset) })
+        return list.sorted { (pos[$0.id] ?? Int.max) < (pos[$1.id] ?? Int.max) }
+    }
+
+    /// Persists a full tile order (built-ins + customs) set by drag & drop.
+    func setActionOrder(_ ids: [String]) {
+        local.snap.actionOrder = ids
+        local.save()
+        objectWillChange.send()
     }
 
     func addAction(_ a: TrackedAction) {
@@ -375,6 +449,16 @@ extension AppStore {
     }
 
     func removeAction(id: String) {
+        // Built-in tile → hide it; its history stays in the snapshot so a
+        // restore brings the data back. Custom → delete + purge its entries.
+        if AC.activities.contains(where: { $0.name == id }) {
+            if !local.snap.hiddenBuiltins.contains(id) {
+                local.snap.hiddenBuiltins.append(id)
+            }
+            local.save()
+            objectWillChange.send()
+            return
+        }
         local.snap.customActions.removeAll { $0.id == id }
         for (date, _) in local.snap.activities {
             local.snap.activities[date]?.removeValue(forKey: id)
@@ -384,13 +468,18 @@ extension AppStore {
         objectWillChange.send()
     }
 
-    func moveAction(from: IndexSet, to: Int) {
-        var arr = local.snap.customActions
-        arr.move(fromOffsets: from, toOffset: to)
-        for (i, _) in arr.enumerated() { arr[i].order = 10 + i }
-        local.snap.customActions = arr
+    func restoreBuiltin(id: String) {
+        local.snap.hiddenBuiltins.removeAll { $0 == id }
         local.save()
         objectWillChange.send()
+    }
+
+    /// List-style reorder (kept for List .onMove); drag & drop goes through
+    /// setActionOrder directly.
+    func moveAction(from: IndexSet, to: Int) {
+        var ids = allActions.map(\.id)
+        ids.move(fromOffsets: from, toOffset: to)
+        setActionOrder(ids)
     }
 
     /// Tri-state toggle for an action (builtin or custom non-counter).
@@ -479,12 +568,14 @@ extension AppStore {
 
     // MARK: iOS audio output
 
-    /// Whether the iPhone itself should play athan/quran (independent of server/web output).
+    /// Whether the iPhone itself should play athan/quran. Merged with iOS
+    /// notifications: enabling them means the iPhone alerts AND plays the
+    /// enabled audio itself.
     var iosAudioEnabled: Bool {
-        get { settings["ios_audio_enabled"] ?? "1" == "1" }
+        get { local.snap.notificationsEnabled }
         set {
-            settings["ios_audio_enabled"] = newValue ? "1" : "0"
-            local.snap.settings["ios_audio_enabled"] = settings["ios_audio_enabled"]
+            notificationsEnabled = newValue
+            local.snap.settings["ios_audio_enabled"] = newValue ? "1" : "0"
             local.save()
         }
     }

@@ -1,5 +1,6 @@
 import SwiftUI
 import UniformTypeIdentifiers
+import MapKit
 
 // MARK: - SettingsSheet — replicates the settings modal (accordion sections).
 
@@ -17,6 +18,7 @@ struct SettingsSheet: View {
     @State private var busy = false
     @State private var cityDraft = ""
     @StateObject private var location = LocationManager()
+    @StateObject private var citySearch = CitySearchCompleter()
 
     private var theme: AppTheme { store.theme }
 
@@ -57,7 +59,6 @@ struct SettingsSheet: View {
                     accordion(3, "Quran recitation", "book") { quranSection }
                     accordion(4, "Audio control", "speaker.wave.1") { audioSection }
                     accordion(5, "Backup & Restore", "externaldrive") { backupSection }
-                    accordion(6, "iPhone", "iphone") { iosSection }
 
                     Text(AC.appVersion)
                         .font(.system(size: 13)).foregroundStyle(theme.muted)
@@ -88,14 +89,21 @@ struct SettingsSheet: View {
             }
         }
         .overlay(alignment: .bottom) {
-            // The main-screen banner is hidden behind this sheet: audio must be stoppable from here too.
-            if store.audio.isActive, let text = store.audio.bannerText {
-                AudioStopBar(theme: theme, text: text,
-                             stopId: "stopAudioBannerSheet", barId: "audioBannerSheet")
-                    .padding(.bottom, 10)
+            VStack(spacing: 10) {
+                // The main-screen toast is hidden behind this sheet too.
+                if let toast = store.toast {
+                    ToastCapsule(text: toast)
+                }
+                // The main-screen banner is hidden behind this sheet: audio must be stoppable from here too.
+                if store.audio.isActive, let text = store.audio.bannerText {
+                    AudioStopBar(theme: theme, text: text,
+                                 stopId: "stopAudioBannerSheet", barId: "audioBannerSheet")
+                }
             }
+            .padding(.bottom, 10)
         }
         .animation(.spring(response: 0.3), value: store.audio.bannerText)
+        .animation(.easeOut, value: store.toast)
         .fileImporter(isPresented: $showImporter, allowedContentTypes: [.commaSeparatedText, .plainText]) { result in
             if case .success(let url) = result {
                 guard url.startAccessingSecurityScopedResource() else { return }
@@ -129,7 +137,7 @@ struct SettingsSheet: View {
 
     private var currentCityName: String {
         if store.isStandalone { return store.local.snap.cityName.isEmpty ? "—" : store.local.snap.cityName }
-        return store.updateInfo?.city_name ?? "—"
+        return store.serverCityName
     }
 
     private func applyPlace(_ p: Place) async {
@@ -140,6 +148,7 @@ struct SettingsSheet: View {
 
     private func searchCity() {
         guard !busy else { return }
+        citySearch.clear()
         Task {
             busy = true
             defer { busy = false }
@@ -148,6 +157,20 @@ struct SettingsSheet: View {
             }
             await applyPlace(p)
             cityDraft = ""
+        }
+    }
+
+    private func pickSuggestion(_ c: MKLocalSearchCompletion) {
+        guard !busy else { return }
+        Task {
+            busy = true
+            defer { busy = false }
+            guard let p = await CitySearchCompleter.resolve(c) else {
+                store.showToast("City not found"); return
+            }
+            citySearch.clear()
+            cityDraft = ""
+            await applyPlace(p)
         }
     }
 
@@ -197,6 +220,22 @@ struct SettingsSheet: View {
 
     private var generalSection: some View {
         VStack(alignment: .leading, spacing: 10) {
+            // Operating mode, stated clearly at the top.
+            HStack(spacing: 8) {
+                Image(systemName: store.isStandalone ? "iphone" : "wifi")
+                Text(store.isStandalone
+                     ? "Standalone app"
+                     : "Sync: \(store.serverDisplayHost)")
+                    .font(.system(size: 14, weight: .bold))
+            }
+            .foregroundStyle(store.isStandalone ? theme.textAccent : .white)
+            .padding(.horizontal, 12).padding(.vertical, 10)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(store.isStandalone ? AnyShapeStyle(theme.inputBg) : AnyShapeStyle(theme.brandGradient)))
+            .accessibilityIdentifier("modeLabel")
+
             infoCard
 
             ToggleRow(theme: theme, title: "Dark mode",
@@ -207,14 +246,18 @@ struct SettingsSheet: View {
             Text("Enable dark mode for a comfortable viewing experience in low-light environments")
                 .font(.system(size: 13)).foregroundStyle(theme.helpText)
 
+            tasbihGoalPicker
+
             // iOS-specific: server address (the web app is served same-origin).
             VStack(alignment: .leading, spacing: 6) {
-                Text("Server address").font(.system(size: 14, weight: .semibold)).foregroundStyle(theme.labelText)
+                Text("Sync with Athan Center Server").font(.system(size: 14, weight: .semibold)).foregroundStyle(theme.labelText)
                 HStack(spacing: 8) {
                     TextField("http://192.168.1.50:7777", text: $serverDraft)
                         .keyboardType(.URL)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
+                        .submitLabel(.done)
+                        .onSubmit { hideKeyboard() }
                         .font(.system(size: 14))
                         .padding(10)
                         .background(theme.inputBg)
@@ -231,8 +274,8 @@ struct SettingsSheet: View {
                         .accessibilityIdentifier("applyServerBtn")
                 }
                 Text(store.isStandalone
-                     ? "Optional: connect to your Athan Center server (Raspberry Pi) to sync data and play on its speakers."
-                     : "HTTP address of your Athan Center server (Raspberry Pi)")
+                     ? "Optional: connect to Athan Center Server to sync data and have Athan on its speakers."
+                     : "HTTP address of Athan Center Server (optional)")
                     .font(.system(size: 12)).foregroundStyle(theme.helpText)
                 if !store.isStandalone {
                     Button("Disconnect — use standalone mode") { store.switchToStandalone() }
@@ -255,7 +298,7 @@ struct SettingsSheet: View {
                 infoRow("calendar", "Last prayer times update:", store.local.snap.lastIcsFetch)
                 infoRow("wifi.slash", "Mode:", "Standalone (no server)")
             } else {
-            infoRow("mappin", "City:", store.updateInfo?.city_name ?? "Loading...")
+            infoRow("mappin", "City:", store.serverCityName)
             infoRow("calendar", "Server date:", store.serverTimeInfo?.date ?? "--/--/----")
             TimelineView(.periodic(from: .now, by: 1)) { _ in
                 infoRow("clock", "Server time:", liveServerTime)
@@ -275,45 +318,29 @@ struct SettingsSheet: View {
         .sheetCard(theme)
     }
 
-    // MARK: - iPhone (iOS-only features)
+    // MARK: - iOS-only: Tasbih goal (moved into General)
 
-    private var iosSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            ToggleRow(theme: theme, title: "Athan notifications",
-                      isOn: Binding(get: { store.notificationsEnabled },
-                                    set: { store.notificationsEnabled = $0 }))
-                .accessibilityIdentifier("notificationsToggle")
-            Text("Sends a local notification at each enabled prayer time, even when the app is closed")
-                .font(.system(size: 12)).foregroundStyle(theme.helpText)
-
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Tasbih goal").font(.system(size: 14, weight: .semibold)).foregroundStyle(theme.labelText)
-                HStack(spacing: 8) {
-                    ForEach([10, 11, 33, 99, 100, 101], id: \.self) { n in
-                        let on = store.tasbihTarget == n
-                        Button { store.tasbihTarget = n } label: {
-                            Text("\(n)")
-                                .font(.system(size: 15, weight: .bold).monospacedDigit())
-                                .frame(maxWidth: .infinity, minHeight: 40)
-                                .foregroundStyle(on ? .white : theme.sheetText)
-                                .background(on ? AnyShapeStyle(theme.brandGradient) : AnyShapeStyle(theme.inputBg))
-                                .clipShape(RoundedRectangle(cornerRadius: 8))
-                                .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(theme.inputBorder, lineWidth: on ? 0 : 1))
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityIdentifier("tasbihTarget-\(n)")
-                        .accessibilityAddTraits(on ? .isSelected : [])
+    private var tasbihGoalPicker: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Tasbih goal").font(.system(size: 14, weight: .semibold)).foregroundStyle(theme.labelText)
+            HStack(spacing: 8) {
+                ForEach([10, 11, 33, 99, 100, 101], id: \.self) { n in
+                    let on = store.tasbihTarget == n
+                    Button { store.tasbihTarget = n } label: {
+                        Text("\(n)")
+                            .font(.system(size: 15, weight: .bold).monospacedDigit())
+                            .frame(maxWidth: .infinity, minHeight: 40)
+                            .foregroundStyle(on ? .white : theme.sheetText)
+                            .background(on ? AnyShapeStyle(theme.brandGradient) : AnyShapeStyle(theme.inputBg))
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                            .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(theme.inputBorder, lineWidth: on ? 0 : 1))
                     }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("tasbihTarget-\(n)")
+                    .accessibilityAddTraits(on ? .isSelected : [])
                 }
-                Text("Swipe left on the main screen to open the Tasbih counter")
-                    .font(.system(size: 12)).foregroundStyle(theme.helpText)
             }
-
-            ToggleRow(theme: theme, title: "Play audio on this iPhone",
-                      isOn: Binding(get: { store.iosAudioEnabled },
-                                    set: { store.iosAudioEnabled = $0 }))
-                .accessibilityIdentifier("iosAudioToggle")
-            Text("Plays the athan and Quran recitation through the iPhone speaker")
+            Text("Swipe left on the main screen to open the Tasbih counter")
                 .font(.system(size: 12)).foregroundStyle(theme.helpText)
         }
     }
@@ -380,7 +407,7 @@ struct SettingsSheet: View {
                     .clipShape(RoundedRectangle(cornerRadius: 8))
                     .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(theme.inputBorder, lineWidth: 1))
                     .accessibilityIdentifier("cityField")
-                    .onSubmit { searchCity() }
+                    .onSubmit { searchCity(); hideKeyboard() }
                 Button { searchCity() } label: {
                     Image(systemName: "magnifyingglass")
                         .font(.system(size: 15, weight: .semibold))
@@ -392,6 +419,37 @@ struct SettingsSheet: View {
                 .disabled(busy || cityDraft.trimmingCharacters(in: .whitespaces).isEmpty)
                 .accessibilityIdentifier("citySearchBtn")
             }
+            .onChange(of: cityDraft) { _, q in citySearch.update(q) }
+            if !citySearch.results.isEmpty {
+                VStack(spacing: 0) {
+                    ForEach(Array(citySearch.results.prefix(5).enumerated()), id: \.offset) { i, r in
+                        Button { pickSuggestion(r) } label: {
+                            HStack(spacing: 8) {
+                                Image(systemName: "mappin.circle.fill")
+                                    .foregroundStyle(Color(hex: 0x2A6DD1))
+                                VStack(alignment: .leading, spacing: 1) {
+                                    Text(r.title)
+                                        .font(.system(size: 14, weight: .medium))
+                                        .foregroundStyle(theme.sheetText)
+                                    if !r.subtitle.isEmpty {
+                                        Text(r.subtitle)
+                                            .font(.system(size: 12))
+                                            .foregroundStyle(theme.helpText)
+                                    }
+                                }
+                                .lineLimit(1)
+                                Spacer()
+                            }
+                            .padding(.horizontal, 10).padding(.vertical, 8)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("citySuggestion-\(i)")
+                    }
+                }
+                .background(theme.inputBg)
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+                .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(theme.inputBorder, lineWidth: 1))
+            }
             Text(store.isStandalone
                  ? "Prayer times are downloaded directly from the ICS link on this iPhone."
                  : "The new location is applied to the server ICS link.")
@@ -402,6 +460,8 @@ struct SettingsSheet: View {
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
                 .keyboardType(.URL)
+                .submitLabel(.done)
+                .onSubmit { hideKeyboard() }
                 .font(.system(size: 14))
                 .padding(10)
                 .background(theme.inputBg).foregroundStyle(theme.inputText)
@@ -438,18 +498,26 @@ struct SettingsSheet: View {
 
     // MARK: - Athan call
 
+    /// File names displayed without the .mp3 extension.
+    private func fileLabels(_ files: [String]) -> [String: String] {
+        Dictionary(files.map { f in
+            (f, f == "default_athan.mp3" ? "Athan (Nice An-Nour Institute)"
+                : f.replacingOccurrences(of: ".mp3", with: ""))
+        }, uniquingKeysWith: { _, new in new })
+    }
+
     private var athanSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Athan call audio file:").font(.system(size: 14, weight: .semibold)).foregroundStyle(theme.labelText)
             PickerField(theme: theme,
-                        options: store.isStandalone ? ["default_athan.mp3"] : store.audioFiles,
-                        labels: ["default_athan.mp3": "Athan (Nice An-Nour Institute)"],
+                        options: store.isStandalone ? AC.bundledAthans : store.audioFiles,
+                        labels: fileLabels(store.isStandalone ? AC.bundledAthans : store.audioFiles),
                         selection: Binding(
                             get: { store.settings["audio_file"] ?? "" },
                             set: { v in Task { await store.updateSetting("audio_file", v) } }))
                 .accessibilityIdentifier("audioFilePicker")
             Text(store.isStandalone
-                 ? "Athan bundled with the app. Connect a server to use your own audio files."
+                 ? "Athan files bundled with the app — they play entirely on this iPhone."
                  : "Upload your audio files into /audio/athan so they appear in this list.")
                 .font(.system(size: 12)).foregroundStyle(theme.helpText)
 
@@ -462,32 +530,29 @@ struct SettingsSheet: View {
 
     // MARK: - Quran recitation
 
-    @ViewBuilder
     private var quranSection: some View {
-        if store.isStandalone {
-            Text("Quran recitation is streamed from your Athan Center server. Connect a server in General settings to enable it.")
-                .font(.system(size: 13)).foregroundStyle(theme.helpText)
-                .accessibilityIdentifier("quranStandaloneNote")
-        } else { quranServerSection }
-    }
-
-    private var quranServerSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        let files = store.isStandalone ? AC.bundledQurans : store.quranFiles
+        return VStack(alignment: .leading, spacing: 12) {
             Text("Al Kahf Sourat audio file:").font(.system(size: 14, weight: .semibold)).foregroundStyle(theme.labelText)
             PickerField(theme: theme,
-                        options: store.quranFiles,
+                        options: files,
+                        labels: fileLabels(files),
                         selection: Binding(
-                            get: { store.settings["friday_quran_file"] ?? "" },
+                            get: { store.settings["friday_quran_file"] ?? files.first ?? "" },
                             set: { v in Task { await store.updateSetting("friday_quran_file", v) } }))
                 .accessibilityIdentifier("fridayQuranFilePicker")
-            Text("Upload your audio files into /audio/coran so they appear in this list.")
+            Text(store.isStandalone
+                 ? "Bundled with the app — the recitation plays entirely on this iPhone."
+                 : "Upload your audio files into /audio/coran so they appear in this list.")
                 .font(.system(size: 12)).foregroundStyle(theme.helpText)
 
             PrimaryButton(theme: theme, title: "Listen to Sourat Al Kahf now",
                           systemImage: "speaker.wave.1", accessibility: "playFullQuranBtn") {
                 Task { await store.playFullQuran() }
             }
-            Text("Plays on server and/or app (depending on audio output setting). Recitation continues until the end.")
+            Text(store.isStandalone
+                 ? "Plays the bundled file on this iPhone. Recitation continues until the end."
+                 : "Plays on server and/or app (depending on audio output setting). Recitation continues until the end.")
                 .font(.system(size: 12)).foregroundStyle(theme.helpText)
 
             Text("Schedule every Friday:").font(.system(size: 14, weight: .semibold)).foregroundStyle(theme.labelText)
@@ -506,6 +571,15 @@ struct SettingsSheet: View {
 
     @ViewBuilder
     private var audioSection: some View {
+        // Merged "iOS notifications" toggle (was Athan notifications + Play
+        // audio on this iPhone): alerts AND plays enabled audio on this iPhone.
+        ToggleRow(theme: theme, title: "iOS notifications",
+                  isOn: Binding(get: { store.notificationsEnabled },
+                                set: { store.notificationsEnabled = $0 }))
+            .accessibilityIdentifier("notificationsToggle")
+        Text("Notifies at each enabled prayer and plays the athan / Quran recitation on this iPhone")
+            .font(.system(size: 12)).foregroundStyle(theme.helpText)
+
         if store.isStandalone { standaloneAudioSection } else { serverAudioSection }
     }
 
@@ -722,12 +796,14 @@ struct SettingsSheet: View {
 
     private func exportCSV() async {
         busy = true
-        if let csv = try? await store.api.exportSettingsCSV() {
+        if let csv = await store.exportConfigCSV() {
             let url = FileManager.default.temporaryDirectory
                 .appendingPathComponent("athan-center-config-\(store.todayStr).csv")
             try? csv.write(to: url, atomically: true, encoding: .utf8)
             exportURL = url
             showExporter = true
+        } else {
+            store.showToast("Export failed")
         }
         busy = false
     }

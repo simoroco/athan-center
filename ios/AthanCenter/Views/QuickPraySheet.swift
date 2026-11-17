@@ -127,7 +127,7 @@ struct QuickPraySheet: View {
 
     private func cell(date: String, prayer: String) -> some View {
         let state = checks[date]?[prayer] ?? 0
-        return Button {
+        return QFPulseCell(theme: theme, date: date, prayer: prayer, state: state) {
             // Optimistic cycle 0 → 2 → 1 → 0, then POST toggle.
             let next = state == 0 ? 2 : (state == 2 ? 1 : 0)
             checks[date, default: [:]][prayer] = next
@@ -140,28 +140,67 @@ struct QuickPraySheet: View {
                     checks[date, default: [:]][prayer] = state
                 }
             }
+        }
+    }
+
+}
+
+// MARK: - QFPulseCell — one quick-pray cell; fast heartbeat + gold glow
+// when the tap checks it (blue or orange), like the main page rows.
+
+private struct QFPulseCell: View {
+    let theme: AppTheme
+    let date: String
+    let prayer: String
+    let state: Int
+    let action: () -> Void
+    @State private var beat = false
+    @State private var glow = false
+
+    var body: some View {
+        Button {
+            // Cycle 0 → 2 → 1 → 0: pulse only when it lands on a check.
+            if state == 0 || state == 2 { heartbeat() }
+            action()
         } label: {
             Text(state >= 1 ? "✓" : "")
                 .font(.system(size: 20, weight: .bold))
                 .foregroundStyle(state == 1 ? theme.qfCheckedText : theme.qfLateText)
                 .frame(maxWidth: .infinity)
                 .frame(height: 44)
-                .background(cellBg(state))
+                .background(cellBg)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
                         .strokeBorder(theme.componentBorder, lineWidth: state == 0 ? 1.5 : 0)
                 )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .strokeBorder(AppTheme.gold.opacity(glow ? 0.95 : 0), lineWidth: 2)
+                )
+                .shadow(color: AppTheme.gold.opacity(glow ? 0.9 : 0), radius: 10)
+                .scaleEffect(beat ? 1.08 : 1)
+                .animation(.easeInOut(duration: 0.09).repeatCount(1, autoreverses: true), value: beat)
+                .animation(.easeOut(duration: 0.4), value: glow)
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier("qf-\(date)-\(prayer)")
     }
 
-    private func cellBg(_ state: Int) -> Color {
+    private var cellBg: Color {
         switch state {
         case 1: return theme.qfCheckedBg
         case 2: return theme.qfLateBg
         default: return theme.componentBg
+        }
+    }
+
+    private func heartbeat() {
+        beat = true
+        glow = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+            beat = false
+            glow = false
         }
     }
 }

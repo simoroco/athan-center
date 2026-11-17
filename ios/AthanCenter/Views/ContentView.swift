@@ -25,7 +25,7 @@ struct ContentView: View {
                     .resizable()
                     .aspectRatio(2.0 / 3.0, contentMode: .fit)
                     .frame(width: metrics.bgImageWidth, height: metrics.bgImageHeight)
-                    .position(x: geo.size.width / 2, y: metrics.bgImageHeight * 0.06)
+                    .position(x: geo.size.width / 2, y: metrics.bgImageHeight * 0.16)
                     .clipped()
                     .ignoresSafeArea()
                 theme.bgOverlay.ignoresSafeArea()
@@ -51,7 +51,11 @@ struct ContentView: View {
                         }
                         .frame(width: metrics.doorWidth)
                         .frame(maxWidth: .infinity)
-                        .padding(.top, 50)
+                        // Center the column between the top pad and the floating
+                        // bar when it's shorter than the screen; it still scrolls
+                        // when taller.
+                        .frame(minHeight: max(0, geo.size.height - 64 - 130))
+                        .padding(.top, 64)
                         .padding(.bottom, 130)   // content scrolls under the floating bar
                         // Tick: refresh the card when the 15-min window ends.
                         .onChange(of: context.date) { _, _ in
@@ -70,28 +74,60 @@ struct ContentView: View {
                                   abs(v.translation.width) > abs(v.translation.height)
                             else { return }
                             tasbihDrag = v.translation.width
+                            // A horizontal swipe must not fire the buttons it started on.
+                            if tasbihDrag < -8 { store.blockTaps = true }
                         }
                         .onEnded { v in
                             let w = v.translation.width
                             let open = w < -80 || (w < -40 && v.predictedEndTranslation.width < -120)
-                            withAnimation(.easeOut(duration: 0.25)) {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) {
                                 showTasbih = open && abs(v.translation.height) < abs(w)
                                 tasbihDrag = 0
+                            }
+                            // Release the block slightly after the touch-up so a
+                            // tap fired at release-time still sees it active.
+                            Task { @MainActor in
+                                try? await Task.sleep(nanoseconds: 200_000_000)
+                                store.blockTaps = false
                             }
                         })
             }
             // --- Top corner buttons ---
             .overlay(alignment: .top) { topBar(theme) }
+            // --- Floating bottom bar + audio banner + toast ---
+            .overlay(alignment: .bottom) {
+                VStack(spacing: 10) {
+                    if let toast = store.toast {
+                        ToastCapsule(text: toast)
+                    }
+                    if store.audio.isActive, let banner = store.audio.bannerText {
+                        AudioStopBar(theme: theme, text: banner)
+                    }
+                    FloatingNavBar(theme: theme) { showCalendar = true }
+                        // The Tasbih page is translucent: fade the nav bar out as
+                        // it slides in, back in as it slides out.
+                        .opacity(navOpacity)
+                }
+                // Bar bottom sits ~14pt above the screen edge (into the safe area).
+                .padding(.bottom, 14 - geo.safeAreaInsets.bottom)
+            }
             // --- Tasbih overlay: slides in from the right, in continuity
-            // with the swipe; swipe right (or the X) dismisses it.
+            // with the swipe; swipe right (or the back arrow) dismisses it.
+            // MUST stay the LAST overlay: overlays stack in declaration order, so
+            // anything declared after it (nav bar, banner, toast) would draw on top.
             .overlay {
                 if showTasbih || tasbihDrag < 0 {
                     TasbihView(onClose: {
-                        withAnimation(.easeOut(duration: 0.25)) { showTasbih = false }
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) { showTasbih = false }
                     })
                         .environmentObject(store)
-                        .offset(x: showTasbih ? max(0, tasbihDrag) : max(0, geo.size.width + tasbihDrag))
+                        // Offset driven by the live drag only — independent of
+                        // showTasbih so a removal never jumps before sliding out.
+                        .offset(x: tasbihDrag < 0 ? max(0, geo.size.width + tasbihDrag) : tasbihDrag)
                         .ignoresSafeArea()
+                        // Slide (not the default fade) on programmatic open/close,
+                        // and let a released dismiss-drag keep sliding off-screen.
+                        .transition(.move(edge: .trailing))
                         .simultaneousGesture(
                             DragGesture(minimumDistance: 10)
                                 .onChanged { v in
@@ -100,40 +136,39 @@ struct ContentView: View {
                                     }
                                 }
                                 .onEnded { v in
-                                    withAnimation(.easeOut(duration: 0.25)) {
+                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) {
                                         if v.translation.width > 80 {
                                             showTasbih = false
                                         }
                                         tasbihDrag = 0
                                     }
                                 })
-                        .zIndex(20)
                 }
-            }
-            // --- Floating bottom bar + audio banner + toast ---
-            .overlay(alignment: .bottom) {
-                VStack(spacing: 10) {
-                    if let toast = store.toast {
-                        Text(toast)
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 18).padding(.vertical, 10)
-                            .background(Color.black.opacity(0.78))
-                            .clipShape(Capsule())
-                            .transition(.opacity)
-                            .accessibilityIdentifier("toast")
-                    }
-                    if store.audio.isActive, let banner = store.audio.bannerText {
-                        AudioStopBar(theme: theme, text: banner)
-                    }
-                    FloatingNavBar(theme: theme) { showCalendar = true }
-                }
-                .padding(.bottom, 6)
             }
         }
         .animation(.spring(response: 0.3), value: store.audio.bannerText)
         .animation(.easeOut, value: store.toast)
+        .coordinateSpace(name: "mainContent")
+        // Tap anywhere OUTSIDE the actions row → exit the jiggle edit mode.
+        // Taps inside the row hit its own controls (tiles, X badges, +, done)
+        // and must keep edit mode alive (exitJiggle ignores the release that
+        // ended the entering long-press via jiggleTapGuard).
+        .simultaneousGesture(
+            SpatialTapGesture().onEnded { e in
+                if !store.activityRowFrame.contains(e.location) {
+                    store.exitJiggle()
+                }
+            })
         .task { await store.boot() }
+        // Test hooks: -showTasbih YES opens the counter, -showSettings YES opens Settings.
+        .onAppear {
+            if UserDefaults.standard.bool(forKey: "showTasbih") { showTasbih = true }
+            if UserDefaults.standard.bool(forKey: "showSettings") { showSettings = true }
+        }
+        // Unchecked Tasbih action tile → slide the counter in from the right.
+        .onChange(of: store.tasbihOpenTick) { _, _ in
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) { showTasbih = true }
+        }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { Task { await store.appDidBecomeActive() } }
         }
@@ -147,21 +182,30 @@ struct ContentView: View {
 
     private func topBar(_ theme: AppTheme) -> some View {
         HStack {
-            Group {
-                if store.pastDayIncomplete {
-                    BarIconButton(theme: theme, id: "quickPrayBtn", a11y: "Quick pray",
-                                  action: { showQuickPray = true }) {
-                        Image("emoji-zap").resizable().frame(width: 22, height: 22)
+            HStack(spacing: 0) {
+                BarIconButton(theme: theme, id: "muteNextBtn",
+                              a11y: store.muteAlertActive ? "Unmute next athan" : "Mute next athan",
+                              disabled: !store.cardVisible) {
+                    // Same contract as the central "next athan is muted" banner:
+                    // a manual mute unmutes, a schedule mute opens Settings.
+                    if store.muteAlertActive {
+                        if store.muteAlertManual { Task { await store.unmuteNext() } }
+                        else { showSettings = true }
+                    } else {
+                        Task { await store.muteNext() }
                     }
-                } else {
-                    let off = store.skipNext || !store.cardVisible
-                    BarIconButton(theme: theme, id: "muteNextBtn", a11y: "Mute next athan", disabled: off,
-                                  action: { Task { await store.muteNext() } }) {
-                        Image(systemName: "speaker.slash").foregroundStyle(theme.danger)
-                    }
+                } label: {
+                    Image(systemName: store.muteAlertActive ? "speaker.slash.fill" : "speaker.slash")
+                        .foregroundStyle(theme.danger)
+                }
+                BarIconButton(theme: theme, id: "quickPrayBtn", a11y: "Quick pray",
+                              action: { showQuickPray = true }) {
+                    Image("emoji-zap").resizable().frame(width: 22, height: 22)
                 }
             }
-            .floatingGlass(dark: theme.dark, in: Circle())
+            .padding(.horizontal, 4)
+            .background(theme.componentBg, in: Capsule())
+            .overlay(Capsule().strokeBorder(theme.componentBorder, lineWidth: 1))
             Spacer()
             HStack(spacing: 0) {
                 BarIconButton(theme: theme, id: "historyBtn", a11y: "Statistics",
@@ -174,10 +218,18 @@ struct ContentView: View {
                 }
             }
             .padding(.horizontal, 4)
-            .floatingGlass(dark: theme.dark, in: Capsule())
+            .background(theme.componentBg, in: Capsule())
+            .overlay(Capsule().strokeBorder(theme.componentBorder, lineWidth: 1))
         }
         .padding(.horizontal, 16)
         .padding(.top, 4)
+    }
+
+    /// Nav bar alpha: slides to 0 while the Tasbih page drags in, back to 1
+    /// while it drags out. Stays 0 while Tasbih is fully open.
+    private var navOpacity: Double {
+        if showTasbih { return max(0, min(1, tasbihDrag / 120)) }
+        return max(0, min(1, 1 + tasbihDrag / 120))
     }
 
     /// Every second: when next-prayer window has expired, reload next prayer.

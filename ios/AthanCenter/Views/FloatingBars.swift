@@ -41,8 +41,8 @@ struct BarIconButton<Label: View>: View {
     var body: some View {
         Button(action: action) {
             label()
-                .font(.system(size: 17, weight: .semibold))
-                .frame(width: 44, height: 44)
+                .font(.system(size: 20, weight: .semibold))
+                .frame(width: 52, height: 52)
                 .contentShape(Circle())
         }
         .buttonStyle(.plain)
@@ -58,6 +58,11 @@ func barIconColor(_ theme: AppTheme) -> Color {
     theme.dark ? .white : Color(hex: 0x1F2937)
 }
 
+/// Dismisses the software keyboard — used when a text field's Return key is hit.
+func hideKeyboard() {
+    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+}
+
 // MARK: - Floating bottom navigation bar (previous / today / calendar / next)
 
 struct FloatingNavBar: View {
@@ -65,26 +70,49 @@ struct FloatingNavBar: View {
     let theme: AppTheme
     var onCalendar: () -> Void
 
+    private static let captionFmt: DateFormatter = {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.dateFormat = "d MMM"
+        return f
+    }()
+
     var body: some View {
         HStack(spacing: 6) {
             navButton("chevron.left", id: "prevDay", label: "Previous day") { store.goPrevDay() }
             navButton("house", id: "todayBtn", label: "Today", disabled: store.isViewingToday) { store.goToday() }
-            navButton("calendar", id: "calendarBtn", label: "Calendar") { onCalendar() }
+            navButton("calendar", id: "calendarBtn", label: "Calendar",
+                      caption: Self.captionFmt.string(from: store.selectedDate)) { onCalendar() }
             navButton("chevron.right", id: "nextDay", label: "Next day") { store.goNextDay() }
         }
-        .padding(.horizontal, 14).padding(.vertical, 9)
-        .floatingGlass(dark: theme.dark, in: Capsule())
+        .padding(.horizontal, 14).padding(.vertical, 6)
+        // Same translucent glass as the action buttons — the door photo shows through.
+        .background(theme.componentBg, in: Capsule())
+        .overlay(Capsule().strokeBorder(theme.componentBorder, lineWidth: 1))
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("navBar")
     }
 
     private func navButton(_ icon: String, id: String, label: String, disabled: Bool = false,
-                           action: @escaping () -> Void) -> some View {
+                           caption: String? = nil, action: @escaping () -> Void) -> some View {
         Button(action: action) {
+            // The icon sits dead-center in the box — same for every button. The
+            // caption is an overlay that dips slightly below the frame, into the
+            // pill's bottom padding, keeping a clear margin under the icon.
             Image(systemName: icon)
-                .font(.system(size: 22, weight: .semibold))
+                .font(.system(size: 19, weight: .semibold))
                 .foregroundStyle(barIconColor(theme))
-                .frame(width: 76, height: 54)
+                .frame(width: 76, height: 48)
+                .overlay(alignment: .bottom) {
+                    if let caption {
+                        Text(caption)
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundStyle(barIconColor(theme).opacity(0.8))
+                            .lineLimit(1)
+                            .offset(y: 4)
+                            .accessibilityIdentifier("calendarDateLabel")
+                    }
+                }
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -92,6 +120,23 @@ struct FloatingNavBar: View {
         .opacity(disabled ? 0.35 : 1)
         .accessibilityIdentifier(id)
         .accessibilityLabel(label)
+    }
+}
+
+// MARK: - Toast capsule (store.showToast). The main screen draws it above the
+// nav bar; sheets cover the main screen, so each sheet must draw its own.
+
+struct ToastCapsule: View {
+    let text: String
+    var body: some View {
+        Text(text)
+            .font(.system(size: 14, weight: .semibold))
+            .foregroundStyle(.white)
+            .padding(.horizontal, 18).padding(.vertical, 10)
+            .background(Color.black.opacity(0.78))
+            .clipShape(Capsule())
+            .transition(.opacity)
+            .accessibilityIdentifier("toast")
     }
 }
 

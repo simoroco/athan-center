@@ -1,6 +1,7 @@
 import Foundation
 import SwiftUI
 import Combine
+import CoreLocation
 
 // MARK: - AppStore — replicates app.js behavior against the same REST API.
 
@@ -57,6 +58,94 @@ final class AppStore: ObservableObject {
     @Published var muteAlertManual = false
     @Published var muteAlertGeneral = false
 
+    /// Transient: true while a horizontal swipe is in progress → buttons on the
+    /// main page must ignore the release (the touch was a gesture, not a tap).
+    var blockTaps = false
+
+    /// Transient: after the user stops audio, the Pi can keep reporting
+    /// serverPlayingQuran=true for a few seconds → don't let the poll re-show
+    /// the banner until the server actually confirms playback stopped.
+    var suppressServerBanner = false
+
+    // MARK: Actions edit (iOS jiggle) mode — shared so taps anywhere can exit it
+    @Published var actionsEditMode = false
+    /// Eats the FIRST tap after entering jiggle: it's the release of the
+    /// long-press that opened it, not a deliberate "tap outside".
+    private var jiggleTapGuard = false
+    private var jiggleTimer: Task<Void, Never>? = nil
+    private var jiggleGuardTask: Task<Void, Never>? = nil
+
+    func enterJiggle() {
+        actionsEditMode = true
+        jiggleTapGuard = true
+        jiggleTimer?.cancel()
+        // Auto-exit after 20s.
+        jiggleTimer = Task { @MainActor [weak self] in
+            try? await Task.sleep(nanoseconds: 20_000_000_000)
+            guard !Task.isCancelled else { return }
+            self?.actionsEditMode = false
+            self?.jiggleTapGuard = false
+        }
+        jiggleGuardTask?.cancel()
+        // The guard must not eat a real later tap if the release never fired one.
+        jiggleGuardTask = Task { @MainActor [weak self] in
+            try? await Task.sleep(nanoseconds: 2_000_000_000)
+            self?.jiggleTapGuard = false
+        }
+    }
+
+    /// Exits jiggle mode ("tap anywhere else"). The tap that released the
+    /// entering long-press is ignored via `jiggleTapGuard`.
+    func exitJiggle(force: Bool = false) {
+        if !force && jiggleTapGuard { jiggleTapGuard = false; return }
+        actionsEditMode = false
+        jiggleTapGuard = false
+        jiggleTimer?.cancel()
+        jiggleGuardTask?.cancel()
+    }
+
+    /// Global frame of the actions row — taps inside it are edit controls, not
+    /// "tap outside" gestures (kept up to date by DailyActivitiesView).
+    var activityRowFrame: CGRect = .zero
+
+    // MARK: Location permission at first launch
+    // The app must ask once even when the setup screen is skipped (server-mode
+    // installs never see SetupView) — otherwise it never shows up under iOS
+    // Settings → Location and the locate buttons have nothing to request.
+
+    private var askedLocationPermission = false
+    /// Kept alive for the prompt's lifetime — releasing the manager drops it.
+    private var permissionManager: CLLocationManager?
+
+    /// Requests "when in use" access once per app lifetime. Called when the
+    /// scene becomes active — iOS silently drops prompts asked while the app
+    /// is still activating. Never prompts when the app is already configured:
+    /// location access is only asked by the "use my location" buttons.
+    func requestLocationPermissionOnce() {
+        guard !setupComplete else { return }
+        guard !askedLocationPermission else { return }
+        let args = ProcessInfo.processInfo.arguments
+        guard !args.contains("-resetLocal"), !args.contains("-serverBase") else { return }
+        askedLocationPermission = true
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 400_000_000)
+            let m = CLLocationManager()
+            guard m.authorizationStatus == .notDetermined else { return }
+            permissionManager = m
+            m.requestWhenInUseAuthorization()
+        }
+    }
+
+    /// Set by the unchecked Tasbih action tile → ContentView slides the counter in.
+    /// A monotonic counter (not a flag): onChange fires on every increment.
+    @Published var tasbihOpenTick = 0
+    func requestTasbih() { tasbihOpenTick += 1 }
+
+    /// City shown in Settings when the server only knows "Unknown": the coords
+    /// are embedded in the ICS URL (x=…:y=…) → reverse-geocode them once.
+    @Published var geoCityName: String? = nil
+    private var geoCityResolvedFor = ""
+
     private var loops: [Task<Void, Never>] = []
     var booted = false
     private var toastTask: Task<Void, Never>?
@@ -99,6 +188,12 @@ final class AppStore: ObservableObject {
 
     var configured: Bool { !serverBase.isEmpty }
 
+    /// Server address as shown to the user (scheme trimmed): "192.168.1.50:7777".
+    var serverDisplayHost: String {
+        serverBase.replacingOccurrences(of: "^https?://", with: "", options: .regularExpression)
+            .trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+    }
+
     // MARK: - Boot
 
     func boot() async {
@@ -131,6 +226,7 @@ final class AppStore: ObservableObject {
         _ = await (af, qf, dv)
         startLoops()
         Task { await cacheUpcomingFromServer() }
+        Task { await cacheAllChecksFromServer() }
         await playOnPageLoad()
     }
 
@@ -143,8 +239,10 @@ final class AppStore: ObservableObject {
                 guard !Task.isCancelled, let self else { return }
                 if self.isStandalone {
                     self.checkAthanLocal()
+                    self.checkQuranLocal()
                 } else if !self.connected {
                     self.checkAthanLocal()
+                    self.checkQuranLocal()
                     await self.probeConnectivity()
                 } else {
                     await self.checkAudioTriggers()
@@ -339,6 +437,29 @@ final class AppStore: ObservableObject {
 
     func loadUpdateInfo() async {
         updateInfo = try? await api.updateInfo()
+        await resolveGeoCityIfNeeded()
+    }
+
+    /// Server-mode city name: from update-info, else reverse-geocoded from the
+    /// coordinates embedded in the configured ICS URL (fixes "Unknown").
+    var serverCityName: String {
+        let n = updateInfo?.city_name ?? ""
+        if !n.isEmpty && n != "Unknown" && n != "Not configured" { return n }
+        return geoCityName ?? (updateInfo == nil ? "Loading..." : "—")
+    }
+
+    private func resolveGeoCityIfNeeded() async {
+        guard !isStandalone, geoCityName == nil, geoCityResolvedFor != settings["ics_url"] ?? "",
+              let ics = settings["ics_url"],
+              let m = try? NSRegularExpression(pattern: "x=(-?[0-9]+\\.?[0-9]*):y=(-?[0-9]+\\.?[0-9]*)")
+                  .firstMatch(in: ics, range: NSRange(ics.startIndex..., in: ics)),
+              let xr = Range(m.range(at: 1), in: ics), let yr = Range(m.range(at: 2), in: ics),
+              let lat = Double(ics[xr]), let lon = Double(ics[yr]) else { return }
+        geoCityResolvedFor = ics
+        if let mark = try? await CLGeocoder().reverseGeocodeLocation(
+            CLLocation(latitude: lat, longitude: lon)).first {
+            geoCityName = mark.locality ?? mark.administrativeArea
+        }
     }
 
     func loadAudioSupport() async {
@@ -355,13 +476,23 @@ final class AppStore: ObservableObject {
     }
 
     func loadMutedWeekdays() async {
-        let rows = (try? await api.mutedWeekdays()) ?? []
-        mutedWeekdays = Dictionary(rows.map { ($0.weekday, $0.muted) }, uniquingKeysWith: { _, new in new })
+        if let rows = try? await api.mutedWeekdays() {
+            mutedWeekdays = Dictionary(rows.map { ($0.weekday, $0.muted) }, uniquingKeysWith: { _, new in new })
+            local.snap.mutedWeekdays = mutedWeekdays
+            local.save()
+        } else {
+            mutedWeekdays = local.snap.mutedWeekdays   // offline → last known values
+        }
     }
 
     func loadRamadan() async {
-        let rows = (try? await api.ramadanDates()) ?? []
-        ramadanDates = Set(rows.map { $0.gregorian_date })
+        if let rows = try? await api.ramadanDates() {
+            ramadanDates = Set(rows.map { $0.gregorian_date })
+            local.snap.ramadanDates = rows.map { $0.gregorian_date }
+            local.save()
+        } else {
+            ramadanDates = Set(local.snap.ramadanDates)
+        }
     }
 
     func loadAudioFiles() async { audioFiles = (try? await api.audioFiles()) ?? [] }
@@ -582,10 +713,26 @@ final class AppStore: ObservableObject {
         await boot()
     }
 
+    /// Configuration backup in the web CSV format: from the server API when it
+    /// is reachable, generated locally otherwise — either file loads on the Pi.
+    func exportConfigCSV() async -> String? {
+        if isStandalone || !connected { return local.exportConfigCSV() }
+        return try? await api.exportSettingsCSV()
+    }
+
+    /// Restores a web-format backup: pushed to the server when reachable,
+    /// applied to the local snapshot otherwise (same merge rules as the Pi).
     func importConfig(_ csv: String) async -> String {
-        let r = try? await api.importSettings(csv: csv)
+        if isStandalone || !connected {
+            let n = local.importConfigCSV(csv)
+            guard n > 0 else { return "Invalid or empty backup file" }
+            await loadDay()
+            rescheduleNotifications()
+            return "Imported \(n) entries"
+        }
+        guard let r = try? await api.importSettings(csv: csv) else { return "Import failed" }
         await boot()
-        return r?.message ?? "Imported"
+        return r.message ?? "Imported"
     }
 
     func permanentSilence() async {
@@ -631,11 +778,17 @@ final class AppStore: ObservableObject {
 
     private func checkQuran() async {
         guard let r = try? await api.checkFridayQuran() else { return }
-        if r.serverPlayingQuran == true && !audio.isPlaying {
-            audio.showServerBanner("Al Kahf Sourat recitation playing", duration: 15)   // refreshed by each poll
-        } else if r.serverPlayingQuran == false, audio.serverPlaying,
-                  audio.bannerText == "Al Kahf Sourat recitation playing" {
-            audio.clearServerBanner()
+        if r.serverPlayingQuran == true {
+            // Suppressed right after a user stop: the Pi's flag stays true for a
+            // few seconds after the kill — don't resurrect the banner.
+            if !suppressServerBanner && !audio.isPlaying {
+                audio.showServerBanner("Al Kahf Sourat recitation playing", duration: 15)
+            }
+        } else {
+            suppressServerBanner = false     // server confirmed playback ended
+            if audio.serverPlaying, audio.bannerText == "Al Kahf Sourat recitation playing" {
+                audio.clearServerBanner()
+            }
         }
         if r.shouldPlay == true, r.type == "friday_quran", let file = r.quranFile {
             let key = "\(todayStr)-quran"
@@ -660,11 +813,12 @@ final class AppStore: ObservableObject {
     /// Stop everything: local player immediately, then the Pi (if reachable).
     func stopAllAudio() async {
         audio.stopLocal()
+        suppressServerBanner = true   // don't let the 5s poll re-show the banner
         if !isStandalone && configured { try? await api.stopAudio() }
     }
 
     func testAthanWeb() {
-        if isStandalone { playLocalAthan(); return }
+        if isStandalone || !connected { playLocalAthan(); return }
         let file = settings["audio_file"] ?? "Masjid Al-Haram.mp3"
         if let url = api.athanURL(file) {
             audio.play(url: url, banner: "Athan calling (app)...")
@@ -672,7 +826,8 @@ final class AppStore: ObservableObject {
     }
 
     func testQuranWeb() {
-        guard !isStandalone else { showToast("Quran recitation requires a server"); return }
+        // No server reachability → bundled file; online → 30s server preview.
+        if isStandalone || !connected { playLocalQuran(); return }
         let file = settings["friday_quran_file"] ?? "Sourat Al Kahf - Hani Arrifai.mp3"
         if let url = api.quranURL(file) {
             audio.play(url: url, banner: "Quran reciting (30s preview)...", limit30s: true)
@@ -693,7 +848,7 @@ final class AppStore: ObservableObject {
 
     /// "Listen to Sourat Al Kahf now"
     func playFullQuran() async {
-        guard !isStandalone else { showToast("Quran recitation requires a server"); return }
+        if isStandalone || !connected { playLocalQuran(); return }
         let output = settings["audio_output"] ?? "both"
         let file = settings["friday_quran_file"] ?? ""
         if output == "server" || output == "both" {

@@ -12,8 +12,17 @@ enum AC {
     ]
     static let weekdayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] // prayer_schedule: 0=Mon
     static let weekdayNamesSun = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"] // JS getDay(): 0=Sun
-    static let appVersion = "© 2026 Athan Center | v6.0.0"
+    static let appVersion = "© 2026 Athan Center | v6.5.0"
     static let defaultServer = "http://192.168.1.50:7777"
+
+    /// Audio bundled into the app — athan & Quran keep working with no server
+    /// at all (standalone) or while the Pi is unreachable (offline).
+    static let bundledAthans = [
+        "default_athan.mp3",
+        "Athan - Ali Ahmed Mullah - Masjid Al-Haram.mp3",
+        "Athan - Omar Hisham Al Arabi.mp3"
+    ]
+    static let bundledQurans = ["Sourat Al Kahf - Hani Arrifai.mp3"]
 
     /// getPrayerName() from app.js — normalizes ICS event names for display.
     static func displayPrayerName(_ name: String) -> String {

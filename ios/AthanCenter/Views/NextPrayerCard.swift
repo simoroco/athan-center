@@ -54,9 +54,9 @@ struct NextPrayerCard: View {
             }
         }
         .frame(width: door)
-        .frame(minHeight: metrics.archHeight)
-        .padding(.top, 30)
-        .padding(.bottom, 8)
+        .frame(minHeight: metrics.archHeight * 0.82)
+        .padding(.top, 60)
+        .padding(.bottom, 0)
         .onAppear { pulsing = true }
     }
 
@@ -106,7 +106,7 @@ struct NextPrayerCard: View {
                         .glowText(theme, gold: true)
                 }
                 Text(AC.displayPrayerName(np.prayer_name))
-                    .font(.system(size: door * 0.177, weight: .heavy).monospaced())
+                    .font(.system(size: door * 0.115, weight: .heavy).monospaced())
                     .minimumScaleFactor(0.4)
                     .lineLimit(1)
             }
@@ -115,7 +115,7 @@ struct NextPrayerCard: View {
             .padding(.bottom, door * 0.011)
 
             Text(np.prayer_time)
-                .font(.system(size: door * 0.143, weight: .bold))
+                .font(.system(size: door * 0.118, weight: .bold))
                 .foregroundStyle(theme.textCard)
                 .glowText(theme, gold: true)
                 .padding(.bottom, door * 0.025)

@@ -7,7 +7,7 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.0"
-    MARKETING_VERSION: "6.0.0"
+    MARKETING_VERSION: "6.5.0"
     CURRENT_PROJECT_VERSION: "1"
     TARGETED_DEVICE_FAMILY: "1"
 targets:
@@ -32,6 +32,8 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.athancenter.app
         GENERATE_INFOPLIST_FILE: NO
+        DEVELOPMENT_TEAM: "HZ947F72NK"
+        CODE_SIGN_STYLE: Automatic
         ENABLE_PREVIEWS: YES
   AthanCenterUITests:
     type: bundle.ui-testing
