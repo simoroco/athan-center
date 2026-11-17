@@ -28,7 +28,7 @@ extension View {
     }
 }
 
-// MARK: - Round icon button used in the top corners (mute, history, settings, quick pray)
+// MARK: - Round icon button used in the top corners (mute, history, settings, prayer overview)
 
 struct BarIconButton<Label: View>: View {
     let theme: AppTheme

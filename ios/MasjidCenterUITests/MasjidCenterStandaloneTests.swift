@@ -156,10 +156,11 @@ final class MasjidCenterStandaloneTests: XCTestCase {
     func testTasbihCountsAndChecksActivity() throws {
         let app = launchStandalone()
 
-        // Goal = 10 via the chips (not a list box). They live in General now,
-        // which is already open when the sheet appears — just open the sheet.
+        // Goal = 10 via the chips (not a list box). They live in the
+        // "Tasbih & Objectives" section, closed by default — open it first.
         app.buttons["settingsBtn"].tap()
         XCTAssertTrue(app.buttons["closeSettings"].waitForExistence(timeout: 10))
+        app.buttons["section-Tasbih & Objectives"].tap()
         let chip = app.buttons["tasbihTarget-10"]
         XCTAssertTrue(chip.waitForExistence(timeout: 5), "Goal choices must be displayed directly")
         for n in [10, 11, 33, 99, 100, 101] { XCTAssertTrue(app.buttons["tasbihTarget-\(n)"].exists) }

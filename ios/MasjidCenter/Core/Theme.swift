@@ -59,13 +59,13 @@ struct AppTheme {
     }
     var sheetText: Color { dark ? Color(hex: 0xE4E6EB) : Color(hex: 0x1A1A1A) }
 
-    // Quick pray cell states
-    var qfCheckedBg: Color { dark ? Color(hex: 0x1E3A5F) : Color(hex: 0xDBEAFE) }
-    var qfCheckedText: Color { dark ? Color(hex: 0x60A5FA) : Color(hex: 0x3B82F6) }
-    var qfLateBg: Color { dark ? Color(hex: 0x3D2E00) : Color(hex: 0xFFF3CD) }
-    var qfLateText: Color { Color(hex: 0xF59E0B) }
-    var qfTodayBg: Color { dark ? Color(hex: 0x60A5FA).opacity(0.1) : Color(hex: 0x3B82F6).opacity(0.06) }
-    var qfTodayLabel: Color { dark ? Color(hex: 0x60A5FA) : Color(hex: 0x3B82F6) }
+    // Prayer overview cell states
+    var poCheckedBg: Color { dark ? Color(hex: 0x1E3A5F) : Color(hex: 0xDBEAFE) }
+    var poCheckedText: Color { dark ? Color(hex: 0x60A5FA) : Color(hex: 0x3B82F6) }
+    var poLateBg: Color { dark ? Color(hex: 0x3D2E00) : Color(hex: 0xFFF3CD) }
+    var poLateText: Color { Color(hex: 0xF59E0B) }
+    var poTodayBg: Color { dark ? Color(hex: 0x60A5FA).opacity(0.1) : Color(hex: 0x3B82F6).opacity(0.06) }
+    var poTodayLabel: Color { dark ? Color(hex: 0x60A5FA) : Color(hex: 0x3B82F6) }
 
     // Charts
     static let chartNotDone = Color(hex: 0x6C757D)

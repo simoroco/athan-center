@@ -240,7 +240,7 @@ extension AppStore {
         rescheduleNotifications()
     }
 
-    /// Cache the whole year's prayer checks so local stats and the Quick Pray
+    /// Cache the whole year's prayer checks so local stats and the Prayer Overview
     /// view stay complete when the server later becomes unreachable or the
     /// app goes standalone (server data keeps working locally).
     func cacheAllChecksFromServer() async {
@@ -384,9 +384,9 @@ extension AppStore {
         muteAlertManual = false
     }
 
-    // MARK: Quick Pray (local data)
+    // MARK: Prayer Overview (local data)
 
-    func quickFillRowsLocal() -> (days: [(date: String, label: String)], checks: [String: [String: Int]]) {
+    func prayerOverviewRowsLocal() -> (days: [(date: String, label: String)], checks: [String: [String: Int]]) {
         var map: [String: [String: Int]] = [:]
         for (date, checks) in local.snap.checks {
             map[date] = checks.filter { AC.mainPrayers.contains($0.key) }

@@ -14,7 +14,7 @@
  */
 
 (async function runBrowserTest() {
-    console.log('%c=== ATHAN CENTER IMPORT BROWSER TEST ===', 'font-size:16px;font-weight:bold;color:#2196F3');
+    console.log('%c=== MASJID CENTER IMPORT BROWSER TEST ===', 'font-size:16px;font-weight:bold;color:#2196F3');
     
     // Step 1: Navigate to 2026-01-08
     console.log('Step 1: Navigating to 2026-01-08...');

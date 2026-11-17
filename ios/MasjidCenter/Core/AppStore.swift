@@ -735,6 +735,25 @@ final class AppStore: ObservableObject {
         return r.message ?? "Imported"
     }
 
+    /// Full iOS-side reset: wipes every local datum (LocalStore snapshot,
+    /// UserDefaults incl. the server address, pending notifications) without
+    /// touching the server. setupComplete flips → SetupView reappears.
+    func resetApp() {
+        stopLoops()
+        audio.stopLocal()
+        local.reset()
+        if let bid = Bundle.main.bundleIdentifier {
+            UserDefaults.standard.removePersistentDomain(forName: bid)
+        }
+        rescheduleNotifications()           // clears pending requests; notifications are off in the fresh snap
+        connected = false
+        serverTimeInfo = nil
+        updateInfo = nil
+        audioSupport = nil
+        serverBase = ""                     // didSet → fresh API client + re-boot on the empty snapshot
+        objectWillChange.send()
+    }
+
     func permanentSilence() async {
         if isStandalone {
             local.bulkSchedule(enabled: false)
@@ -860,10 +879,10 @@ final class AppStore: ObservableObject {
         }
     }
 
-    // MARK: - Quick Pray data (14-day window)
+    // MARK: - Prayer Overview data (14-day window)
 
-    func quickFillRows() async -> (days: [(date: String, label: String)], checks: [String: [String: Int]]) {
-        if isStandalone || !connected { return quickFillRowsLocal() }
+    func prayerOverviewRows() async -> (days: [(date: String, label: String)], checks: [String: [String: Int]]) {
+        if isStandalone || !connected { return prayerOverviewRowsLocal() }
         let year = Calendar.current.component(.year, from: serverNow)
         var all = (try? await api.prayerChecksRange(year: year)) ?? []
         // If window crosses Jan 1, also fetch previous year.
@@ -894,7 +913,7 @@ final class AppStore: ObservableObject {
 
     // MARK: - UI state helpers
 
-    /// Is the selected past day incomplete (drives Quick Pray button swap)?
+    /// Is the selected past day incomplete (drives Prayer Overview button swap)?
     var pastDayIncomplete: Bool {
         guard selectedDateStr < todayStr else { return false }
         return AC.mainPrayers.contains { (prayerChecks[$0] ?? 0) == 0 }

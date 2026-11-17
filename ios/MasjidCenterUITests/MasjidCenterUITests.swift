@@ -98,7 +98,8 @@ final class MasjidCenterUITests: XCTestCase {
 
         XCTAssertTrue(waitFor(app.buttons["closeSettings"]))
         for section in ["section-General", "section-Location", "section-Athan call",
-                        "section-Quran recitation", "section-Audio control", "section-Backup & Restore"] {
+                        "section-Tasbih & Objectives", "section-Quran recitation",
+                        "section-Audio control", "section-Backup & Restore"] {
             XCTAssertTrue(app.buttons[section].exists, "Missing \(section)")
         }
 
@@ -172,9 +173,9 @@ final class MasjidCenterUITests: XCTestCase {
     func testMuteNextButton() throws {
         let app = launch()
         XCTAssertTrue(waitFor(app.buttons["settingsBtn"], 20))
-        // On a fully-checked past day it swaps to Quick Pray; today shows mute.
+        // On a fully-checked past day it swaps to Prayer Overview; today shows mute.
         let mute = app.buttons["muteNextBtn"]
-        let quick = app.buttons["quickPrayBtn"]
+        let quick = app.buttons["prayerOverviewBtn"]
         XCTAssertTrue(mute.exists || quick.exists)
     }
 }

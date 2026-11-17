@@ -15,6 +15,10 @@ struct SettingsSheet: View {
     @State private var exportURL: URL?
     @State private var confirmReset = false
     @State private var confirmRestore = false
+    @State private var confirmResetApp = false
+    @State private var editingAction: TrackedAction? = nil
+    @State private var showActionEditor = false
+    @State private var actionDeleteTarget: ActionItem? = nil
     @State private var busy = false
     @State private var cityDraft = ""
     @StateObject private var location = LocationManager()
@@ -56,9 +60,10 @@ struct SettingsSheet: View {
                     accordion(0, "General", "wrench") { generalSection }
                     accordion(1, "Location", "mappin") { locationSection }
                     accordion(2, "Athan call", "building") { athanSection }
-                    accordion(3, "Quran recitation", "book") { quranSection }
-                    accordion(4, "Audio control", "speaker.wave.1") { audioSection }
-                    accordion(5, "Backup & Restore", "externaldrive") { backupSection }
+                    accordion(3, "Tasbih & Objectives", "checklist") { tasbihObjectivesSection }
+                    accordion(4, "Quran recitation", "book") { quranSection }
+                    accordion(5, "Audio control", "speaker.wave.1") { audioSection }
+                    accordion(6, "Backup & Restore", "externaldrive") { backupSection }
 
                     Text(AC.appVersion)
                         .font(.system(size: 13)).foregroundStyle(theme.muted)
@@ -132,6 +137,36 @@ struct SettingsSheet: View {
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("This will reset ALL settings to their default values")
+        }
+        .alert("Reset the iOS app?", isPresented: $confirmResetApp) {
+            Button("Reset app", role: .destructive) {
+                store.resetApp()
+                dismiss()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("All settings, checks and objectives stored on this iPhone will be erased and the first-launch setup will reappear. Nothing changes on the server.")
+        }
+        .sheet(isPresented: $showActionEditor) {
+            ActionEditSheet(editing: editingAction).environmentObject(store)
+        }
+        .alert(
+            actionDeleteTarget?.builtin == true
+                ? "Hide \"\(actionDeleteTarget?.name ?? "")\"?"
+                : "Delete \"\(actionDeleteTarget?.name ?? "")\"?",
+            isPresented: Binding(
+                get: { actionDeleteTarget != nil },
+                set: { if !$0 { actionDeleteTarget = nil } }),
+            presenting: actionDeleteTarget
+        ) { a in
+            Button(a.builtin ? "Hide" : "Delete", role: .destructive) {
+                store.removeAction(id: a.id)
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: { a in
+            Text(a.builtin
+                ? "You can restore it later from this section."
+                : "This custom objective and its history will be deleted.")
         }
     }
 
@@ -246,8 +281,6 @@ struct SettingsSheet: View {
             Text("Enable dark mode for a comfortable viewing experience in low-light environments")
                 .font(.system(size: 13)).foregroundStyle(theme.helpText)
 
-            tasbihGoalPicker
-
             // iOS-specific: server address (the web app is served same-origin).
             VStack(alignment: .leading, spacing: 6) {
                 Text("Sync with Masjid Center Server").font(.system(size: 14, weight: .semibold)).foregroundStyle(theme.labelText)
@@ -318,7 +351,92 @@ struct SettingsSheet: View {
         .sheetCard(theme)
     }
 
-    // MARK: - iOS-only: Tasbih goal (moved into General)
+    // MARK: - Tasbih & Objectives (iOS-only: goal + tracked objectives list)
+
+    private var tasbihObjectivesSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            tasbihGoalPicker
+
+            Text("Objectives").font(.system(size: 14, weight: .semibold)).foregroundStyle(theme.labelText)
+            VStack(spacing: 0) {
+                let hidden = store.local.snap.hiddenBuiltins
+                ForEach(Array(store.allActions.enumerated()), id: \.element.id) { i, a in
+                    objectiveRow(a)
+                    if i < store.allActions.count - 1 || !hidden.isEmpty {
+                        Divider().overlay(theme.inputBorder)
+                    }
+                }
+                ForEach(Array(hidden.enumerated()), id: \.element) { i, n in
+                    hiddenObjectiveRow(n)
+                    if i < hidden.count - 1 { Divider().overlay(theme.inputBorder) }
+                }
+            }
+            .sheetCard(theme)
+
+            PrimaryButton(theme: theme, title: "Add objective",
+                          systemImage: "plus", accessibility: "addObjectiveBtn") {
+                editingAction = nil
+                showActionEditor = true
+            }
+            Text("The pencil edits a custom objective. The trash hides a built-in (restorable below) or deletes a custom one.")
+                .font(.system(size: 12)).foregroundStyle(theme.helpText)
+        }
+    }
+
+    private func objectiveRow(_ a: ActionItem) -> some View {
+        HStack(spacing: 10) {
+            if a.isAsset {
+                Image(a.icon).resizable().frame(width: 24, height: 24)
+            } else {
+                Text(a.icon).font(.system(size: 20))
+            }
+            Text(a.name).font(.system(size: 15, weight: .medium)).foregroundStyle(theme.sheetText)
+            if a.counter {
+                Text("counter").font(.system(size: 11, weight: .semibold)).foregroundStyle(theme.muted)
+            }
+            Spacer()
+            if !a.builtin {
+                Button {
+                    editingAction = store.local.snap.customActions.first { $0.id == a.id }
+                    showActionEditor = true
+                } label: {
+                    Image(systemName: "pencil").font(.system(size: 15))
+                        .foregroundStyle(theme.textAccent)
+                        .frame(width: 34, height: 34)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("editObjective-\(a.name)")
+            }
+            Button { actionDeleteTarget = a } label: {
+                Image(systemName: "trash").font(.system(size: 15))
+                    .foregroundStyle(theme.danger)
+                    .frame(width: 34, height: 34)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("deleteObjective-\(a.name)")
+        }
+        .padding(.horizontal, 12).padding(.vertical, 6)
+    }
+
+    private func hiddenObjectiveRow(_ name: String) -> some View {
+        HStack(spacing: 10) {
+            if let bi = AC.activities.first(where: { $0.name == name }) {
+                Image(bi.icon).resizable().frame(width: 24, height: 24).opacity(0.5)
+            }
+            Text(name).font(.system(size: 15, weight: .medium)).foregroundStyle(theme.muted)
+            Text("hidden").font(.system(size: 11, weight: .semibold)).foregroundStyle(theme.muted)
+            Spacer()
+            Button("Restore") { store.restoreBuiltin(id: name) }
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(theme.textAccent)
+                .accessibilityIdentifier("restoreObjective-\(name)")
+        }
+        .padding(.horizontal, 12).padding(.vertical, 6)
+    }
+
+    // MARK: - iOS-only: Tasbih goal
 
     private var tasbihGoalPicker: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -788,6 +906,14 @@ struct SettingsSheet: View {
                           accessibility: "permanentSilenceBtn") {
                 Task { await store.permanentSilence(); store.showToast("Permanent silence enabled") }
             }
+
+            PrimaryButton(theme: theme, title: "Reset app (iPhone only)",
+                          systemImage: "iphone", danger: true, disabled: busy,
+                          accessibility: "resetAppBtn") {
+                confirmResetApp = true
+            }
+            Text("Erases all app data on this iPhone and returns to the first-launch setup. The server is not affected.")
+                .font(.system(size: 12, weight: .semibold)).foregroundStyle(theme.danger)
         }
         .overlay {
             if busy { ProgressView().scaleEffect(1.3).frame(maxWidth: .infinity, maxHeight: .infinity).background(.black.opacity(0.15)) }

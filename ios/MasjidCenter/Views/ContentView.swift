@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 // MARK: - ContentView — replicates index.html layout over the door background.
 
@@ -6,7 +7,7 @@ struct ContentView: View {
     @EnvironmentObject var store: AppStore
     @Environment(\.scenePhase) private var scenePhase
     @State private var showCalendar = false
-    @State private var showQuickPray = false
+    @State private var showPrayerOverview = false
     @State private var showStats = false
     @State private var showSettings = false
     @State private var showTasbih = false
@@ -173,19 +174,38 @@ struct ContentView: View {
             if phase == .active { Task { await store.appDidBecomeActive() } }
         }
         .sheet(isPresented: $showCalendar) { CalendarSheet().environmentObject(store) }
-        .sheet(isPresented: $showQuickPray) { QuickPraySheet().environmentObject(store) }
+        .sheet(isPresented: $showPrayerOverview) { PrayerOverviewSheet().environmentObject(store) }
         .sheet(isPresented: $showStats) { StatisticsSheet().environmentObject(store) }
         .sheet(isPresented: $showSettings) { SettingsSheet().environmentObject(store) }
     }
 
-    // MARK: Top bar — mute / quick-pray (left), history + settings (right)
+    // MARK: Top bar — settings + history (left), prayer-overview / mute (right)
 
     private func topBar(_ theme: AppTheme) -> some View {
         HStack {
             HStack(spacing: 0) {
+                BarIconButton(theme: theme, id: "settingsBtn", a11y: "Settings",
+                              action: { showSettings = true }) {
+                    Image(systemName: "gearshape").foregroundStyle(barIconColor(theme))
+                }
+                BarIconButton(theme: theme, id: "historyBtn", a11y: "Statistics",
+                              action: { showStats = true }) {
+                    Image(systemName: "chart.bar").foregroundStyle(barIconColor(theme))
+                }
+            }
+            .padding(.horizontal, 4)
+            .background(theme.componentBg, in: Capsule())
+            .overlay(Capsule().strokeBorder(theme.componentBorder, lineWidth: 1))
+            Spacer()
+            HStack(spacing: 0) {
+                BarIconButton(theme: theme, id: "prayerOverviewBtn", a11y: "Prayer overview",
+                              action: { showPrayerOverview = true }) {
+                    Image("emoji-zap").resizable().frame(width: 22, height: 22)
+                }
                 BarIconButton(theme: theme, id: "muteNextBtn",
                               a11y: store.muteAlertActive ? "Unmute next athan" : "Mute next athan",
                               disabled: !store.cardVisible) {
+                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
                     // Same contract as the central "next athan is muted" banner:
                     // a manual mute unmutes, a schedule mute opens Settings.
                     if store.muteAlertActive {
@@ -195,26 +215,8 @@ struct ContentView: View {
                         Task { await store.muteNext() }
                     }
                 } label: {
-                    Image(systemName: store.muteAlertActive ? "speaker.slash.fill" : "speaker.slash")
-                        .foregroundStyle(theme.danger)
-                }
-                BarIconButton(theme: theme, id: "quickPrayBtn", a11y: "Quick pray",
-                              action: { showQuickPray = true }) {
-                    Image("emoji-zap").resizable().frame(width: 22, height: 22)
-                }
-            }
-            .padding(.horizontal, 4)
-            .background(theme.componentBg, in: Capsule())
-            .overlay(Capsule().strokeBorder(theme.componentBorder, lineWidth: 1))
-            Spacer()
-            HStack(spacing: 0) {
-                BarIconButton(theme: theme, id: "historyBtn", a11y: "Statistics",
-                              action: { showStats = true }) {
-                    Image(systemName: "chart.bar").foregroundStyle(barIconColor(theme))
-                }
-                BarIconButton(theme: theme, id: "settingsBtn", a11y: "Settings",
-                              action: { showSettings = true }) {
-                    Image(systemName: "gearshape").foregroundStyle(barIconColor(theme))
+                    Image(systemName: store.muteAlertActive ? "speaker.slash.fill" : "speaker.wave.2")
+                        .foregroundStyle(store.muteAlertActive ? theme.danger : barIconColor(theme))
                 }
             }
             .padding(.horizontal, 4)

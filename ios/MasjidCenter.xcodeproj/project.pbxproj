@@ -36,7 +36,7 @@
 		DD6D92D11B9A0A81C891D67D /* Athan - Ali Ahmed Mullah - Masjid Al-Haram.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 57052D54949372391A1BD0D0 /* Athan - Ali Ahmed Mullah - Masjid Al-Haram.mp3 */; };
 		DDCFB5C5A4B87809A6627CDD /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D7ADE5000C30D8E219E0727 /* Models.swift */; };
 		EB2C42DDC556404884228117 /* MasjidCenterUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27C570AF77E40794D470F64B /* MasjidCenterUITests.swift */; };
-		F3588C02541461FE2A9BC1AA /* QuickPraySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BD29C1A073F88CBC3B1A676 /* QuickPraySheet.swift */; };
+		F3588C02541461FE2A9BC1AA /* PrayerOverviewSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BD29C1A073F88CBC3B1A676 /* PrayerOverviewSheet.swift */; };
 		F5CCD229309C3ED7DEFDBF9B /* StatisticsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 076C8DFC3DEAE1B78C2BA11A /* StatisticsSheet.swift */; };
 /* End PBXBuildFile section */
 
@@ -54,7 +54,7 @@
 		0712B998E2CAB7685385DE6D /* AppStoreOffline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStoreOffline.swift; sourceTree = "<group>"; };
 		076C8DFC3DEAE1B78C2BA11A /* StatisticsSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticsSheet.swift; sourceTree = "<group>"; };
 		1BCAB872020A089F611B5214 /* LocalStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalStore.swift; sourceTree = "<group>"; };
-		1BD29C1A073F88CBC3B1A676 /* QuickPraySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickPraySheet.swift; sourceTree = "<group>"; };
+		1BD29C1A073F88CBC3B1A676 /* PrayerOverviewSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerOverviewSheet.swift; sourceTree = "<group>"; };
 		1C0D2B908C15772CE55EBF23 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		27C570AF77E40794D470F64B /* MasjidCenterUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MasjidCenterUITests.swift; sourceTree = "<group>"; };
 		317825494731B397267FF3C2 /* PrayerListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerListView.swift; sourceTree = "<group>"; };
@@ -122,7 +122,7 @@
 				6FC7CD00A064D24AAE0A0D02 /* FloatingBars.swift */,
 				4692A100286580C3B5E67B9A /* NextPrayerCard.swift */,
 				317825494731B397267FF3C2 /* PrayerListView.swift */,
-				1BD29C1A073F88CBC3B1A676 /* QuickPraySheet.swift */,
+				1BD29C1A073F88CBC3B1A676 /* PrayerOverviewSheet.swift */,
 				E9CB5BAF437A5DF6C97BAB29 /* ScheduleMatrixView.swift */,
 				A357D0FC185A298216E3AD2D /* ServerSetupView.swift */,
 				BF51B1C3166E0289BEB1EA25 /* SettingsSheet.swift */,
@@ -281,7 +281,7 @@
 				31397D73175A4F1BC9FD06EF /* NextPrayerCard.swift in Sources */,
 				215E85B58B4C41258712CA7D /* NotificationManager.swift in Sources */,
 				075218E5A2996A67B58829E6 /* PrayerListView.swift in Sources */,
-				F3588C02541461FE2A9BC1AA /* QuickPraySheet.swift in Sources */,
+				F3588C02541461FE2A9BC1AA /* PrayerOverviewSheet.swift in Sources */,
 				1415C20FE5C9FDC5E098FD77 /* ScheduleMatrixView.swift in Sources */,
 				0E62A930181AEEAEDA1E5A43 /* ServerSetupView.swift in Sources */,
 				B381837AE8404F20CB6543BE /* SettingsSheet.swift in Sources */,
@@ -398,7 +398,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
-				MARKETING_VERSION = 6.5.0;
+				MARKETING_VERSION = 7.0.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -463,7 +463,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
-				MARKETING_VERSION = 6.5.0;
+				MARKETING_VERSION = 7.0.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;

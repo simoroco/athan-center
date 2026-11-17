@@ -2213,8 +2213,8 @@ body.dark-mode .audio-notification-content {
        so no specific desktop override needed. */
 }
 
-/* ===== QUICK FILL MODAL ===== */
-.qf-modal-content {
+/* ===== PRAYER OVERVIEW MODAL ===== */
+.po-modal-content {
     padding: 0;
     max-width: 520px;
     margin: 12px auto;
@@ -2225,7 +2225,7 @@ body.dark-mode .audio-notification-content {
     max-height: calc(100dvh - 24px);
 }
 
-.qf-modal-header {
+.po-modal-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -2234,13 +2234,13 @@ body.dark-mode .audio-notification-content {
     flex-shrink: 0;
 }
 
-.qf-modal-title {
+.po-modal-title {
     font-size: 1rem;
     font-weight: 600;
     color: var(--text-primary);
 }
 
-.qf-modal-content .close {
+.po-modal-content .close {
     position: static;
     font-size: 1.6rem;
     line-height: 1;
@@ -2251,7 +2251,7 @@ body.dark-mode .audio-notification-content {
     padding: 0 4px;
 }
 
-.qf-body {
+.po-body {
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     flex: 1;
@@ -2260,14 +2260,14 @@ body.dark-mode .audio-notification-content {
 }
 
 /* Table wrapper makes it fill width */
-.qf-table {
+.po-table {
     width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
 }
 
 /* Header row: prayer initials */
-.qf-table thead th {
+.po-table thead th {
     padding: 6px 2px 4px;
     text-align: center;
     font-size: 0.7rem;
@@ -2278,23 +2278,23 @@ body.dark-mode .audio-notification-content {
     width: 18%;
 }
 
-.qf-table thead th.qf-day-col {
+.po-table thead th.po-day-col {
     width: 10%;
     text-align: left;
     padding-left: 4px;
 }
 
 /* Body rows */
-.qf-table tbody tr {
+.po-table tbody tr {
     border-bottom: 1px solid var(--component-border);
 }
 
-.qf-table tbody tr:last-child {
+.po-table tbody tr:last-child {
     border-bottom: none;
 }
 
 /* Day label cell */
-.qf-day-label {
+.po-day-label {
     text-align: left;
     padding: 4px 4px 4px 6px;
     font-size: 0.72rem;
@@ -2305,30 +2305,30 @@ body.dark-mode .audio-notification-content {
     overflow: hidden;
 }
 
-.qf-lbl-short { display: none; }
-.qf-lbl-full  { display: inline; }
+.po-lbl-short { display: none; }
+.po-lbl-full  { display: inline; }
 
 /* Mobile: always show compact labels */
 @media (max-width: 768px) {
-    .qf-lbl-full  { display: none; }
-    .qf-lbl-short { display: inline; }
+    .po-lbl-full  { display: none; }
+    .po-lbl-short { display: inline; }
 }
 
 /* Desktop but very narrow container fallback */
 @container (max-width: 310px) {
-    .qf-lbl-full  { display: none; }
-    .qf-lbl-short { display: inline; }
+    .po-lbl-full  { display: none; }
+    .po-lbl-short { display: inline; }
 }
 
 /* Prayer toggle cell */
-.qf-table tbody td.qf-prayer-cell {
+.po-table tbody td.po-prayer-cell {
     padding: 3px 2px;
     text-align: center;
     vertical-align: middle;
 }
 
 /* The toggle button itself */
-.qf-prayer-btn {
+.po-prayer-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -2348,39 +2348,39 @@ body.dark-mode .audio-notification-content {
     -webkit-tap-highlight-color: transparent;
 }
 
-.qf-prayer-btn:active {
+.po-prayer-btn:active {
     transform: scale(0.92);
 }
 
 /* State: orange (state 2) */
-.qf-prayer-btn[data-state="2"] {
+.po-prayer-btn[data-state="2"] {
     background: var(--color-warning-bg, #fff3cd);
     border-color: var(--color-warning, #f59e0b);
     color: var(--color-warning, #f59e0b);
 }
 
 /* State: blue (state 1) */
-.qf-prayer-btn[data-state="1"] {
+.po-prayer-btn[data-state="1"] {
     background: #dbeafe;
     border-color: #3b82f6;
     color: #3b82f6;
 }
 
 /* Dark mode overrides */
-.dark-mode .qf-prayer-btn[data-state="1"] {
+.dark-mode .po-prayer-btn[data-state="1"] {
     background: #1e3a5f;
     border-color: #60a5fa;
     color: #60a5fa;
 }
 
-.dark-mode .qf-prayer-btn[data-state="2"] {
+.dark-mode .po-prayer-btn[data-state="2"] {
     background: #3d2e00;
     border-color: #f59e0b;
     color: #f59e0b;
 }
 
 /* Week separator row */
-.qf-week-sep td {
+.po-week-sep td {
     padding: 8px 6px 2px;
     font-size: 0.62rem;
     font-weight: 700;
@@ -2391,24 +2391,24 @@ body.dark-mode .audio-notification-content {
     border-bottom: none;
 }
 
-.qf-week-sep:first-child td {
+.po-week-sep:first-child td {
     padding-top: 4px;
 }
 
 /* Today row highlight */
-.qf-row-today {
+.po-row-today {
     background: rgba(59, 130, 246, 0.06);
 }
 
-.qf-row-today .qf-day-label {
+.po-row-today .po-day-label {
     color: #3b82f6;
     font-weight: 700;
 }
 
-.dark-mode .qf-row-today {
+.dark-mode .po-row-today {
     background: rgba(96, 165, 250, 0.1);
 }
 
-.dark-mode .qf-row-today .qf-day-label {
+.dark-mode .po-row-today .po-day-label {
     color: #60a5fa;
 }

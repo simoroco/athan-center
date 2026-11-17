@@ -110,8 +110,8 @@
             <button id="skipNextBtn" class="action-btn warning-btn" style="display: none;">
                 <span class="action-btn-icon"><svg class="icon"><use href="#i-volume-x"/></svg></span><span class="action-btn-label"> Mute next Athan</span>
             </button>
-            <button id="quickFillBtn" class="action-btn" style="display: none;" title="Quick fill incomplete days">
-                <span class="action-btn-icon">⚡️</span><span class="action-btn-label"> Quick Pray</span>
+            <button id="prayerOverviewBtn" class="action-btn" style="display: none;" title="Prayer overview">
+                <span class="action-btn-icon">⚡️</span><span class="action-btn-label"> Prayer Overview</span>
             </button>
             <button id="statisticsBtn" class="action-btn">
                 <span class="action-btn-icon"><svg class="icon"><use href="#i-bar-chart"/></svg></span><span class="action-btn-label"> History</span>
@@ -436,7 +436,7 @@
                         <svg class="icon"><use href="#i-alert"/></svg> This will reset ALL settings to their default values
                     </p>
                 </div>
-                <p class="app-version">© 2026 Masjid Center | v6.5.0</p>
+                <p class="app-version">© 2026 Masjid Center | v7.0.0</p>
             </div>
         </div>
 
@@ -498,14 +498,14 @@
             </div>
         </div>
 
-        <!-- Quick Fill Modal -->
-        <div id="quickFillModal" class="modal qf-modal">
-            <div class="modal-content qf-modal-content">
-                <div class="qf-modal-header">
-                    <span class="qf-modal-title">⚡️ Quick Pray</span>
-                    <span class="close" id="closeQuickFill">&times;</span>
+        <!-- Prayer Overview Modal -->
+        <div id="prayerOverviewModal" class="modal po-modal">
+            <div class="modal-content po-modal-content">
+                <div class="po-modal-header">
+                    <span class="po-modal-title">⚡️ Prayer Overview</span>
+                    <span class="close" id="closePrayerOverview">&times;</span>
                 </div>
-                <div id="quickFillBody" class="qf-body">
+                <div id="prayerOverviewBody" class="po-body">
                     <!-- Table populated dynamically -->
                 </div>
             </div>

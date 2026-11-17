@@ -1,8 +1,8 @@
 import SwiftUI
 
-// MARK: - QuickPraySheet — "⚡️ Quick Pray" modal (14-day grid with week separators).
+// MARK: - PrayerOverviewSheet — "⚡️ Prayer Overview" modal (14-day grid with week separators).
 
-struct QuickPraySheet: View {
+struct PrayerOverviewSheet: View {
     @EnvironmentObject var store: AppStore
     @Environment(\.dismiss) private var dismiss
     @State private var days: [(date: String, label: String)] = []
@@ -17,7 +17,7 @@ struct QuickPraySheet: View {
         case day(String, String)
     }
 
-    /// Flattened rows with ISO-week separators (qf-week-sep rows in the web app).
+    /// Flattened rows with ISO-week separators (po-week-sep rows in the web app).
     private var rowItems: [RowItem] {
         var items: [RowItem] = []
         var lastWeek = ""
@@ -67,7 +67,7 @@ struct QuickPraySheet: View {
                     }
                 }
             }
-            .navigationTitle("Quick Pray")
+            .navigationTitle("Prayer Overview")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -75,7 +75,7 @@ struct QuickPraySheet: View {
                         Image(systemName: "xmark").font(.system(size: 15, weight: .bold))
                             .foregroundStyle(theme.muted)
                     }
-                    .accessibilityIdentifier("closeQuickPray")
+                    .accessibilityIdentifier("closePrayerOverview")
                 }
             }
         }
@@ -83,7 +83,7 @@ struct QuickPraySheet: View {
     }
 
     private func load() async {
-        let r = await store.quickFillRows()
+        let r = await store.prayerOverviewRows()
         days = r.days
         checks = r.checks
         loading = false
@@ -105,7 +105,7 @@ struct QuickPraySheet: View {
         return HStack(spacing: 4) {
             Text(isToday ? "T." : shortDay(day.date))
                 .font(.system(size: 11, weight: .semibold))
-                .foregroundStyle(isToday ? theme.qfTodayLabel : theme.sheetText)
+                .foregroundStyle(isToday ? theme.poTodayLabel : theme.sheetText)
                 .frame(width: 44, alignment: .leading)
             ForEach(AC.mainPrayers, id: \.self) { p in
                 cell(date: day.date, prayer: p)
@@ -113,10 +113,10 @@ struct QuickPraySheet: View {
         }
         .padding(.vertical, 3)
         .padding(.horizontal, 4)
-        .background(isToday ? theme.qfTodayBg : .clear)
+        .background(isToday ? theme.poTodayBg : .clear)
         .clipShape(RoundedRectangle(cornerRadius: 6))
         .accessibilityElement(children: .contain)
-        .accessibilityIdentifier("qf-row-\(day.date)")
+        .accessibilityIdentifier("po-row-\(day.date)")
     }
 
     private func shortDay(_ ds: String) -> String {
@@ -127,7 +127,7 @@ struct QuickPraySheet: View {
 
     private func cell(date: String, prayer: String) -> some View {
         let state = checks[date]?[prayer] ?? 0
-        return QFPulseCell(theme: theme, date: date, prayer: prayer, state: state) {
+        return POPulseCell(theme: theme, date: date, prayer: prayer, state: state) {
             // Optimistic cycle 0 → 2 → 1 → 0, then POST toggle.
             let next = state == 0 ? 2 : (state == 2 ? 1 : 0)
             checks[date, default: [:]][prayer] = next
@@ -145,10 +145,10 @@ struct QuickPraySheet: View {
 
 }
 
-// MARK: - QFPulseCell — one quick-pray cell; fast heartbeat + gold glow
+// MARK: - POPulseCell — one prayer-overview cell; fast heartbeat + gold glow
 // when the tap checks it (blue or orange), like the main page rows.
 
-private struct QFPulseCell: View {
+private struct POPulseCell: View {
     let theme: AppTheme
     let date: String
     let prayer: String
@@ -165,7 +165,7 @@ private struct QFPulseCell: View {
         } label: {
             Text(state >= 1 ? "✓" : "")
                 .font(.system(size: 20, weight: .bold))
-                .foregroundStyle(state == 1 ? theme.qfCheckedText : theme.qfLateText)
+                .foregroundStyle(state == 1 ? theme.poCheckedText : theme.poLateText)
                 .frame(maxWidth: .infinity)
                 .frame(height: 44)
                 .background(cellBg)
@@ -184,13 +184,13 @@ private struct QFPulseCell: View {
                 .animation(.easeOut(duration: 0.4), value: glow)
         }
         .buttonStyle(.plain)
-        .accessibilityIdentifier("qf-\(date)-\(prayer)")
+        .accessibilityIdentifier("po-\(date)-\(prayer)")
     }
 
     private var cellBg: Color {
         switch state {
-        case 1: return theme.qfCheckedBg
-        case 2: return theme.qfLateBg
+        case 1: return theme.poCheckedBg
+        case 2: return theme.poLateBg
         default: return theme.componentBg
         }
     }

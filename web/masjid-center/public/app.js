@@ -434,13 +434,13 @@ async function checkSkipNextStatus() {
             }
         }
 
-        const quickFillBtn = document.getElementById('quickFillBtn');
+        const prayerOverviewBtn = document.getElementById('prayerOverviewBtn');
         const isDesktop = window.innerWidth >= 769;
 
         if (isDesktop) {
             // Desktop: always show both buttons regardless of date
             skipBtn.style.display = '';
-            if (quickFillBtn) quickFillBtn.style.display = '';
+            if (prayerOverviewBtn) prayerOverviewBtn.style.display = '';
             if (!shouldShow) {
                 muteAlert.style.display = 'none';
                 const cardEl = document.getElementById('nextPrayerCard');
@@ -448,17 +448,17 @@ async function checkSkipNextStatus() {
                 return;
             }
         } else {
-            // Mobile: toggle — only one at a time; never show quickFillBtn for today
+            // Mobile: toggle — only one at a time; never show prayerOverviewBtn for today
             if (!shouldShow && currentDateStr !== todayStr) {
                 muteAlert.style.display = 'none';
                 skipBtn.style.display = 'none';
-                if (quickFillBtn) quickFillBtn.style.display = '';
+                if (prayerOverviewBtn) prayerOverviewBtn.style.display = '';
                 const cardEl = document.getElementById('nextPrayerCard');
                 if (cardEl) cardEl.classList.remove('banner-up');
                 return;
             }
             skipBtn.style.display = '';
-            if (quickFillBtn) quickFillBtn.style.display = 'none';
+            if (prayerOverviewBtn) prayerOverviewBtn.style.display = 'none';
         }
         skipBtn.classList.remove('disabled');
         skipBtn.style.pointerEvents = 'auto';
@@ -1256,9 +1256,9 @@ function setupEventListeners() {
             if (statsModal && statsModal.style.display === 'block') {
                 statsModal.style.display = 'none';
             }
-            const qfModal = document.getElementById('quickFillModal');
-            if (qfModal && qfModal.style.display === 'block') {
-                qfModal.style.display = 'none';
+            const poModal = document.getElementById('prayerOverviewModal');
+            if (poModal && poModal.style.display === 'block') {
+                poModal.style.display = 'none';
             }
         }
     });
@@ -4522,8 +4522,8 @@ document.addEventListener('keydown', (event) => {
     }
 });
 
-// ===== QUICK FILL MODAL =====
-const QUICK_FILL_PRAYERS = [
+// ===== PRAYER OVERVIEW MODAL =====
+const PRAYER_OVERVIEW_PRAYERS = [
     { name: 'Fajr | Sobh', letter: 'Faj' },
     { name: 'Dohr',        letter: 'Doh' },
     { name: 'Asr',         letter: 'Asr' },
@@ -4531,18 +4531,18 @@ const QUICK_FILL_PRAYERS = [
     { name: 'Isha',        letter: 'Ish' },
 ];
 
-async function openQuickFillModal() {
-    const modal = document.getElementById('quickFillModal');
+async function openPrayerOverviewModal() {
+    const modal = document.getElementById('prayerOverviewModal');
     modal.style.display = 'block';
-    await loadQuickFillData();
+    await loadPrayerOverviewData();
 }
 
-function closeQuickFillModal() {
-    document.getElementById('quickFillModal').style.display = 'none';
+function closePrayerOverviewModal() {
+    document.getElementById('prayerOverviewModal').style.display = 'none';
 }
 
-async function loadQuickFillData() {
-    const body = document.getElementById('quickFillBody');
+async function loadPrayerOverviewData() {
+    const body = document.getElementById('prayerOverviewBody');
     body.innerHTML = '<p style="text-align:center;padding:20px;color:var(--text-secondary)">Loading…</p>';
     try {
         const today = getServerSyncedDate();
@@ -4579,7 +4579,7 @@ async function loadQuickFillData() {
         let oldestIncompleteIndex = -1;
         for (let i = days.length - 1; i >= 1; i--) { // skip today (index 0)
             const dayChecks = checksMap[days[i]] || {};
-            if (QUICK_FILL_PRAYERS.some(p => !dayChecks[p.name] || dayChecks[p.name] === 0)) {
+            if (PRAYER_OVERVIEW_PRAYERS.some(p => !dayChecks[p.name] || dayChecks[p.name] === 0)) {
                 oldestIncompleteIndex = i;
                 break;
             }
@@ -4600,8 +4600,8 @@ async function loadQuickFillData() {
         };
 
         // Build table
-        let html = '<table class="qf-table"><thead><tr><th class="qf-day-col"></th>';
-        QUICK_FILL_PRAYERS.forEach(p => { html += `<th>${p.letter}</th>`; });
+        let html = '<table class="po-table"><thead><tr><th class="po-day-col"></th>';
+        PRAYER_OVERVIEW_PRAYERS.forEach(p => { html += `<th>${p.letter}</th>`; });
         html += '</tr></thead><tbody>';
 
         let lastWeek = null;
@@ -4613,17 +4613,17 @@ async function loadQuickFillData() {
             const weekNum = getISOWeek(dateStr);
 
             if (weekNum !== lastWeek) {
-                html += `<tr class="qf-week-sep"><td colspan="6">W${weekNum}</td></tr>`;
+                html += `<tr class="po-week-sep"><td colspan="6">W${weekNum}</td></tr>`;
                 lastWeek = weekNum;
             }
 
             const shortLabel = isToday ? 'T.' : parts[2]; // just day number
-            html += `<tr data-date="${dateStr}"${isToday ? ' class="qf-row-today"' : ''}>`;
-            html += `<td class="qf-day-label"><span class="qf-lbl-full">${isToday ? 'Today' : dayDisplay}</span><span class="qf-lbl-short">${shortLabel}</span></td>`;
-            QUICK_FILL_PRAYERS.forEach(p => {
+            html += `<tr data-date="${dateStr}"${isToday ? ' class="po-row-today"' : ''}>`;
+            html += `<td class="po-day-label"><span class="po-lbl-full">${isToday ? 'Today' : dayDisplay}</span><span class="po-lbl-short">${shortLabel}</span></td>`;
+            PRAYER_OVERVIEW_PRAYERS.forEach(p => {
                 const state = dayChecks[p.name] || 0;
                 const inner = state >= 1 ? '✓' : '';
-                html += `<td class="qf-prayer-cell"><button class="qf-prayer-btn" data-date="${dateStr}" data-prayer="${p.name}" data-state="${state}">${inner}</button></td>`;
+                html += `<td class="po-prayer-cell"><button class="po-prayer-btn" data-date="${dateStr}" data-prayer="${p.name}" data-state="${state}">${inner}</button></td>`;
             });
             html += '</tr>';
         });
@@ -4631,7 +4631,7 @@ async function loadQuickFillData() {
         body.innerHTML = html;
 
         // Attach toggle handlers
-        body.querySelectorAll('.qf-prayer-btn').forEach(btn => {
+        body.querySelectorAll('.po-prayer-btn').forEach(btn => {
             btn.addEventListener('click', async () => {
                 const date = btn.dataset.date;
                 const prayer = btn.dataset.prayer;
@@ -4656,15 +4656,15 @@ async function loadQuickFillData() {
                     // If a past day's row is now complete, fade it out only if
                     // there are no older (lower in table) incomplete rows remaining
                     const row = btn.closest('tr');
-                    if (row && !row.classList.contains('qf-row-today')) {
-                        const allDone = Array.from(row.querySelectorAll('.qf-prayer-btn'))
+                    if (row && !row.classList.contains('po-row-today')) {
+                        const allDone = Array.from(row.querySelectorAll('.po-prayer-btn'))
                             .every(b => parseInt(b.dataset.state, 10) >= 1);
                         if (allDone) {
                             const tbody = row.closest('tbody');
                             const allDataRows = Array.from(tbody.querySelectorAll('tr[data-date]'));
                             const rowIndex = allDataRows.indexOf(row);
                             const hasOlderIncomplete = allDataRows.slice(rowIndex + 1).some(r =>
-                                Array.from(r.querySelectorAll('.qf-prayer-btn'))
+                                Array.from(r.querySelectorAll('.po-prayer-btn'))
                                     .some(b => parseInt(b.dataset.state, 10) === 0)
                             );
                             if (!hasOlderIncomplete) {
@@ -4678,7 +4678,7 @@ async function loadQuickFillData() {
                         }
                     }
 
-                    // Refresh skip/quick-fill button visibility
+                    // Refresh skip/prayer-overview button visibility
                     checkSkipNextStatus();
                 } catch (error) {
                     // Revert optimistic update on error
@@ -4691,14 +4691,14 @@ async function loadQuickFillData() {
 
     } catch (error) {
         body.innerHTML = '<p style="text-align:center;padding:20px;color:var(--color-danger)">Error loading data</p>';
-        console.error('Error loading quick fill data:', error);
+        console.error('Error loading prayer overview data:', error);
     }
 }
 
-document.getElementById('quickFillBtn').addEventListener('click', openQuickFillModal);
-document.getElementById('closeQuickFill').addEventListener('click', closeQuickFillModal);
-document.getElementById('quickFillModal').addEventListener('click', (e) => {
-    if (e.target === document.getElementById('quickFillModal')) closeQuickFillModal();
+document.getElementById('prayerOverviewBtn').addEventListener('click', openPrayerOverviewModal);
+document.getElementById('closePrayerOverview').addEventListener('click', closePrayerOverviewModal);
+document.getElementById('prayerOverviewModal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('prayerOverviewModal')) closePrayerOverviewModal();
 });
 
 // Export to Excel
