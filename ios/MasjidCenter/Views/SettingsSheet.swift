@@ -892,6 +892,14 @@ struct SettingsSheet: View {
             Text("Export all settings to a CSV file for backup or import to restore configuration")
                 .font(.system(size: 12)).foregroundStyle(theme.helpText)
 
+            PrimaryButton(theme: theme, title: "Reset iOS app",
+                          systemImage: "iphone", danger: true, disabled: busy,
+                          accessibility: "resetAppBtn") {
+                confirmResetApp = true
+            }
+            Text("Erases all app data on this iPhone, then quits — relaunch to redo the first-launch setup. The server is not affected.")
+                .font(.system(size: 12, weight: .semibold)).foregroundStyle(theme.danger)
+
             PrimaryButton(theme: theme, title: "Reset prayers & objectives",
                           systemImage: "arrow.clockwise", danger: true, disabled: busy,
                           accessibility: "resetChecksBtn") {
@@ -913,14 +921,6 @@ struct SettingsSheet: View {
                           accessibility: "permanentSilenceBtn") {
                 Task { await store.permanentSilence(); store.showToast("Permanent silence enabled") }
             }
-
-            PrimaryButton(theme: theme, title: "Reset iOS app",
-                          systemImage: "iphone", danger: true, disabled: busy,
-                          accessibility: "resetAppBtn") {
-                confirmResetApp = true
-            }
-            Text("Erases all app data on this iPhone, then quits — relaunch to redo the first-launch setup. The server is not affected.")
-                .font(.system(size: 12, weight: .semibold)).foregroundStyle(theme.danger)
         }
         .overlay {
             if busy { ProgressView().scaleEffect(1.3).frame(maxWidth: .infinity, maxHeight: .infinity).background(.black.opacity(0.15)) }
