@@ -75,6 +75,7 @@ struct SettingsSheet: View {
             .background(theme.sheetBg.ignoresSafeArea())
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarColorScheme(theme.dark ? .dark : .light, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { dismiss() } label: {
@@ -87,7 +88,7 @@ struct SettingsSheet: View {
         }
         .task {
             icsDraft = store.settings["ics_url"] ?? ""
-            serverDraft = store.serverBase
+            serverDraft = store.serverDisplayHost
             if !store.isStandalone {
                 await store.loadUpdateInfo()
                 await store.syncTime()
@@ -139,13 +140,19 @@ struct SettingsSheet: View {
             Text("This will reset ALL settings to their default values")
         }
         .alert("Reset the iOS app?", isPresented: $confirmResetApp) {
-            Button("Reset app", role: .destructive) {
+            Button("Reset & quit", role: .destructive) {
                 store.resetApp()
                 dismiss()
+                Task {
+                    // Brief beat so the async cleanup (pending-notification removal)
+                    // lands before the process exits; relaunch shows SetupView.
+                    try? await Task.sleep(nanoseconds: 600_000_000)
+                    exit(0)
+                }
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("All settings, checks and objectives stored on this iPhone will be erased and the first-launch setup will reappear. Nothing changes on the server.")
+            Text("All settings, checks and objectives stored on this iPhone will be erased, then the app will close. Relaunch it to run the first-launch setup again. Nothing changes on the server.")
         }
         .sheet(isPresented: $showActionEditor) {
             ActionEditSheet(editing: editingAction).environmentObject(store)
@@ -285,7 +292,7 @@ struct SettingsSheet: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text("Sync with Masjid Center Server").font(.system(size: 14, weight: .semibold)).foregroundStyle(theme.labelText)
                 HStack(spacing: 8) {
-                    TextField("http://192.168.1.50:7777", text: $serverDraft)
+                    TextField("192.168.1.50 or pi.local", text: $serverDraft)
                         .keyboardType(.URL)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
@@ -308,7 +315,7 @@ struct SettingsSheet: View {
                 }
                 Text(store.isStandalone
                      ? "Optional: connect to Masjid Center Server to sync data and have Athan on its speakers."
-                     : "HTTP address of Masjid Center Server (optional)")
+                     : "IP address or domain of Masjid Center Server (optional)")
                     .font(.system(size: 12)).foregroundStyle(theme.helpText)
                 if !store.isStandalone {
                     Button("Disconnect — use standalone mode") { store.switchToStandalone() }
@@ -907,12 +914,12 @@ struct SettingsSheet: View {
                 Task { await store.permanentSilence(); store.showToast("Permanent silence enabled") }
             }
 
-            PrimaryButton(theme: theme, title: "Reset app (iPhone only)",
+            PrimaryButton(theme: theme, title: "Reset iOS app",
                           systemImage: "iphone", danger: true, disabled: busy,
                           accessibility: "resetAppBtn") {
                 confirmResetApp = true
             }
-            Text("Erases all app data on this iPhone and returns to the first-launch setup. The server is not affected.")
+            Text("Erases all app data on this iPhone, then quits — relaunch to redo the first-launch setup. The server is not affected.")
                 .font(.system(size: 12, weight: .semibold)).foregroundStyle(theme.danger)
         }
         .overlay {

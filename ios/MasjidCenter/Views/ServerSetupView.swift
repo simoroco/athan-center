@@ -5,7 +5,7 @@ import SwiftUI
 
 struct ServerSetupView: View {
     @EnvironmentObject var store: AppStore
-    @State private var url: String = AC.defaultServer
+    @State private var url: String = ServerURL.display(AC.defaultServer)
     @State private var checking = false
     @State private var error: String? = nil
 
@@ -36,7 +36,7 @@ struct ServerSetupView: View {
                     .foregroundStyle(.white.opacity(0.85))
 
                 VStack(spacing: 14) {
-                    TextField("http://192.168.1.50:7777", text: $url)
+                    TextField("192.168.1.50 or pi.local", text: $url)
                         .keyboardType(.URL)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
@@ -76,10 +76,7 @@ struct ServerSetupView: View {
     }
 
     private func connect() {
-        var candidate = url.trimmingCharacters(in: .whitespacesAndNewlines)
-        if !candidate.lowercased().hasPrefix("http") {
-            candidate = "http://" + candidate
-        }
+        let candidate = ServerURL.normalize(url)
         checking = true
         error = nil
         Task {

@@ -14,12 +14,41 @@ enum APIError: Error, LocalizedError {
     }
 }
 
+// MARK: - ServerURL — the user only ever types an IP or a domain;
+// "http://" and the ":7777" port are implied everywhere.
+
+enum ServerURL {
+    static let defaultPort = 7777
+
+    /// "pi.local" / "192.168.1.50" → "http://pi.local:7777". An explicit
+    /// "https://" scheme or a non-default port is preserved on purpose.
+    static func normalize(_ raw: String) -> String {
+        var s = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        let https = s.lowercased().hasPrefix("https://")
+        if let r = s.range(of: "://") { s = String(s[r.upperBound...]) }
+        s = String(s.split(separator: "/", maxSplits: 1).first ?? "")
+        guard !s.isEmpty else { return "" }
+        let hasPort = s.range(of: #":\d+$"#, options: .regularExpression) != nil
+        return "\(https ? "https" : "http")://\(s)\(hasPort ? "" : ":\(defaultPort)")"
+    }
+
+    /// "http://192.168.1.50:7777" → "192.168.1.50" — what input fields display.
+    static func display(_ base: String) -> String {
+        var s = base
+        if let r = s.range(of: "://") { s = String(s[r.upperBound...]) }
+        s = String(s.split(separator: "/", maxSplits: 1).first ?? "")
+        let suffix = ":\(defaultPort)"
+        if s.hasSuffix(suffix) { s.removeLast(suffix.count) }
+        return s
+    }
+}
+
 actor APIClient {
     let base: String
     private let session: URLSession
 
     init(base: String) {
-        self.base = base.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        self.base = ServerURL.normalize(base)
         let cfg = URLSessionConfiguration.default
         cfg.timeoutIntervalForRequest = 8
         cfg.waitsForConnectivity = false

@@ -13,9 +13,13 @@ final class AppStore: ObservableObject {
         didSet {
             UserDefaults.standard.set(serverBase, forKey: "serverBaseURL")
             api = APIClient(base: serverBase)
-            Task { await boot() }
+            bootTask = Task { await boot() }
         }
     }
+    /// Last boot started by a server address change — first-launch setup awaits it.
+    var bootTask: Task<Void, Never>?
+    /// True while first-launch setup is fetching data: the main screen stays hidden (loader in SetupView).
+    @Published var settingUp = false
     private(set) var api: APIClient
 
     // MARK: Server clock sync (syncTimeWithServer)
@@ -188,10 +192,9 @@ final class AppStore: ObservableObject {
 
     var configured: Bool { !serverBase.isEmpty }
 
-    /// Server address as shown to the user (scheme trimmed): "192.168.1.50:7777".
+    /// Server address as shown to the user: "192.168.1.50" (scheme and default port hidden).
     var serverDisplayHost: String {
-        serverBase.replacingOccurrences(of: "^https?://", with: "", options: .regularExpression)
-            .trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        ServerURL.display(serverBase)
     }
 
     // MARK: - Boot
@@ -736,8 +739,9 @@ final class AppStore: ObservableObject {
     }
 
     /// Full iOS-side reset: wipes every local datum (LocalStore snapshot,
-    /// UserDefaults incl. the server address, pending notifications) without
-    /// touching the server. setupComplete flips → SetupView reappears.
+    /// UserDefaults incl. the server address, pending notifications) and every
+    /// in-memory field, without touching the server. setupComplete flips to
+    /// false → SetupView replaces the main screen right away, no relaunch needed.
     func resetApp() {
         stopLoops()
         audio.stopLocal()
@@ -746,11 +750,37 @@ final class AppStore: ObservableObject {
             UserDefaults.standard.removePersistentDomain(forName: bid)
         }
         rescheduleNotifications()           // clears pending requests; notifications are off in the fresh snap
-        connected = false
-        serverTimeInfo = nil
+        selectedDate = Date()
+        prayers = []
+        prayerChecks = [:]
+        activityChecks = [:]
+        nextPrayer = nil
+        cardVisible = false
+        cardDateOnly = false
+        settings = [:]
         updateInfo = nil
         audioSupport = nil
-        serverBase = ""                     // didSet → fresh API client + re-boot on the empty snapshot
+        skipNext = false
+        mutedWeekdays = [:]
+        schedule = []
+        ramadanDates = []
+        audioFiles = []
+        quranFiles = []
+        audioDevices = []
+        connected = false
+        loadingPrayers = false
+        probing = false
+        toast = nil
+        muteAlertManual = false
+        muteAlertGeneral = false
+        actionsEditMode = false
+        geoCityName = nil
+        ishaPassedSync = false
+        serverTimeInfo = nil
+        serverOffset = 0
+        settingUp = false
+        booted = false
+        serverBase = ""                     // setupComplete flips → SetupView; didSet → fresh API client
         objectWillChange.send()
     }
 

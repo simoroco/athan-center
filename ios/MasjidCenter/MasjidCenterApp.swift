@@ -8,21 +8,36 @@ struct MasjidCenterApp: App {
 
     var body: some Scene {
         WindowGroup {
-            Group {
-                if store.setupComplete {
-                    ContentView()
-                } else {
-                    SetupView()
-                }
-            }
+            // The setup/main swap MUST live in a real View: reads inside a
+            // Scene's content builder don't subscribe to the store, so a
+            // conditional here never re-evaluated on publishes and the app
+            // stayed on SetupView forever after a successful setup.
+            RootView()
             .environmentObject(store)
-            .preferredColorScheme(store.theme.dark ? .dark : .light)
             .task { store.requestLocationPermissionOnce() }
             .onAppear { StatusBarPin.install() }
             .onChange(of: scenePhase) { _, phase in
                 if phase == .active { store.requestLocationPermissionOnce() }
             }
         }
+    }
+}
+
+/// First-launch gate — re-evaluates on every store publish (View body).
+private struct RootView: View {
+    @EnvironmentObject private var store: AppStore
+    var body: some View {
+        Group {
+            if store.setupComplete {
+                ContentView()
+            } else {
+                SetupView()
+            }
+        }
+        // Must be read in a real View body: a read in the Scene builder would
+        // freeze the launch-time scheme and system UI (nav titles, keyboard,
+        // pickers) would stay light after a dark-mode toggle.
+        .preferredColorScheme(store.theme.dark ? .dark : .light)
     }
 }
 

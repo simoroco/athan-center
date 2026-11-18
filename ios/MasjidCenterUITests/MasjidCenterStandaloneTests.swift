@@ -19,7 +19,8 @@ final class MasjidCenterStandaloneTests: XCTestCase {
         return app
     }
 
-    /// Fresh install → the single setup field → "Paris" + search (validates the city) → Continue → home screen with local prayer times.
+    /// Fresh install → the single setup field → "Paris" + Return (runs the whole
+    /// validate + configure pipeline with the loader) → home screen with local prayer times.
     private func launchStandalone(city: String = "Paris") -> XCUIApplication {
         let app = launchFresh()
         XCTAssertTrue(app.buttons["useLocationButton"].waitForExistence(timeout: 10), "Setup screen expected")
@@ -27,11 +28,7 @@ final class MasjidCenterStandaloneTests: XCTestCase {
         XCTAssertTrue(field.waitForExistence(timeout: 5))
         field.tap()
         field.typeText(city + "\n")
-        let confirm = app.buttons["setupConfirmButton"]
-        expectation(for: NSPredicate(format: "isEnabled == true"), evaluatedWith: confirm)
-        waitForExpectations(timeout: 20)
-        confirm.tap()
-        XCTAssertTrue(app.buttons["prayer-Dohr"].waitForExistence(timeout: 40), "Prayer times must load from the ICS link")
+        XCTAssertTrue(app.buttons["prayer-Dohr"].waitForExistence(timeout: 60), "Prayer times must load from the ICS link")
         return app
     }
 
@@ -115,15 +112,16 @@ final class MasjidCenterStandaloneTests: XCTestCase {
         let field = app.textFields["setupField"]
         let confirm = app.buttons["setupConfirmButton"]
         XCTAssertTrue(field.exists, "A single field must be displayed")
-        XCTAssertFalse(confirm.isEnabled, "Nothing validated yet → Continue locked")
+        XCTAssertFalse(confirm.isEnabled, "Empty field → Continue locked")
 
-        // A server address is detected as such and checked live: nobody answers on :1.
+        // A server address is detected as such; Return validates: nobody answers on :1 → error.
         field.tap()
-        field.typeText("127.0.0.1:1")
+        field.typeText("127.0.0.1:1\n")
         let status = app.descendants(matching: .any)["setupStatus"]
         expectation(for: NSPredicate(format: "label CONTAINS[c] 'Cannot reach'"), evaluatedWith: status)
         waitForExpectations(timeout: 15)
-        XCTAssertFalse(confirm.isEnabled, "An unreachable server must never be accepted")
+        XCTAssertTrue(field.exists, "An unreachable server must stay on the setup screen")
+        XCTAssertTrue(confirm.isEnabled, "The button stays tappable — each validation retries")
         XCTAssertTrue(confirm.label.contains("Connect"), "A server address switches the action to Connect")
     }
 

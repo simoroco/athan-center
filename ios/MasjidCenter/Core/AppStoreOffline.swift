@@ -17,13 +17,15 @@ extension AppStore {
     /// The ICS link itself can be configured later in Settings → Location.
     var standaloneReady: Bool { !local.snap.prayers.isEmpty }
     /// Whether first-launch setup (location OR server) is complete.
-    var setupComplete: Bool { isStandalone ? standaloneReady : configured }
+    var setupComplete: Bool { !settingUp && (isStandalone ? standaloneReady : configured) }
 
     // MARK: Setup / mode switching
 
     /// Standalone setup: store location + ICS URL, fetch prayers, apply.
     func configureStandalone(city: String, lat: Double, lon: Double, tz: String) async -> Bool {
         let url = ICSClient.icsURL(city: city, lat: lat, lon: lon, tz: tz)
+        settingUp = true
+        defer { settingUp = false }
         guard let map = try? await ICSClient.fetch(urlString: url), !map.isEmpty else { return false }
         local.snap.mode = .standalone
         local.snap.cityName = city
@@ -80,10 +82,20 @@ extension AppStore {
     }
 
     /// Switch to server mode (from Settings → Connect to server).
+    /// Accepts a bare IP/domain ("192.168.1.50") — http:// and :7777 are implied.
     func connectToServer(_ base: String) {
         local.snap.mode = .server
         local.save()
-        serverBase = base                  // didSet -> boot()
+        serverBase = ServerURL.normalize(base)   // didSet -> boot()
+    }
+
+    /// First-launch server setup: connect, then wait for the initial data
+    /// before the main screen replaces the setup screen.
+    func connectToServerAndLoad(_ base: String) async {
+        settingUp = true
+        defer { settingUp = false }
+        connectToServer(base)
+        await bootTask?.value
     }
 
     /// Standalone boot — no network calls except ICS refresh.

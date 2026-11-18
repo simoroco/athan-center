@@ -180,6 +180,45 @@ final class MasjidCenterUITests: XCTestCase {
     }
 }
 
+// MARK: - First-launch setup with a server (fresh install, real Pi)
+
+extension MasjidCenterUITests {
+
+    /// Type the server IP + Return → validate → loader → boot → home screen.
+    /// Regression: validation used to be gated on a finished live check, so a
+    /// quick validation did literally nothing.
+    func testSetupServerFlow() throws {
+        let app = XCUIApplication()
+        app.launchArguments = ["-resetLocal"]
+        app.launch()
+        let field = app.textFields["setupField"]
+        XCTAssertTrue(field.waitForExistence(timeout: 10), "Setup screen expected")
+        field.tap()
+        field.typeText("192.168.1.50\n")   // Return = validate → Connect pipeline
+        XCTAssertTrue(app.buttons["prayer-Dohr"].waitForExistence(timeout: 40),
+                      "Connect must boot the app and show the main screen")
+    }
+
+    /// The LAN scan must offer the discovered server as a chip — never typed
+    /// into the field (injected text corrupted user input: "192.168.1.51Paris").
+    /// Tapping the chip fills the field, checks the server, then Connect boots.
+    func testSetupDiscoveryChipConnects() throws {
+        let app = XCUIApplication()
+        app.launchArguments = ["-resetLocal"]
+        app.launch()
+        let chip = app.buttons["setupDiscoveredServer"]
+        XCTAssertTrue(chip.waitForExistence(timeout: 20),
+                      "LAN scan must offer the discovered server as a suggestion")
+        chip.tap()
+        let status = app.descendants(matching: .any)["setupStatus"]
+        expectation(for: NSPredicate(format: "label CONTAINS[c] 'reachable'"), evaluatedWith: status)
+        waitForExpectations(timeout: 15)
+        app.buttons["setupConfirmButton"].tap()
+        XCTAssertTrue(app.buttons["settingsBtn"].waitForExistence(timeout: 40),
+                      "Connect from the discovered chip must reach the main screen")
+    }
+}
+
 // MARK: - Server-mode stability / regression tests
 
 extension MasjidCenterUITests {
@@ -285,6 +324,37 @@ extension MasjidCenterUITests {
         app.buttons["calendarBtn"].tap()
         XCTAssertTrue(waitFor(app.buttons["closeCalendar"]))
         save(app.screenshot(), "05-calendar")
+    }
+
+    /// Dark mode must restyle SYSTEM chrome too — the Settings nav title must
+    /// be white on the dark sheet, not black (regression: preferredColorScheme
+    /// read in the Scene builder stayed at the launch-time value).
+    func testDarkModeSettingsTitle() throws {
+        let app = launch()
+        XCTAssertTrue(waitFor(app.buttons["settingsBtn"], 20))
+        app.buttons["settingsBtn"].tap()
+        XCTAssertTrue(waitFor(app.buttons["closeSettings"]))
+
+        let row = app.descendants(matching: .any)["darkModeToggle"].firstMatch
+        XCTAssertTrue(row.waitForExistence(timeout: 10))
+
+        // The toggle capsule is folded into the row's accessibility element,
+        // so tap by screen coordinates: the row's mid-Y, near the sheet's
+        // trailing edge where the capsule sits.
+        func tapToggle() {
+            let y = row.frame.midY
+            app.coordinate(withNormalizedOffset: .zero)
+                .withOffset(CGVector(dx: app.frame.width - 64, dy: y))
+                .tap()
+        }
+
+        tapToggle()                                     // → other theme
+        sleep(2)
+        tapToggle()                                     // → back
+        sleep(2)
+        save(app.screenshot(), "settings-dark-title")
+
+        XCTAssertTrue(app.navigationBars["Settings"].exists)
     }
 
     private func save(_ shot: XCUIScreenshot, _ name: String) {

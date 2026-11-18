@@ -21,9 +21,17 @@ struct SetupView: View {
     @State private var serverTask: Task<Void, Never>? = nil
     /// Set for a programmatic `query` change so onChange doesn't invalidate the place it just validated.
     @State private var silent = false
+    /// Search-field frame in the "setup" space — background taps inside it must NOT dismiss the keyboard.
+    @State private var fieldFrame: CGRect = .zero
+    /// True while the background LAN scan is looking for a server.
+    @State private var scanning = false
+    /// Server found by the LAN scan — offered as a tappable chip, NEVER written
+    /// into the field (injected text corrupted the user's own typing: a city
+    /// typed over a pre-filled IP became "192.168.1.51Paris" → misclassified).
+    @State private var discovered: String? = nil
 
     private enum ServerState { case idle, checking, reachable, unreachable }
-    private enum Kind { case empty, city, server(String) }
+    private enum Kind: Equatable { case empty, city, server(String) }
 
     // MARK: Input classification
 
@@ -37,15 +45,15 @@ struct SetupView: View {
             || matches(#"^[a-z0-9-]+(\.[a-z0-9-]+)+(:\d{1,5})?(/\S*)?$"#)           // pi.local, my.domain.org
             || matches(#"^localhost(/\S*)?$"#)
         guard isServer else { return .city }
-        var url = s.lowercased().hasPrefix("http") ? s : "http://" + s
-        while url.hasSuffix("/") { url.removeLast() }
-        return .server(url)
+        return .server(ServerURL.normalize(s))
     }
 
     private var kind: Kind { Self.classify(query) }
     private var serverURL: String? { if case .server(let u) = kind { return u }; return nil }
     private var isCity: Bool { if case .city = kind { return true }; return false }
-    private var canConfirm: Bool { serverURL != nil ? serverState == .reachable : place != nil }
+    /// The button stays tappable whenever something is typed: confirm()
+    /// performs the validation itself and shows the loader while doing so.
+    private var canConfirm: Bool { kind != .empty && !busy }
     private var showResults: Bool { isCity && place == nil && !citySearch.results.isEmpty }
 
     // MARK: Body
@@ -65,7 +73,16 @@ struct SetupView: View {
                     .clipped()
                     .ignoresSafeArea()
                 theme.bgOverlay.ignoresSafeArea()
-                    .onTapGesture { focused = false }
+                    // Tap outside the field → dismiss the keyboard. Without the
+                    // frame check this gesture could fight the field's own tap
+                    // and intermittently steal its focus.
+                    .gesture(
+                        SpatialTapGesture(coordinateSpace: .named("setup"))
+                            .onEnded { v in
+                                if !fieldFrame.insetBy(dx: -12, dy: -12).contains(v.location) {
+                                    focused = false
+                                }
+                            })
 
                 VStack(spacing: 14) {
                     if !focused { header.transition(.opacity.combined(with: .scale(scale: 0.9))) }
@@ -80,26 +97,39 @@ struct SetupView: View {
                 .frame(maxWidth: 520, maxHeight: .infinity, alignment: focused ? .top : .center)
                 .animation(.spring(response: 0.35, dampingFraction: 0.88), value: focused)
             }
+            .coordinateSpace(name: "setup")
         }
         .onChange(of: query) { _, q in
             if silent { silent = false; return }
             queryChanged(q)
+        }
+        .task {
+            // Background LAN scan: probe the subnet for a Masjid Center server
+            // and offer it as a chip — the field itself is never touched. The
+            // task is cancelled automatically when the setup view disappears.
+            scanning = true
+            defer { scanning = false }
+            guard let url = await ServerDiscovery.findServer(), !Task.isCancelled else { return }
+            guard query.isEmpty, place == nil else { return }
+            discovered = url
         }
     }
 
     // MARK: Pieces
 
     private var header: some View {
-        VStack(spacing: 16) {
+        let theme = store.theme
+        return VStack(spacing: 16) {
             Image("logo")
                 .resizable()
+                .renderingMode(.template)
+                .foregroundStyle(theme.textCard)
+                .glowText(theme, gold: true)
                 .frame(width: 96, height: 96)
-                .clipShape(RoundedRectangle(cornerRadius: 22))
-                .shadow(color: Color(hex: 0xD4AF37).opacity(0.6), radius: 18)
             Text("Masjid Center")
                 .font(.system(size: 32, weight: .bold))
-                .foregroundStyle(.white)
-                .shadow(color: .black.opacity(0.5), radius: 6)
+                .foregroundStyle(theme.textCard)
+                .glowText(theme, gold: true)
         }
         .padding(.bottom, 10)
     }
@@ -118,6 +148,7 @@ struct SetupView: View {
                 .font(.system(size: 17))
                 .foregroundStyle(theme.inputText)
                 .tint(theme.textAccent)
+                .disabled(busy)
                 .onSubmit { submit() }
                 .accessibilityIdentifier("setupField")
             Button { useLocation() } label: {
@@ -141,12 +172,25 @@ struct SetupView: View {
         .overlay(RoundedRectangle(cornerRadius: 18)
             .strokeBorder(focused ? AppTheme.gold : theme.inputBorder, lineWidth: focused ? 2 : 1))
         .shadow(color: .black.opacity(0.25), radius: 10, y: 4)
+        // Explicit focus on tap anywhere in the row + frame tracking so the
+        // background tap-to-dismiss can ignore taps that land on the field.
+        .contentShape(Rectangle())
+        .onTapGesture { focused = true }
+        .onGeometryChange(for: CGRect.self) { $0.frame(in: .named("setup")) } action: {
+            fieldFrame = $0
+        }
     }
 
     /// One reserved slot for hints / validation / errors, so nothing below it jumps.
     private var statusLine: some View {
         Group {
-            if let e = message ?? location.error {
+            if busy {
+                HStack(spacing: 8) {
+                    ProgressView().controlSize(.small).tint(.white)
+                    Text(serverURL != nil ? "Connecting…" : "Downloading prayer times…")
+                }
+                .foregroundStyle(.white.opacity(0.85))
+            } else if let e = message ?? location.error {
                 Label(e, systemImage: "exclamationmark.triangle.fill")
                     .foregroundStyle(Color(hex: 0xFCA5A5))
             } else if serverURL != nil {
@@ -164,11 +208,17 @@ struct SetupView: View {
                     Label("Cannot reach the server", systemImage: "xmark.circle.fill")
                         .foregroundStyle(Color(hex: 0xFCA5A5))
                 case .idle:
-                    Text("Enter the full server address").foregroundStyle(.white.opacity(0.7))
+                    Text("Enter the server IP address or domain").foregroundStyle(.white.opacity(0.7))
                 }
             } else if let p = place {
                 Label(p.city, systemImage: "checkmark.circle.fill")
                     .foregroundStyle(AppTheme.gold)
+            } else if scanning && kind == .empty {
+                HStack(spacing: 8) {
+                    ProgressView().controlSize(.small).tint(.white)
+                    Text("Searching the local network for a server…")
+                }
+                .foregroundStyle(.white.opacity(0.85))
             } else {
                 Text("Type a city or a server address, or use your location")
                     .foregroundStyle(.white.opacity(0.7))
@@ -194,6 +244,8 @@ struct SetupView: View {
                 .background(theme.inputBg, in: RoundedRectangle(cornerRadius: 18))
                 .clipShape(RoundedRectangle(cornerRadius: 18))
                 .shadow(color: .black.opacity(0.25), radius: 10, y: 4)
+            } else if let discovered, kind == .empty {
+                discoveredChip(theme, discovered)
             }
         }
         .frame(maxHeight: focused ? .infinity : nil, alignment: .top)
@@ -228,6 +280,33 @@ struct SetupView: View {
         }
     }
 
+    /// Server found on the local network — same card look as a city suggestion.
+    private func discoveredChip(_ theme: AppTheme, _ ip: String) -> some View {
+        Button { pickDiscovered(ip) } label: {
+            HStack(spacing: 12) {
+                Image(systemName: "server.rack")
+                    .font(.system(size: 20))
+                    .foregroundStyle(theme.textAccent)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Masjid Center server found")
+                        .font(.system(size: 16, weight: .semibold))
+                    Text(ip)
+                        .font(.system(size: 13))
+                        .foregroundStyle(theme.muted)
+                }
+                .lineLimit(1)
+                Spacer(minLength: 0)
+            }
+            .foregroundStyle(theme.inputText)
+            .padding(.horizontal, 14).padding(.vertical, 11)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .background(theme.inputBg, in: RoundedRectangle(cornerRadius: 18))
+        .shadow(color: .black.opacity(0.25), radius: 10, y: 4)
+        .accessibilityIdentifier("setupDiscoveredServer")
+    }
+
     private func confirmButton(_ theme: AppTheme) -> some View {
         Button { confirm() } label: {
             HStack(spacing: 8) {
@@ -242,7 +321,7 @@ struct SetupView: View {
             .background(theme.brandGradient, in: RoundedRectangle(cornerRadius: 18))
         }
         .buttonStyle(.plain)
-        .disabled(!canConfirm || busy)
+        .disabled(!canConfirm)
         .opacity(canConfirm ? 1 : 0.4)
         .accessibilityIdentifier("setupConfirmButton")
     }
@@ -299,11 +378,22 @@ struct SetupView: View {
         focused = false
         message = nil
         serverTask?.cancel()
+        busy = true   // blocks the confirm button while resolving
         Task {
+            defer { busy = false }
             guard let p = await location.resolve() else { return }   // reason in location.error
             serverState = .idle
             validate(p)
         }
+    }
+
+    /// Fills the field with the discovered server — a deliberate user choice,
+    /// so the live check runs and Connect unlocks like a typed address.
+    private func pickDiscovered(_ ip: String) {
+        focused = false
+        message = nil
+        discovered = nil
+        query = ip   // non-silent edit → checkServer → "Checking server…" → reachable
     }
 
     private func pick(_ c: MKLocalSearchCompletion) {
@@ -317,38 +407,48 @@ struct SetupView: View {
         }
     }
 
-    /// Keyboard "search": validates the typed city when no suggestion was picked, or confirms.
+    /// Keyboard "search": same as tapping the confirm button — validate then go.
     private func submit() {
         focused = false
-        switch kind {
-        case .empty: return
-        case .server: if canConfirm { confirm() }
-        case .city:
-            if place != nil { confirm(); return }
-            message = nil
-            busy = true
-            Task {
-                defer { busy = false }
-                guard let p = await LocationManager.search(city: query) else { message = "City not found."; return }
-                validate(p)
-            }
-        }
+        confirm()
     }
 
+    /// A reachable check that can run at confirm time: reuses the debounced
+    /// result when it already succeeded, pings the server directly otherwise.
+    private func ensureServerReachable(_ url: String) async -> Bool {
+        if serverState == .reachable { return true }
+        serverTask?.cancel()
+        let ok = (try? await APIClient(base: url).serverTime()) != nil
+        serverState = ok ? .reachable : .unreachable
+        return ok
+    }
+
+    /// Always runs the full pipeline for whatever was typed — never gated by
+    /// a not-yet-finished validation (that made taps silently do nothing).
+    /// `busy` drives the loader for the whole validate + configure duration.
     private func confirm() {
-        guard canConfirm, !busy else { return }
+        guard canConfirm else { return }
         focused = false
         message = nil
-        if let url = serverURL {
-            store.connectToServer(url)   // setupComplete flips → main screen
-            return
-        }
-        guard let p = place else { return }
         busy = true
         Task {
             defer { busy = false }
-            if await !store.configureStandalone(city: p.city, lat: p.lat, lon: p.lon, tz: p.tz) {
-                message = "Could not download prayer times. Check your connection."
+            switch kind {
+            case .empty:
+                return
+            case .server(let url):
+                if await ensureServerReachable(url) {
+                    await store.connectToServerAndLoad(url)   // setupComplete flips → main screen
+                } else {
+                    message = "Cannot reach the server"
+                }
+            case .city:
+                var p = place
+                if p == nil { p = await LocationManager.search(city: query) }
+                guard let p else { message = "City not found."; return }
+                if await !store.configureStandalone(city: p.city, lat: p.lat, lon: p.lon, tz: p.tz) {
+                    message = "Could not download prayer times. Check your connection."
+                }
             }
         }
     }
