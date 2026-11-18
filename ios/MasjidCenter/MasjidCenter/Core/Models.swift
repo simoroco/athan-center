@@ -12,7 +12,10 @@ enum AC {
     ]
     static let weekdayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] // prayer_schedule: 0=Mon
     static let weekdayNamesSun = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"] // JS getDay(): 0=Sun
-    static let appVersion = "© 2026 Masjid Center | v7.5.0"
+    /// Read from the bundle so project.yml's MARKETING_VERSION is the only
+    /// place to bump — never hardcode the version here.
+    static let appVersion = "© 2026 Masjid Center | v"
+        + (Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?")
     static let defaultServer = "http://192.168.1.50:7777"
 
     /// Audio bundled into the app — athan & Quran keep working with no server

@@ -39,8 +39,7 @@ struct ActionEditSheet: View {
                             .foregroundStyle(theme.muted)
                         LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 8), spacing: 10) {
                             ForEach(icons, id: \.self) { e in
-                                Text(e)
-                                    .font(.system(size: 26))
+                                ObjectiveIcon(icon: e, isAsset: false, size: 26, theme: theme)
                                     .frame(width: 40, height: 40)
                                     .background(icon == e ? Color(hex: 0xD4AF37).opacity(0.35) : Color.clear)
                                     .clipShape(RoundedRectangle(cornerRadius: 8))
@@ -85,7 +84,7 @@ struct ActionEditSheet: View {
                             ForEach(store.local.snap.hiddenBuiltins, id: \.self) { n in
                                 HStack(spacing: 10) {
                                     if let bi = AC.activities.first(where: { $0.name == n }) {
-                                        Image(bi.icon).resizable().frame(width: 26, height: 26)
+                                        ObjectiveIcon(icon: bi.icon, isAsset: true, size: 26, theme: theme)
                                     }
                                     Text(n).foregroundStyle(theme.textPrimary)
                                     Spacer()

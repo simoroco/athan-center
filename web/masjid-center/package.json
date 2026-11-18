@@ -1,6 +1,6 @@
 {
   "name": "masjid-center",
-  "version": "3.1.0",
+  "version": "7.6.0",
   "description": "Complete Islamic prayer times solution with automatic Athan playback. Self-hosted, Docker-ready, perfect for Raspberry Pi. REST API, web interface, mosque-ready.",
   "main": "server.js",
   "scripts": {

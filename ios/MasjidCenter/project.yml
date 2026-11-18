@@ -7,7 +7,7 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.0"
-    MARKETING_VERSION: "7.5.0"
+    MARKETING_VERSION: "7.6.0"
     CURRENT_PROJECT_VERSION: "1"
     TARGETED_DEVICE_FAMILY: "1"
 targets:
@@ -21,6 +21,8 @@ targets:
       path: MasjidCenter/Info.plist
       properties:
         CFBundleDisplayName: Masjid Center
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         UILaunchScreen:
           UILaunchScreen_Generation: true
         UISupportedInterfaceOrientations:

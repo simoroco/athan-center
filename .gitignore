@@ -38,3 +38,6 @@ Thumbs.db
 # Test / tooling caches
 .pytest_cache/
 .windsurf/
+
+# iOS build artifacts (archives, IPA exports)
+ios/build/

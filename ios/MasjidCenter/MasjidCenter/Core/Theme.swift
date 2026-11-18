@@ -156,12 +156,14 @@ struct GlowText: ViewModifier {
 
     func body(content: Content) -> some View {
         if gold {
-            // next-prayer-card glow
+            // next-prayer-card glow — gold in light mode, black in dark
+            // (body.dark-mode .next-prayer-card in styles.css).
+            let glow = theme.dark ? Color.black : Color(hex: 0xD4AF37)
             content
-                .shadow(color: Color(hex: 0xD4AF37), radius: 1.5)
-                .shadow(color: Color(hex: 0xD4AF37).opacity(0.95), radius: 3.5)
-                .shadow(color: Color(hex: 0xD4AF37).opacity(0.75), radius: 7)
-                .shadow(color: Color(hex: 0xD4AF37).opacity(0.55), radius: 11)
+                .shadow(color: glow, radius: 1.5)
+                .shadow(color: glow.opacity(0.95), radius: 3.5)
+                .shadow(color: glow.opacity(0.75), radius: 7)
+                .shadow(color: glow.opacity(0.55), radius: 11)
                 .shadow(color: Color.black.opacity(0.45), radius: 1.5, y: 1)
         } else {
             content

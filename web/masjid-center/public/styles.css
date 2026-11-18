@@ -575,6 +575,18 @@ body.dark-mode .next-prayer-card.date-only {
     color: var(--text-accent) !important;
 }
 
+/* Objective symbols: flat monochrome silhouette like the nav/settings icons —
+   black on the light theme, white on dark. Same emoji, just recolored.
+   No text-shadow/stroke (inherited from .activity-name): flat like the nav icons. */
+.activity-icon {
+    filter: brightness(0);
+    text-shadow: none;
+    -webkit-text-stroke: 0;
+}
+body.dark-mode .activity-icon {
+    filter: brightness(0) invert(1);
+}
+
 .activity-name {
     font-size: 0.82rem;
     font-weight: 700;

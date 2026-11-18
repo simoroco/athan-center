@@ -288,7 +288,7 @@ struct SetupView: View {
                     .font(.system(size: 20))
                     .foregroundStyle(theme.textAccent)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Masjid Center server found")
+                    Text("Masjid Center Server nearby")
                         .font(.system(size: 16, weight: .semibold))
                     Text(ip)
                         .font(.system(size: 13))

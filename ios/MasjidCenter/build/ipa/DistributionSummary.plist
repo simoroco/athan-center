@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>MasjidCenter.ipa</key>
+	<array>
+		<dict>
+			<key>architectures</key>
+			<array>
+				<string>arm64</string>
+			</array>
+			<key>buildNumber</key>
+			<string>1</string>
+			<key>certificate</key>
+			<dict>
+				<key>SHA1</key>
+				<string>8BD4E016887CE141371EFD4489122B3727525946</string>
+				<key>dateExpires</key>
+				<string>3/16/27</string>
+				<key>type</key>
+				<string>Apple Development</string>
+			</dict>
+			<key>entitlements</key>
+			<dict>
+				<key>application-identifier</key>
+				<string>HZ947F72NK.com.masjidcenter.app</string>
+				<key>com.apple.developer.team-identifier</key>
+				<string>HZ947F72NK</string>
+				<key>get-task-allow</key>
+				<true/>
+			</dict>
+			<key>name</key>
+			<string>MasjidCenter.app</string>
+			<key>profile</key>
+			<dict>
+				<key>UUID</key>
+				<string>31400e75-be0c-463d-84ab-7dd1e31b6b44</string>
+				<key>dateExpires</key>
+				<string>11/24/26</string>
+				<key>name</key>
+				<string>iOS Team Provisioning Profile: com.masjidcenter.app</string>
+			</dict>
+			<key>team</key>
+			<dict>
+				<key>id</key>
+				<string>HZ947F72NK</string>
+				<key>name</key>
+				<string>Mohammed BENJELLOUN</string>
+			</dict>
+			<key>versionNumber</key>
+			<string>7.6.0</string>
+		</dict>
+	</array>
+</dict>
+</plist>

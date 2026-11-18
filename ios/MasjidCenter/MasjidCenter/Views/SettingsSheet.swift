@@ -37,14 +37,14 @@ struct SettingsSheet: View {
                                 .font(.system(size: 40))
                                 .foregroundStyle(AppTheme.gold)
                         }
-                        Text("لا تنسى أخاك في دعائك")
-                            .font(.system(size: 20, weight: .semibold))
                         HStack(spacing: 6) {
-                            Text("Don't forget your brother in your du'a")
-                                .font(.system(size: 16, weight: .semibold))
+                            Text("لا تنسى أخاك في دعائك")
+                                .font(.system(size: 20, weight: .semibold))
                             Image("emoji-pray").resizable().frame(width: 18, height: 18)
                             Image("emoji-pray").resizable().frame(width: 18, height: 18)
                         }
+                        Text("Don't forget your brother in your du'a")
+                            .font(.system(size: 16, weight: .semibold))
                     }
                     .foregroundStyle(theme.duaText)
                     .frame(maxWidth: .infinity)
@@ -392,11 +392,7 @@ struct SettingsSheet: View {
 
     private func objectiveRow(_ a: ActionItem) -> some View {
         HStack(spacing: 10) {
-            if a.isAsset {
-                Image(a.icon).resizable().frame(width: 24, height: 24)
-            } else {
-                Text(a.icon).font(.system(size: 20))
-            }
+            ObjectiveIcon(icon: a.icon, isAsset: a.isAsset, size: 24, theme: theme)
             Text(a.name).font(.system(size: 15, weight: .medium)).foregroundStyle(theme.sheetText)
             if a.counter {
                 Text("counter").font(.system(size: 11, weight: .semibold)).foregroundStyle(theme.muted)
@@ -430,7 +426,7 @@ struct SettingsSheet: View {
     private func hiddenObjectiveRow(_ name: String) -> some View {
         HStack(spacing: 10) {
             if let bi = AC.activities.first(where: { $0.name == name }) {
-                Image(bi.icon).resizable().frame(width: 24, height: 24).opacity(0.5)
+                ObjectiveIcon(icon: bi.icon, isAsset: true, size: 24, theme: theme).opacity(0.5)
             }
             Text(name).font(.system(size: 15, weight: .medium)).foregroundStyle(theme.muted)
             Text("hidden").font(.system(size: 11, weight: .semibold)).foregroundStyle(theme.muted)
@@ -892,12 +888,12 @@ struct SettingsSheet: View {
             Text("Export all settings to a CSV file for backup or import to restore configuration")
                 .font(.system(size: 12)).foregroundStyle(theme.helpText)
 
-            PrimaryButton(theme: theme, title: "Reset iOS app",
+            PrimaryButton(theme: theme, title: "Reset iOS app configuration",
                           systemImage: "iphone", danger: true, disabled: busy,
                           accessibility: "resetAppBtn") {
                 confirmResetApp = true
             }
-            Text("Erases all app data on this iPhone, then quits — relaunch to redo the first-launch setup. The server is not affected.")
+            Text("Erases all app data on this iPhone and restarts setup. The server is not affected.")
                 .font(.system(size: 12, weight: .semibold)).foregroundStyle(theme.danger)
 
             PrimaryButton(theme: theme, title: "Reset prayers & objectives",

@@ -1,6 +1,91 @@
 import SwiftUI
 import UIKit
 
+// MARK: - ObjectiveIcon — the same flat monochrome look as the nav-bar icons
+// (white in dark mode, near-black in light). Asset PNGs are tinted directly;
+// emoji glyphs are rasterized to a mask first. The symbols are unchanged —
+// only the colors are stripped.
+
+struct ObjectiveIcon: View {
+    let icon: String
+    let isAsset: Bool
+    var size: CGFloat = 40
+    let theme: AppTheme
+
+    var body: some View {
+        Group {
+            if isAsset {
+                Image(icon).renderingMode(.template).resizable()
+            } else {
+                Image(uiImage: Self.mask(icon, pointSize: size))
+                    .renderingMode(.template).resizable()
+            }
+        }
+        .aspectRatio(contentMode: .fit)
+        .frame(width: size, height: size)
+        .foregroundStyle(barIconColor(theme))
+    }
+
+    /// Emoji → UIImage masks, cached (view bodies re-evaluate on every publish).
+    private static var maskCache: [String: UIImage] = [:]
+    static func mask(_ text: String, pointSize: CGFloat) -> UIImage {
+        let key = "\(text)@\(Int(pointSize))"
+        if let img = maskCache[key] { return img }
+        let s = NSAttributedString(string: text,
+                                   attributes: [.font: UIFont.systemFont(ofSize: pointSize)])
+        let bounds = s.boundingRect(with: CGSize(width: 200, height: 200),
+                                    options: .usesLineFragmentOrigin, context: nil)
+        let size = CGSize(width: ceil(bounds.width) + 4, height: ceil(bounds.height) + 4)
+        let img = UIGraphicsImageRenderer(size: size).image { _ in
+            s.draw(at: CGPoint(x: 2 - bounds.origin.x, y: 2 - bounds.origin.y))
+        }
+        maskCache[key] = img
+        return img
+    }
+}
+
+// MARK: - FlowLayout — rows of tiles that wrap instead of scrolling/clipping.
+// Each row is centered (same look as the old centered HStack).
+
+private struct FlowLayout: Layout {
+    var hSpacing: CGFloat = 14
+    var vSpacing: CGFloat = 16
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let maxW = proposal.width ?? .infinity
+        var x: CGFloat = 0, y: CGFloat = 0, rowH: CGFloat = 0
+        for s in subviews {
+            let size = s.sizeThatFits(.unspecified)
+            if x > 0, x + size.width > maxW { x = 0; y += rowH + vSpacing; rowH = 0 }
+            rowH = max(rowH, size.height)
+            x += size.width + hSpacing
+        }
+        return CGSize(width: maxW.isFinite ? maxW : x, height: y + rowH)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        var rows: [[(LayoutSubview, CGSize)]] = [[]]
+        var x: CGFloat = 0
+        for s in subviews {
+            let size = s.sizeThatFits(.unspecified)
+            if x > 0, x + size.width > bounds.width { rows.append([]); x = 0 }
+            rows[rows.count - 1].append((s, size))
+            x += size.width + hSpacing
+        }
+        var y = bounds.minY
+        for row in rows {
+            let rowW = row.reduce(CGFloat(0)) { $0 + $1.1.width } + hSpacing * CGFloat(row.count - 1)
+            var rx = bounds.minX + max(0, (bounds.width - rowW) / 2)
+            let rowH = row.map { $0.1.height }.max() ?? 0
+            for (s, size) in row {
+                s.place(at: CGPoint(x: rx, y: y), anchor: .topLeading, proposal: ProposedViewSize(size))
+                rx += size.width + hSpacing
+            }
+            y += rowH + vSpacing
+        }
+    }
+}
+
 // MARK: - Prayers list, daily activities, date navigation, action buttons.
 
 struct PrayerListView: View {
@@ -166,18 +251,9 @@ struct DailyActivitiesView: View {
     }
 
     var body: some View {
-        let tiles = store.allActions.count + (jiggle ? 2 : 0)
-        let _ = tiles
-        // Fixed-size circles: centered when they fit, horizontal scroll otherwise.
-        ViewThatFits(in: .horizontal) {
-            HStack(spacing: 14) { rowContent() }
-                .frame(maxWidth: .infinity)
-            ScrollView(.horizontal) {
-                HStack(spacing: 14) { rowContent() }
-            }
-            .scrollIndicators(.hidden)
-            .scrollDisabled(dragId != nil)
-        }
+        // Fixed-size circles, centered per row. Overflow wraps to a second
+        // line — never clips a tile off the right edge (iPhone 13 only fits 3).
+        FlowLayout(hSpacing: 14, vSpacing: 16) { rowContent() }
         // Rebuild the whole row on mode toggle: kills the scroll offset that
         // otherwise keeps drifting the tiles for seconds after edit mode ends.
         .id(jiggle)
@@ -271,17 +347,10 @@ struct DailyActivitiesView: View {
                     Task { await store.toggleActivity(a.id) }
                 }
             } label: {
-                // The symbol stays centered in the circle in every state; the
-                // check / counter reads as a badge straddling the bottom rim.
-                Group {
-                    if a.isAsset {
-                        Image(a.icon).resizable().frame(width: 40, height: 40)
-                    } else {
-                        Text(a.icon).font(.system(size: 38))
-                    }
-                }
+                // The symbol stays centered in the circle in every state —
+                // flat monochrome, no glow/shadow (matches the nav icons).
+                ObjectiveIcon(icon: a.icon, isAsset: a.isAsset, size: 40, theme: theme)
                 .frame(width: 84, height: 84)
-                .glowText(theme)
                 // Jiggle animates the glyph + check only: the circle itself
                 // never moves off its slot.
                 .rotationEffect(.degrees(jiggle ? phase * (wiggleOn ? 3.4 : -3.4) : 0))
@@ -290,10 +359,6 @@ struct DailyActivitiesView: View {
                 .animation(.easeInOut(duration: 0.16), value: wiggleOn)
                 .frame(width: 84, height: 84)
                 .glassCircle(theme)
-                .overlay(alignment: .bottom) {
-                    stateBadge(a, checked: checked, past: past)
-                        .offset(y: 12)
-                }
                 // Check heartbeat, identical to the prayer rows: scale pulse +
                 // gold ring & halo that fade right after.
                 .overlay(Circle().strokeBorder(AppTheme.gold.opacity(glowId == a.id ? 0.95 : 0), lineWidth: 2))
@@ -322,6 +387,15 @@ struct DailyActivitiesView: View {
                         }
                     }
             )
+
+            // Check / counter badge lives OUTSIDE the button label so it stays
+            // above the tile in every state — including while the heartbeat
+            // scale + glow animation runs (it used to slip under the borders).
+            stateBadge(a, checked: checked, past: past)
+                .frame(width: 84, height: 84, alignment: .bottom)
+                .offset(y: 12)
+                .allowsHitTesting(false)
+                .zIndex(5)
 
             // Red X on EVERY action tile — customs are deleted, built-ins hidden.
             if jiggle {
@@ -407,11 +481,11 @@ struct DailyActivitiesView: View {
         } label: {
             Image(systemName: "plus")
                 .font(.system(size: 28, weight: .bold))
-                .foregroundStyle(Color(hex: 0xD4AF37))
+                .foregroundStyle(barIconColor(theme))
                 .frame(width: 84, height: 84)
                 .background(Color.white.opacity(0.06))
                 .overlay(Circle().strokeBorder(
-                    Color(hex: 0xD4AF37).opacity(0.5), style: StrokeStyle(lineWidth: 1.5, dash: [6, 4])))
+                    barIconColor(theme).opacity(0.5), style: StrokeStyle(lineWidth: 1.5, dash: [6, 4])))
                 .clipShape(Circle())
         }
         .buttonStyle(.plain)
@@ -425,7 +499,7 @@ struct DailyActivitiesView: View {
         } label: {
             Image(systemName: "checkmark")
                 .font(.system(size: 20, weight: .bold))
-                .foregroundStyle(theme.textAccent)
+                .foregroundStyle(barIconColor(theme))
                 .frame(width: 84, height: 84)
         }
         .buttonStyle(.plain)
