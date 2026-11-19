@@ -23,6 +23,7 @@
 		87F0AB69BAEBB27DB228FD2A /* Sourat Al Kahf - Hani Arrifai.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = B40D79547DFE5AAB38DA3B36 /* Sourat Al Kahf - Hani Arrifai.mp3 */; };
 		8EE4AFD7670CF90B204CE5AC /* SettingsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BAE3A708B9A9506BEA01DCC /* SettingsSheet.swift */; };
 		91B32E1AE9299385BFC81A85 /* TasbihView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEDFB494782F44E78FC114D /* TasbihView.swift */; };
+		944EA193C270B395DD1E8C55 /* water_drop.wav in Resources */ = {isa = PBXBuildFile; fileRef = 1F99B7D155819FFA571A435E /* water_drop.wav */; };
 		9DA8AB0657FC0A1C1008A723 /* NextPrayerCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A422062EBDEDEF3FE916DE2 /* NextPrayerCard.swift */; };
 		9E10029F7F3AF6A30399F83B /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52F28B5F9778EB67D5D181A6 /* LocationManager.swift */; };
 		A9D14559164AC72D8E02287D /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D68A0ADD9C5C8A191438AD0 /* Theme.swift */; };
@@ -56,6 +57,7 @@
 		12100506847D98AD4FDA7DD4 /* ScheduleMatrixView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleMatrixView.swift; sourceTree = "<group>"; };
 		15E7DEB56A7D5614836DCD39 /* default_athan.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = default_athan.mp3; sourceTree = "<group>"; };
 		1DEDFB494782F44E78FC114D /* TasbihView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TasbihView.swift; sourceTree = "<group>"; };
+		1F99B7D155819FFA571A435E /* water_drop.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = water_drop.wav; sourceTree = "<group>"; };
 		25D827C56224DDF3E16B98A7 /* FloatingBars.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingBars.swift; sourceTree = "<group>"; };
 		2761541D120274DFBE82E084 /* CalendarSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarSheet.swift; sourceTree = "<group>"; };
 		2850E363CF0D0A38A56F85B7 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -156,6 +158,7 @@
 				73B513A02D9456D3DA307CAA /* Info.plist */,
 				C04894028D6D422B8CD53C75 /* MasjidCenterApp.swift */,
 				B40D79547DFE5AAB38DA3B36 /* Sourat Al Kahf - Hani Arrifai.mp3 */,
+				1F99B7D155819FFA571A435E /* water_drop.wav */,
 				B5FFE7E489944EAA3A7D0F58 /* Core */,
 				BA08288414603A5BDC36C2A8 /* Views */,
 			);
@@ -258,6 +261,7 @@
 				70BA62F0C16331B41F5BA113 /* Athan - Omar Hisham Al Arabi.mp3 in Resources */,
 				87F0AB69BAEBB27DB228FD2A /* Sourat Al Kahf - Hani Arrifai.mp3 in Resources */,
 				4E855A05A99DCF3032CD3476 /* default_athan.mp3 in Resources */,
+				944EA193C270B395DD1E8C55 /* water_drop.wav in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -405,7 +409,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
-				MARKETING_VERSION = 7.6.0;
+				MARKETING_VERSION = 7.7.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -488,7 +492,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
-				MARKETING_VERSION = 7.6.0;
+				MARKETING_VERSION = 7.7.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;

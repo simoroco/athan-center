@@ -27,6 +27,21 @@ enum AC {
     ]
     static let bundledQurans = ["Sourat Al Kahf - Hani Arrifai.mp3"]
 
+    /// Default time assigned to the Nth newly-added objective reminder
+    /// (first free slot is picked, so added reminders stay spread out).
+    static let reminderTimeDefaults = ["09:00", "12:00", "15:00", "18:00", "21:00"]
+
+    /// Per-count slots of the legacy count-only reminder setting — kept to
+    /// migrate stored counts (snapshot + CSV backups) to explicit times.
+    static let legacyReminderSlots: [[String]] = [
+        [],
+        ["20:00"],
+        ["10:00", "20:00"],
+        ["09:00", "14:00", "20:00"],
+        ["09:00", "13:00", "17:00", "21:00"],
+        ["09:00", "12:00", "15:00", "18:00", "21:00"]
+    ]
+
     /// getPrayerName() from app.js — normalizes ICS event names for display.
     static func displayPrayerName(_ name: String) -> String {
         let names: [String: String] = [

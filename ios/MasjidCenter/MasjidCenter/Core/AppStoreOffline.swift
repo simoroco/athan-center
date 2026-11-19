@@ -469,21 +469,25 @@ extension AppStore {
             }
             local.save()
             objectWillChange.send()
+            rescheduleNotifications()    // a hidden objective's reminders must not fire
             return
         }
         local.snap.customActions.removeAll { $0.id == id }
+        local.snap.objectiveReminders.removeValue(forKey: id)
         for (date, _) in local.snap.activities {
             local.snap.activities[date]?.removeValue(forKey: id)
         }
         local.save()
         activityChecks = local.snap.activities[selectedDateStr] ?? activityChecks
         objectWillChange.send()
+        rescheduleNotifications()
     }
 
     func restoreBuiltin(id: String) {
         local.snap.hiddenBuiltins.removeAll { $0 == id }
         local.save()
         objectWillChange.send()
+        rescheduleNotifications()    // restoring also re-arms its configured reminders
     }
 
     /// List-style reorder (kept for List .onMove); drag & drop goes through
@@ -547,6 +551,9 @@ extension AppStore {
 
     // MARK: Notifications
 
+    /// Master switch ("iOS notifications" in Settings → General): every
+    /// notification and every sound the app emits on this iPhone — athan
+    /// alerts, objective reminders, athan/Quran/startup/test playback.
     var notificationsEnabled: Bool {
         get { local.snap.notificationsEnabled }
         set {
@@ -569,11 +576,60 @@ extension AppStore {
         }
     }
 
+    // MARK: Objective reminders (iOS-app notifications only)
+
+    /// Reminder times ("HH:mm", sorted) configured for an objective (max 5).
+    /// iOS-only: keyed by action id, never synced to the server.
+    func objectiveReminderTimes(for id: String) -> [String] {
+        local.snap.objectiveReminders[id] ?? []
+    }
+
+    /// Adds a reminder at the first free default slot (spread across the day).
+    func addObjectiveReminder(_ id: String) {
+        var times = objectiveReminderTimes(for: id)
+        guard times.count < 5 else { return }
+        times.append(AC.reminderTimeDefaults.first { !times.contains($0) } ?? "12:00")
+        saveObjectiveReminders(id, times)
+    }
+
+    func removeObjectiveReminder(_ id: String, at index: Int) {
+        var times = objectiveReminderTimes(for: id)
+        guard times.indices.contains(index) else { return }
+        times.remove(at: index)
+        saveObjectiveReminders(id, times)
+    }
+
+    func setObjectiveReminderTime(_ id: String, at index: Int, time: String) {
+        var times = objectiveReminderTimes(for: id)
+        guard times.indices.contains(index),
+              DateUtil.timeFmt.date(from: time) != nil else { return }
+        times[index] = time
+        saveObjectiveReminders(id, times)
+    }
+
+    /// Dedupes, sorts, clamps to 5 and persists — then reschedules the
+    /// local notifications so the change is live immediately.
+    private func saveObjectiveReminders(_ id: String, _ times: [String]) {
+        let unique = Array(Array(Set(times)).sorted().prefix(5))
+        if unique.isEmpty { local.snap.objectiveReminders.removeValue(forKey: id) }
+        else { local.snap.objectiveReminders[id] = unique }
+        local.save()
+        objectWillChange.send()
+        rescheduleNotifications()
+    }
+
     func rescheduleNotifications() {
         NotificationManager.shared.reschedule(
             prayers: local.snap.prayers,
             scheduleEnabled: { [weak self] p, d in
                 self?.local.scheduleEnabled(p, d) ?? true
+            },
+            reminders: allActions.map {
+                (id: $0.id, name: $0.name,
+                 times: (local.snap.objectiveReminders[$0.id] ?? []).compactMap { t in
+                     let p = t.split(separator: ":").compactMap { Int($0) }
+                     return p.count == 2 ? (hour: p[0], minute: p[1]) : nil
+                 })
             },
             enabled: local.snap.notificationsEnabled)
     }
@@ -582,7 +638,7 @@ extension AppStore {
 
     /// Whether the iPhone itself should play athan/quran. Merged with iOS
     /// notifications: enabling them means the iPhone alerts AND plays the
-    /// enabled audio itself.
+    /// enabled audio itself — the master switch for all app sounds.
     var iosAudioEnabled: Bool {
         get { local.snap.notificationsEnabled }
         set {

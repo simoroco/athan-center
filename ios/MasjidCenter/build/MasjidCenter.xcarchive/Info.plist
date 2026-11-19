@@ -13,7 +13,7 @@
 		<key>CFBundleIdentifier</key>
 		<string>com.masjidcenter.app</string>
 		<key>CFBundleShortVersionString</key>
-		<string>7.6.0</string>
+		<string>7.7.0</string>
 		<key>CFBundleVersion</key>
 		<string>1</string>
 		<key>SigningIdentity</key>
@@ -24,7 +24,7 @@
 	<key>ArchiveVersion</key>
 	<integer>2</integer>
 	<key>CreationDate</key>
-	<date>2026-11-18T18:26:27Z</date>
+	<date>2026-11-19T22:38:50Z</date>
 	<key>Name</key>
 	<string>MasjidCenter</string>
 	<key>SchemeName</key>

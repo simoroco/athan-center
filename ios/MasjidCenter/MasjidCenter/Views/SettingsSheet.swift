@@ -21,6 +21,7 @@ struct SettingsSheet: View {
     @State private var actionDeleteTarget: ActionItem? = nil
     @State private var busy = false
     @State private var cityDraft = ""
+    @State private var selectedObjectiveId: String? = nil
     @StateObject private var location = LocationManager()
     @StateObject private var citySearch = CitySearchCompleter()
 
@@ -288,6 +289,15 @@ struct SettingsSheet: View {
             Text("Enable dark mode for a comfortable viewing experience in low-light environments")
                 .font(.system(size: 13)).foregroundStyle(theme.helpText)
 
+            // Master switch for everything the app emits on this iPhone:
+            // notifications AND sounds (was in "Audio control").
+            ToggleRow(theme: theme, title: "iOS notifications",
+                      isOn: Binding(get: { store.notificationsEnabled },
+                                    set: { store.notificationsEnabled = $0 }))
+                .accessibilityIdentifier("notificationsToggle")
+            Text("Master switch for all notifications and sounds the app emits on this iPhone: prayer alerts, objective reminders, athan, Quran recitation and test sounds. When off, the iOS app stays completely silent — even if sounds are configured in \"Athan call\", \"Tasbih & Objectives\" or \"Quran recitation\".")
+                .font(.system(size: 13)).foregroundStyle(theme.helpText)
+
             // iOS-specific: server address (the web app is served same-origin).
             VStack(alignment: .leading, spacing: 6) {
                 Text("Sync with Masjid Center Server").font(.system(size: 14, weight: .semibold)).foregroundStyle(theme.labelText)
@@ -369,6 +379,10 @@ struct SettingsSheet: View {
                 let hidden = store.local.snap.hiddenBuiltins
                 ForEach(Array(store.allActions.enumerated()), id: \.element.id) { i, a in
                     objectiveRow(a)
+                    // Selected objective → reminder stepper expands right below it.
+                    if selectedObjectiveId == a.id {
+                        objectiveReminderPanel(a)
+                    }
                     if i < store.allActions.count - 1 || !hidden.isEmpty {
                         Divider().overlay(theme.inputBorder)
                     }
@@ -385,19 +399,40 @@ struct SettingsSheet: View {
                 editingAction = nil
                 showActionEditor = true
             }
-            Text("The pencil edits a custom objective. The trash hides a built-in (restorable below) or deletes a custom one.")
+            Text("Tap an objective to set its daily reminder notifications (iOS app only). The pencil edits a custom objective. The trash hides a built-in (restorable below) or deletes a custom one.")
                 .font(.system(size: 12)).foregroundStyle(theme.helpText)
         }
     }
 
     private func objectiveRow(_ a: ActionItem) -> some View {
-        HStack(spacing: 10) {
-            ObjectiveIcon(icon: a.icon, isAsset: a.isAsset, size: 24, theme: theme)
-            Text(a.name).font(.system(size: 15, weight: .medium)).foregroundStyle(theme.sheetText)
-            if a.counter {
-                Text("counter").font(.system(size: 11, weight: .semibold)).foregroundStyle(theme.muted)
+        let selected = selectedObjectiveId == a.id
+        let reminders = store.objectiveReminderTimes(for: a.id).count
+        return HStack(spacing: 0) {
+            // The row itself is the selector — the bell badge shows the
+            // configured reminder count at a glance.
+            Button {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    selectedObjectiveId = selected ? nil : a.id
+                }
+            } label: {
+                HStack(spacing: 10) {
+                    ObjectiveIcon(icon: a.icon, isAsset: a.isAsset, size: 24, theme: theme)
+                    Text(a.name).font(.system(size: 15, weight: .medium)).foregroundStyle(theme.sheetText)
+                    if a.counter {
+                        Text("counter").font(.system(size: 11, weight: .semibold)).foregroundStyle(theme.muted)
+                    }
+                    Spacer()
+                    if reminders > 0 {
+                        Label("\(reminders)", systemImage: "bell.fill")
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundStyle(theme.textAccent)
+                            .labelStyle(.titleAndIcon)
+                    }
+                }
+                .contentShape(Rectangle())
             }
-            Spacer()
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("selectObjective-\(a.name)")
             if !a.builtin {
                 Button {
                     editingAction = store.local.snap.customActions.first { $0.id == a.id }
@@ -421,6 +456,57 @@ struct SettingsSheet: View {
             .accessibilityIdentifier("deleteObjective-\(a.name)")
         }
         .padding(.horizontal, 12).padding(.vertical, 6)
+        .background(selected ? theme.textAccent.opacity(0.10) : Color.clear)
+    }
+
+    /// Daily reminders for the selected objective (0–5 notifications/day),
+    /// each with its own time. These are iOS-app-only local notifications —
+    /// never sent to the server.
+    private func objectiveReminderPanel(_ a: ActionItem) -> some View {
+        let times = store.objectiveReminderTimes(for: a.id)
+        return VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 10) {
+                Image(systemName: "bell.fill").font(.system(size: 13))
+                    .foregroundStyle(theme.textAccent)
+                Text("Daily reminders (\(times.count)/5)")
+                    .font(.system(size: 14, weight: .semibold)).foregroundStyle(theme.sheetText)
+                Spacer()
+            }
+            ForEach(Array(times.enumerated()), id: \.offset) { i, t in
+                HStack(spacing: 10) {
+                    Image(systemName: "clock").font(.system(size: 13))
+                        .foregroundStyle(theme.muted)
+                    Text("Reminder \(i + 1)")
+                        .font(.system(size: 14)).foregroundStyle(theme.sheetText)
+                    Spacer()
+                    DatePicker("", selection: Binding(
+                        get: { DateUtil.timeFmt.date(from: t) ?? Date() },
+                        set: { store.setObjectiveReminderTime(a.id, at: i, time: DateUtil.timeString($0)) }),
+                        displayedComponents: .hourAndMinute)
+                        .labelsHidden()
+                        .accessibilityIdentifier("reminderTime-\(a.name)-\(i)")
+                    Button { store.removeObjectiveReminder(a.id, at: i) } label: {
+                        Image(systemName: "minus.circle.fill").font(.system(size: 20))
+                            .foregroundStyle(theme.danger)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("reminderRemove-\(a.name)-\(i)")
+                }
+            }
+            Button { store.addObjectiveReminder(a.id) } label: {
+                Label("Add reminder", systemImage: "plus.circle.fill")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(times.count < 5 ? theme.textAccent : theme.muted.opacity(0.5))
+            }
+            .buttonStyle(.plain)
+            .disabled(times.count >= 5)
+            .accessibilityIdentifier("reminderAdd-\(a.name)")
+            Text("Up to 5 per day — notifications from the iOS app on this iPhone only (nothing is sent to the server). They can only be silenced by \"iOS notifications\" in General, or by removing all reminders.")
+                .font(.system(size: 12)).foregroundStyle(theme.helpText)
+        }
+        .padding(.horizontal, 12).padding(.vertical, 10)
+        .background(theme.inputBg)
+        .transition(.opacity)
     }
 
     private func hiddenObjectiveRow(_ name: String) -> some View {
@@ -692,15 +778,6 @@ struct SettingsSheet: View {
 
     @ViewBuilder
     private var audioSection: some View {
-        // Merged "iOS notifications" toggle (was Athan notifications + Play
-        // audio on this iPhone): alerts AND plays enabled audio on this iPhone.
-        ToggleRow(theme: theme, title: "iOS notifications",
-                  isOn: Binding(get: { store.notificationsEnabled },
-                                set: { store.notificationsEnabled = $0 }))
-            .accessibilityIdentifier("notificationsToggle")
-        Text("Notifies at each enabled prayer and plays the athan / Quran recitation on this iPhone")
-            .font(.system(size: 12)).foregroundStyle(theme.helpText)
-
         if store.isStandalone { standaloneAudioSection } else { serverAudioSection }
     }
 

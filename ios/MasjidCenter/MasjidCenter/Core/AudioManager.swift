@@ -21,12 +21,18 @@ final class AudioManager: ObservableObject {
     private var statusObserver: NSKeyValueObservation?
     private var stopTimer: Task<Void, Never>?
 
+    /// Master gate wired to "iOS notifications" (Settings → General): when it
+    /// returns false the app emits no sound at all, whatever is configured in
+    /// Athan call / Tasbih & Objectives / Quran recitation.
+    var playbackGate: (() -> Bool)?
+
     init() {
         try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
     }
 
     /// Play a remote audio URL. `limit30s` trims like the web 30s previews.
     func play(url: URL, banner: String, limit30s: Bool = false, isPrayer: Bool = false) {
+        guard playbackGate?() ?? true else { return }
         stopLocal()
         try? AVAudioSession.sharedInstance().setActive(true)
         bannerText = banner

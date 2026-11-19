@@ -188,6 +188,9 @@ final class AppStore: ObservableObject {
         audio.objectWillChange
             .sink { [weak self] _ in self?.objectWillChange.send() }
             .store(in: &cancellables)
+        // "iOS notifications" is the master switch for every sound the app
+        // emits on this iPhone (athan, Quran, startup, tests, previews).
+        audio.playbackGate = { [weak self] in self?.notificationsEnabled ?? false }
     }
 
     var configured: Bool { !serverBase.isEmpty }
@@ -702,6 +705,10 @@ final class AppStore: ObservableObject {
     }
 
     func restoreDefaults() async {
+        // iOS-only config that the server can't reset: objective reminders.
+        local.snap.objectiveReminders = [:]
+        local.save()
+        rescheduleNotifications()
         if isStandalone {
             local.snap.checks = [:]
             local.snap.activities = [:]
@@ -717,14 +724,21 @@ final class AppStore: ObservableObject {
     }
 
     /// Configuration backup in the web CSV format: from the server API when it
-    /// is reachable, generated locally otherwise — either file loads on the Pi.
+    /// is reachable (plus the iOS-only rows the server can't store), generated
+    /// locally otherwise — either file loads unchanged on the Pi.
     func exportConfigCSV() async -> String? {
         if isStandalone || !connected { return local.exportConfigCSV() }
-        return try? await api.exportSettingsCSV()
+        guard var csv = try? await api.exportSettingsCSV() else { return nil }
+        if !csv.hasSuffix("\n") { csv += "\n" }
+        csv += local.exportIOSOnlyCSV()
+        return csv
     }
 
     /// Restores a web-format backup: pushed to the server when reachable,
     /// applied to the local snapshot otherwise (same merge rules as the Pi).
+    /// In server mode the iOS-only rows (objective reminders, custom
+    /// objectives, hidden built-ins, tile order, tasbih target) are applied
+    /// locally afterwards — the Pi ignores them.
     func importConfig(_ csv: String) async -> String {
         if isStandalone || !connected {
             let n = local.importConfigCSV(csv)
@@ -735,6 +749,9 @@ final class AppStore: ObservableObject {
         }
         guard let r = try? await api.importSettings(csv: csv) else { return "Import failed" }
         await boot()
+        _ = local.importConfigCSV(csv, iosOnly: true)
+        objectWillChange.send()
+        rescheduleNotifications()
         return r.message ?? "Imported"
     }
 
@@ -866,7 +883,16 @@ final class AppStore: ObservableObject {
         if !isStandalone && configured { try? await api.stopAudio() }
     }
 
+    /// Gate + hint for user-tapped play buttons: when the master switch is off
+    /// the tap would be silently ignored, so explain why instead.
+    private func requireIOSAudio() -> Bool {
+        if iosAudioEnabled { return true }
+        showToast("Enable \"iOS notifications\" in Settings → General to play sounds on this iPhone")
+        return false
+    }
+
     func testAthanWeb() {
+        guard requireIOSAudio() else { return }
         if isStandalone || !connected { playLocalAthan(); return }
         let file = settings["audio_file"] ?? "Masjid Al-Haram.mp3"
         if let url = api.athanURL(file) {
@@ -875,6 +901,7 @@ final class AppStore: ObservableObject {
     }
 
     func testQuranWeb() {
+        guard requireIOSAudio() else { return }
         // No server reachability → bundled file; online → 30s server preview.
         if isStandalone || !connected { playLocalQuran(); return }
         let file = settings["friday_quran_file"] ?? "Sourat Al Kahf - Hani Arrifai.mp3"
@@ -897,15 +924,22 @@ final class AppStore: ObservableObject {
 
     /// "Listen to Sourat Al Kahf now"
     func playFullQuran() async {
-        if isStandalone || !connected { playLocalQuran(); return }
+        if isStandalone || !connected {
+            if requireIOSAudio() { playLocalQuran() }
+            return
+        }
         let output = settings["audio_output"] ?? "both"
         let file = settings["friday_quran_file"] ?? ""
         if output == "server" || output == "both" {
             _ = try? await api.triggerFridayQuran()
             if output == "server" { audio.showServerBanner("Al Kahf Sourat recitation playing", duration: 3600) }
         }
-        if output == "browser" || output == "both", let url = api.quranURL(file) {
-            audio.play(url: url, banner: "Al Kahf Sourat recitation playing")
+        if output == "browser" || output == "both" {
+            // Server playback above is unaffected; the iPhone part still needs
+            // the master switch (silent gate in AudioManager + hint here).
+            if requireIOSAudio(), let url = api.quranURL(file) {
+                audio.play(url: url, banner: "Al Kahf Sourat recitation playing")
+            }
         }
     }
 

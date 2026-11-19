@@ -59,6 +59,48 @@ struct LocalSnapshot: Codable {
     var notificationsEnabled: Bool = false
     var tasbihTarget: Int = 11
     var tasbihDoneDate: String = ""                   // last date tasbih target reached
+    var objectiveReminders: [String: [String]] = [:]  // action id -> reminder times "HH:mm" (0-5/day)
+
+    /// Tolerant decode: a missing key falls back to the field default, so
+    /// adding a field never wipes an existing install's snapshot.
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        let d = LocalSnapshot()
+        mode = try c.decodeIfPresent(AppMode.self, forKey: .mode) ?? d.mode
+        cityName = try c.decodeIfPresent(String.self, forKey: .cityName) ?? d.cityName
+        icsUrl = try c.decodeIfPresent(String.self, forKey: .icsUrl) ?? d.icsUrl
+        lat = try c.decodeIfPresent(Double.self, forKey: .lat) ?? d.lat
+        lon = try c.decodeIfPresent(Double.self, forKey: .lon) ?? d.lon
+        lastIcsFetch = try c.decodeIfPresent(String.self, forKey: .lastIcsFetch) ?? d.lastIcsFetch
+        prayers = try c.decodeIfPresent([String: [Prayer]].self, forKey: .prayers) ?? d.prayers
+        checks = try c.decodeIfPresent([String: [String: Int]].self, forKey: .checks) ?? d.checks
+        activities = try c.decodeIfPresent([String: [String: Int]].self, forKey: .activities) ?? d.activities
+        customActions = try c.decodeIfPresent([TrackedAction].self, forKey: .customActions) ?? d.customActions
+        hiddenBuiltins = try c.decodeIfPresent([String].self, forKey: .hiddenBuiltins) ?? d.hiddenBuiltins
+        actionOrder = try c.decodeIfPresent([String].self, forKey: .actionOrder) ?? d.actionOrder
+        settings = try c.decodeIfPresent([String: String].self, forKey: .settings) ?? d.settings
+        pendingOps = try c.decodeIfPresent([PendingOp].self, forKey: .pendingOps) ?? d.pendingOps
+        schedule = try c.decodeIfPresent([ScheduleEntry].self, forKey: .schedule) ?? d.schedule
+        mutedWeekdays = try c.decodeIfPresent([Int: Int].self, forKey: .mutedWeekdays) ?? d.mutedWeekdays
+        ramadanDates = try c.decodeIfPresent([String].self, forKey: .ramadanDates) ?? d.ramadanDates
+        skipNextDate = try c.decodeIfPresent(String.self, forKey: .skipNextDate) ?? d.skipNextDate
+        notificationsEnabled = try c.decodeIfPresent(Bool.self, forKey: .notificationsEnabled) ?? d.notificationsEnabled
+        tasbihTarget = try c.decodeIfPresent(Int.self, forKey: .tasbihTarget) ?? d.tasbihTarget
+        tasbihDoneDate = try c.decodeIfPresent(String.self, forKey: .tasbihDoneDate) ?? d.tasbihDoneDate
+        // New format: [id: ["HH:mm", …]]. Legacy format: [id: count] — the
+        // stored count maps to the same default slots the old UI fired at.
+        if let times = try? c.decodeIfPresent([String: [String]].self, forKey: .objectiveReminders) {
+            objectiveReminders = times
+        } else if let counts = try? c.decode([String: Int].self, forKey: .objectiveReminders) {
+            objectiveReminders = counts.mapValues {
+                AC.legacyReminderSlots[max(0, min(5, $0))]
+            }
+        } else {
+            objectiveReminders = [:]
+        }
+    }
+
+    init() {}
 }
 
 final class LocalStore {
@@ -158,16 +200,18 @@ final class LocalStore {
     }
 
     // MARK: - Backup CSV (web-compatible: same rows as server /api/settings/export).
-    // iOS-only rows (custom_action / hidden_builtin / action_order) are skipped
-    // by the web importer, which ignores unknown types — the file stays fully
-    // loadable on the Pi.
+    // iOS-only rows (custom_action / hidden_builtin / action_order /
+    // objective_reminder / setting tasbih_target) are skipped by the web
+    // importer, which ignores unknown types — the file stays fully loadable
+    // on the Pi, and a web export loads fully here (every web row type is
+    // handled below).
 
     func exportConfigCSV() -> String {
         var csv = "type,key,value\n"
         for (k, v) in snap.settings.sorted(by: { $0.key < $1.key }) {
             csv += "setting,\(k),\(v.replacingOccurrences(of: "\n", with: " "))\n"
         }
-        csv += "setting,tasbih_target,\(snap.tasbihTarget)\n"
+        csv += exportIOSOnlyCSV()
         for (w, m) in snap.mutedWeekdays.sorted(by: { $0.key < $1.key }) {
             csv += "weekday_mute,\(w),\(m)\n"
         }
@@ -185,6 +229,15 @@ final class LocalStore {
                 csv += "daily_activity,\(date)::\(name),\(v)|\n"
             }
         }
+        return csv
+    }
+
+    /// iOS-only rows WITHOUT the header — appended to a server export so the
+    /// file also carries on-device config (the server never sees these keys).
+    /// Order: tasbih target, custom objectives, hidden built-ins, tile order,
+    /// objective reminder times.
+    func exportIOSOnlyCSV() -> String {
+        var csv = "setting,tasbih_target,\(snap.tasbihTarget)\n"
         for a in snap.customActions {
             if let d = try? JSONEncoder().encode(a), let j = String(data: d, encoding: .utf8) {
                 csv += "custom_action,\(a.id),\(j)\n"
@@ -196,13 +249,19 @@ final class LocalStore {
         if !snap.actionOrder.isEmpty {
             csv += "action_order,ids,\(snap.actionOrder.joined(separator: ";"))\n"
         }
+        for (id, times) in snap.objectiveReminders.sorted(by: { $0.key < $1.key }) where !times.isEmpty {
+            csv += "objective_reminder,\(id),\(times.joined(separator: ";"))\n"
+        }
         return csv
     }
 
     /// Parses a web backup CSV into the local snapshot (merge semantics, same as
-    /// the server import: INSERT OR REPLACE). Returns the number of applied rows.
+    /// the server import: INSERT OR REPLACE). `iosOnly` applies just the rows the
+    /// server can't store — used in server mode where the same file was already
+    /// pushed to the Pi (which ignores these types and stays authoritative for
+    /// the rest). Returns the number of applied rows.
     @discardableResult
-    func importConfigCSV(_ csv: String) -> Int {
+    func importConfigCSV(_ csv: String, iosOnly: Bool = false) -> Int {
         let lines = csv.components(separatedBy: "\n").filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
         guard lines.count > 1 else { return 0 }
         let headers = lines[0].components(separatedBy: ",")
@@ -215,17 +274,17 @@ final class LocalStore {
             let type = parts[0], key = parts[1]
             let value = parts.dropFirst(2).joined(separator: ",")   // values may contain commas
             switch type {
-            case "setting":
+            case "setting" where !iosOnly || key == "tasbih_target":
                 snap.settings[key] = value
                 if key == "tasbih_target", let n = Int(value) { snap.tasbihTarget = n }
                 imported += 1
-            case "prayer_setting":   // legacy → enable/disable the prayer for all 7 days
+            case "prayer_setting" where !iosOnly:   // legacy → enable/disable the prayer for all 7 days
                 let en = Int(value) ?? 0
                 bulkSchedule(prayer: key, enabled: en != 0)
                 imported += 1
-            case "weekday_mute":
+            case "weekday_mute" where !iosOnly:
                 if let w = Int(key), let m = Int(value) { snap.mutedWeekdays[w] = m; imported += 1 }
-            case "prayer_schedule":   // key = "name-dow" — split on the LAST '-' (names may contain '-')
+            case "prayer_schedule" where !iosOnly:   // key = "name-dow" — split on the LAST '-' (names may contain '-')
                 if let i = key.lastIndex(of: "-"), let dow = Int(key[key.index(after: i)...]) {
                     let name = String(key[..<i])
                     let en = Int(value) ?? 1
@@ -236,10 +295,10 @@ final class LocalStore {
                     }
                     imported += 1
                 }
-            case "skip_next" where key == "skip":
+            case "skip_next" where !iosOnly && key == "skip":
                 snap.skipNextDate = (Int(value) ?? 0) != 0 ? DateUtil.dateString(Date()) : ""
                 imported += 1
-            case "prayer_check", "daily_activity":
+            case "prayer_check" where !iosOnly, "daily_activity" where !iosOnly:
                 let (date, rawName) = Self.parseCompositeKey(key)
                 let name = type == "daily_activity" ? Self.mapActivityName(rawName) : rawName
                 // value = "checked|checked_at" — a bare timestamp (legacy) means checked=1
@@ -255,6 +314,17 @@ final class LocalStore {
                 }
             case "hidden_builtin":
                 if !snap.hiddenBuiltins.contains(key) { snap.hiddenBuiltins.append(key); imported += 1 }
+            case "objective_reminder":
+                // New: "HH:mm;HH:mm;…". Legacy: bare count → its old slots.
+                if value.contains(":") {
+                    let times = value.split(separator: ";").map(String.init)
+                        .filter { DateUtil.timeFmt.date(from: $0) != nil }
+                    snap.objectiveReminders[key] = Array(Array(Set(times)).sorted().prefix(5))
+                } else {
+                    snap.objectiveReminders[key] =
+                        AC.legacyReminderSlots[max(0, min(5, Int(value) ?? 0))]
+                }
+                imported += 1
             case "action_order" where key == "ids":
                 snap.actionOrder = value.split(separator: ";").map(String.init)
                 imported += 1
