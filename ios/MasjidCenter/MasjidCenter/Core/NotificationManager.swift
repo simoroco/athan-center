@@ -52,7 +52,7 @@ final class NotificationManager: ObservableObject {
                 guard seen.insert(t.hour * 60 + t.minute).inserted else { continue }
                 let content = UNMutableNotificationContent()
                 content.title = r.name
-                content.body = "Objective reminder — take a moment for it today"
+                content.body = "It's time to reach your objective"
                 content.sound = UNNotificationSound(named: Self.reminderSound)
                 let trigger = UNCalendarNotificationTrigger(
                     dateMatching: DateComponents(hour: t.hour, minute: t.minute), repeats: true)
